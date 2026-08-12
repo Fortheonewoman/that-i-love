@@ -71,7 +71,7 @@ window.Acts.act7 = (function () {
       const val = Math.round(start * (1 - eased));
       numEl.textContent = val === 0 ? "together" : val.toLocaleString() + " mi";
       if (t < 1) requestAnimationFrame(step);
-      else setTimeout(() => go(8), 900);
+      else setTimeout(() => go(8), 1800);
     }
     requestAnimationFrame(step);
   }
@@ -79,7 +79,7 @@ window.Acts.act7 = (function () {
   function renderQuestion(container, go, ctx) {
     const q = QUESTIONS[idx];
     container.innerHTML = `
-      <div class="act7-stage">
+      <div class="act7-stage floral-decor">
         <h2 class="act7-prompt">${q.prompt}</h2>
         <form class="act7-form" id="act7-form" autocomplete="off">
           <input type="text" class="act7-input" id="act7-input" placeholder="type your answer…" />
@@ -106,7 +106,7 @@ window.Acts.act7 = (function () {
       setTimeout(() => {
         idx++;
         if (idx < QUESTIONS.length) renderQuestion(container, go, ctx);
-      }, 1400);
+      }, 2000);
     });
   }
 

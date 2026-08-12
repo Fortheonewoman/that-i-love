@@ -72,29 +72,30 @@ window.Acts.act9 = (function () {
         him.classList.add("is-in");
       });
 
-      // They stop. Five full seconds of nothing else happening.
-      after(1600, () => {
+      // They finish walking in around t=1.9s. Then — nothing. Five
+      // full seconds of just standing there, just the song. Only
+      // after that does the helmet drop.
+      after(6900, () => {
         helmet.classList.add("is-visible");
       });
-      after(2600, () => {
+      after(7300, () => {
         helmet.classList.add("is-falling");
       });
-      after(3400, () => {
+      after(8000, () => {
         helmet.classList.add("has-landed");
       });
 
-      // Stillness holds from ~1.6s to ~6.6s. Then the hug.
-      after(6600, () => {
+      after(8300, () => {
         her.classList.add("is-hugging");
         him.classList.add("is-hugging");
         stage.classList.add("is-embracing");
       });
 
-      after(8200, () => {
+      after(10200, () => {
         container.querySelector("#act9-red").classList.add("is-bleeding");
       });
 
-      after(11500, () => {
+      after(15000, () => {
         startConfettiForever();
         showReplayControls();
       });

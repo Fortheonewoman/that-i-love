@@ -34,7 +34,7 @@ window.Acts.act2 = (function () {
       const edges = ["from-top", "from-right", "from-bottom", "from-left"];
 
       for (let i = 0; i < PLACEHOLDER_COUNT; i++) {
-        after(120 * i, () => {
+        after(220 * i, () => {
           const card = document.createElement("div");
           card.className = `flood-card ${edges[i % edges.length]}`;
           const rot = Math.round((Math.random() - 0.5) * 30);
@@ -50,10 +50,10 @@ window.Acts.act2 = (function () {
       }
 
       // A pause, then the line.
-      after(120 * PLACEHOLDER_COUNT + 500, () => {
+      after(220 * PLACEHOLDER_COUNT + 900, () => {
         title.classList.add("is-shown");
       });
-      after(120 * PLACEHOLDER_COUNT + 2600, () => go(3));
+      after(220 * PLACEHOLDER_COUNT + 3600, () => go(3));
 
       container.addEventListener("click", () => go(3));
     },

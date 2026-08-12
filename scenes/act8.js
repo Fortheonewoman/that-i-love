@@ -25,7 +25,7 @@ window.Acts.act8 = (function () {
   return {
     async enter({ container, go, ctx }) {
       container.innerHTML = `
-        <div class="act8-stage">
+        <div class="act8-stage floral-decor">
           <div class="act8-photos"></div>
           <div class="act8-figure" id="act8-figure"></div>
           <p class="act8-caption" id="act8-caption"></p>

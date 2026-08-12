@@ -1,7 +1,7 @@
 /* ============================================================
-   Act 1 — the clouds. Bright sky, clouds part fast to reveal
-   HAPPY BIRTHDAY, holds barely a beat, swipes off. Abrupt is the
-   point — original type, original sky, no Simpsons references.
+   Act 1 — the clouds. Bright sky settles in, clouds part to reveal
+   HAPPY BIRTHDAY, holds, swipes off into act 2. Original type,
+   original sky, no Simpsons references — just the mechanic.
    ============================================================ */
 window.Acts = window.Acts || {};
 window.Acts.act1 = (function () {
@@ -42,17 +42,17 @@ window.Acts.act1 = (function () {
       const left = container.querySelector(".cloud-left");
       const right = container.querySelector(".cloud-right");
 
-      // Parting is quick.
-      after(500, () => {
+      // A beat of just sky and drifting clouds first.
+      after(1000, () => {
         left.classList.add("is-parted");
         right.classList.add("is-parted");
       });
-      // The hold is short.
-      after(1300, () => {
+      // Parting itself takes ~1.1s (see CSS), then a real hold on
+      // the title before it swipes away.
+      after(3000, () => {
         stage.classList.add("is-swiping");
       });
-      // Immediate drop into act 2.
-      after(1750, () => go(2));
+      after(3900, () => go(2));
     },
     exit() {
       clearTimers();

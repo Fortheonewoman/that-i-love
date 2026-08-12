@@ -32,7 +32,7 @@ window.Acts.act5 = (function () {
   return {
     async enter({ container, go }) {
       container.innerHTML = `
-        <div class="act5-stage">
+        <div class="act5-stage floral-decor">
           <div class="act5-watermark" id="act5-watermark"></div>
           <h1 class="act5-question">Do you want to continue?</h1>
           <p class="act5-hint" id="act5-hint"></p>

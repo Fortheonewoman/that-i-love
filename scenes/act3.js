@@ -18,13 +18,13 @@ window.Acts.act3 = (function () {
   return {
     async enter({ container, go, ctx }) {
       container.innerHTML = `
-        <div class="act3-stage">
+        <div class="act3-stage floral-decor">
           <h1 class="act3-name" id="act3-name">My Amirah</h1>
         </div>`;
       const nameEl = container.querySelector("#act3-name");
 
       const cascade = [...ctx.names, "Amirachi"];
-      let t = 900; // hold "My Amirah" first
+      let t = 1600; // hold "My Amirah" first, properly
 
       cascade.forEach((name, i) => {
         const isLast = i === cascade.length - 1;
@@ -35,12 +35,13 @@ window.Acts.act3 = (function () {
           nameEl.classList.add("is-pop");
           if (isLast) nameEl.classList.add("is-final");
         });
-        // tempo increases: each gap a bit shorter than the last
-        const gap = Math.max(160, 420 - i * 60);
+        // tempo increases, but never rushes — each gap a bit shorter
+        // than the last, with a gentler floor than a first pass had.
+        const gap = Math.max(260, 620 - i * 70);
         t += gap;
       });
 
-      after(t + 1400, () => go(4));
+      after(t + 2200, () => go(4));
       container.addEventListener("click", () => go(4));
     },
     exit() {
