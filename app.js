@@ -214,6 +214,27 @@ const DAY_VISUALS = {
 };
 
 /* ============================================================
+   The seven-day palette. Each day "wears" its own colour the
+   moment it's opened — set as the --accent CSS variable on the
+   root element, and reverted to the default when she closes it.
+
+   Day 4 is a placeholder for now: act 7 of the birthday sequence
+   has her pick her favourite colour and the site tells her "that's
+   why day four was that colour" — so day4's real value here has to
+   become her actual favourite once we know it, not before.
+   ============================================================ */
+const DAY_PALETTE = {
+  day1: "#C0142B", // deep rose red — roses are red
+  day2: "#FF6F59", // coral
+  day3: "#E8A33D", // amber gold
+  day4: "#A8447E", // placeholder — replace with her favourite colour later
+  day5: "#2FA89C", // teal
+  day6: "#6C63FF", // indigo
+  day7: "#E63E8C", // magenta pink
+};
+const DEFAULT_ACCENT = "#ff5c8a";
+
+/* ============================================================
    Site chrome: the day-card grid, the opened-day stamps, the
    birthday countdown, and the full-screen reveal overlay. Reads
    time exclusively through window.TimeLock — never the device
@@ -237,6 +258,7 @@ const DAY_VISUALS = {
   const overlayEl = document.getElementById("day-overlay");
   const overlayContentEl = document.getElementById("day-overlay-content");
   const overlayCloseEl = document.getElementById("day-overlay-close");
+  const overlayCountdownEl = document.getElementById("overlay-countdown");
 
   const DAY_IDS = ["day1", "day2", "day3", "day4", "day5", "day6", "day7"];
 
@@ -256,14 +278,39 @@ const DAY_VISUALS = {
   async function openDay(id) {
     overlayContentEl.innerHTML = `<p class="dev-note">opening…</p>`;
     overlayEl.hidden = false;
+    document.documentElement.style.setProperty("--accent", DAY_PALETTE[id] || DEFAULT_ACCENT);
+
     try {
       const data = await ContentVault.loadDay(id);
       const visual = data.visual && DAY_VISUALS[data.visual] ? DAY_VISUALS[data.visual]() : "";
+
+      const photosHtml = (data.photos || [])
+        .map(
+          (p) => `
+        <figure class="day-photo">
+          <img src="${p.src}" alt="${p.caption ?? ""}" loading="lazy" />
+          ${p.caption ? `<figcaption>${p.caption}</figcaption>` : ""}
+        </figure>`
+        )
+        .join("");
+
+      const dayIndex = DAY_IDS.indexOf(id);
+      const prevId = dayIndex > 0 ? DAY_IDS[dayIndex - 1] : null;
+      const prevBtn = prevId
+        ? `<button type="button" class="day-overlay-prev" data-prev="${prevId}">← Day ${dayIndex}</button>`
+        : "";
+
       overlayContentEl.innerHTML = `
         <h2 class="day-overlay-title">${data.title ?? ""}</h2>
         ${visual}
+        ${photosHtml ? `<div class="day-photos">${photosHtml}</div>` : ""}
         ${data.body ? `<p class="day-overlay-body">${data.body}</p>` : ""}
+        ${prevBtn}
       `;
+
+      const prevEl = overlayContentEl.querySelector("[data-prev]");
+      if (prevEl) prevEl.addEventListener("click", () => openDay(prevEl.dataset.prev));
+
       markOpened(id);
       renderGrid();
     } catch (err) {
@@ -274,6 +321,7 @@ const DAY_VISUALS = {
 
   overlayCloseEl.addEventListener("click", () => {
     overlayEl.hidden = true;
+    document.documentElement.style.setProperty("--accent", DEFAULT_ACCENT);
   });
 
   function shake(el) {
@@ -317,9 +365,11 @@ const DAY_VISUALS = {
   function renderCountdown() {
     const unlocks = window.TimeLock.unlocks();
     const birthday = unlocks.find((u) => u.id === "birthday");
-    countdownEl.textContent = birthday.unlocked
-      ? "it's her birthday"
-      : window.TimeLock.formatDuration(birthday.msRemaining) + " until Amirachi's birthday";
+    const remaining = birthday.unlocked ? "it's her birthday" : window.TimeLock.formatDuration(birthday.msRemaining);
+    countdownEl.textContent = birthday.unlocked ? remaining : remaining + " until Amirachi's birthday";
+    // Same countdown, shown inside the day overlay too, so it's visible
+    // no matter which screen she's looking at.
+    overlayCountdownEl.textContent = birthday.unlocked ? remaining : remaining + " until her birthday";
   }
 
   function tick() {

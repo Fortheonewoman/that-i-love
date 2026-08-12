@@ -250,6 +250,57 @@ body {
   white-space: pre-wrap;
 }
 
+.overlay-countdown {
+  position: absolute;
+  top: 1.75rem;
+  left: 1.75rem;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.day-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.day-photo {
+  margin: 0;
+  max-width: 16rem;
+}
+
+.day-photo img {
+  display: block;
+  width: 100%;
+  border-radius: 0.5rem;
+}
+
+.day-photo figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--dim);
+}
+
+.day-overlay-prev {
+  appearance: none;
+  border: 1px solid rgba(245, 242, 236, 0.25);
+  background: none;
+  color: var(--fg);
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.day-overlay-prev:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .day-card,
   .day-card.is-shaking {
