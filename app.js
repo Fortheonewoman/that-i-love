@@ -181,10 +181,23 @@
   root.innerHTML = "";
   root.appendChild(list);
 
+  // Display only — purely cosmetic, so it can safely use Intl's real
+  // timezone database (handles DST correctly). The actual unlock
+  // decisions never touch this; they only ever compare against the
+  // fixed UTC epoch numbers in UNLOCKS.
+  const arlingtonFormatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    dateStyle: "medium",
+    timeStyle: "medium",
+  });
+
   function render() {
     const nowMs = window.TimeLock.now();
+    const nowDate = new Date(nowMs);
     sourceNote.textContent =
-      "Trusted time: " + new Date(nowMs).toUTCString() + " (never read from this device's clock)";
+      "Trusted time: " + nowDate.toUTCString() +
+      "  |  Arlington, TX: " + arlingtonFormatter.format(nowDate) +
+      "  (never read from this device's clock)";
 
     const rows = window.TimeLock.unlocks();
     list.innerHTML = rows
