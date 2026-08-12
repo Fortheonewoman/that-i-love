@@ -16,6 +16,12 @@
   box-sizing: border-box;
 }
 
+/* The `hidden` attribute must always win over any component's own
+   `display` rule below — otherwise a hidden panel still renders. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -67,4 +73,187 @@ body {
 .unlock-row.is-unlocked {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* ============================================================
+   Site chrome: locked-out screen, stamps, hero, day grid, overlay.
+   ============================================================ */
+
+.locked-out {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.5rem;
+  padding: 2rem;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem 4rem;
+  gap: 2.5rem;
+}
+
+.stamps {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.stamp {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid rgba(245, 242, 236, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--dim);
+}
+
+.stamp.is-filled {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 92, 138, 0.12);
+}
+
+.hero {
+  text-align: center;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  margin: 0 0 0.75rem;
+  letter-spacing: 0.01em;
+}
+
+.birthday-countdown {
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.1rem;
+}
+
+.day-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 56rem;
+}
+
+.day-card {
+  appearance: none;
+  border: 1px solid rgba(245, 242, 236, 0.15);
+  background: rgba(245, 242, 236, 0.03);
+  border-radius: 0.75rem;
+  padding: 1.5rem 1rem;
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.day-card:hover {
+  transform: translateY(-2px);
+}
+
+.day-card-number {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.day-card-hint {
+  font-size: 0.8rem;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.day-card.is-locked {
+  opacity: 0.55;
+}
+
+.day-card.is-unlocked {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(255, 92, 138, 0.25);
+}
+
+.day-card.is-opened {
+  border-color: rgba(255, 92, 138, 0.4);
+}
+
+.day-card.is-shaking {
+  animation: card-shake 0.4s ease;
+}
+
+@keyframes card-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+.day-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  z-index: 10;
+}
+
+.day-overlay-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--fg);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.day-overlay-content {
+  text-align: center;
+  max-width: 40rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.day-overlay-title {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  margin: 0;
+}
+
+.day-visual {
+  width: 12rem;
+  height: auto;
+  color: var(--accent);
+}
+
+.day-overlay-body {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day-card,
+  .day-card.is-shaking {
+    animation: none !important;
+    transition: none !important;
+  }
 }

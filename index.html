@@ -4,19 +4,30 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
-  <title>time lock test</title>
+  <title>Amirachi</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="test-page">
-    <h1>time lock — bare test</h1>
-    <p class="dev-note">
-      This page proves one thing: the unlock times below come from the
-      server's clock, not this device's. Try changing your system date
-      and reloading — nothing here should move.
-    </p>
-    <div id="lock-test">Checking the time…</div>
-  </main>
+  <div id="locked-out" class="locked-out" hidden>
+    <p>Connect to the internet to open this.</p>
+  </div>
+
+  <div id="app" class="app" hidden>
+    <div class="stamps" id="stamps" aria-label="days opened"></div>
+
+    <main class="hero">
+      <h1 class="hero-title">Amirachi</h1>
+      <p class="birthday-countdown" id="birthday-countdown"></p>
+    </main>
+
+    <div class="day-grid" id="day-grid"></div>
+  </div>
+
+  <div class="day-overlay" id="day-overlay" hidden>
+    <button class="day-overlay-close" id="day-overlay-close" aria-label="close">×</button>
+    <div class="day-overlay-content" id="day-overlay-content"></div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

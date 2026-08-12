@@ -153,66 +153,180 @@
 })();
 
 /* ============================================================
-   Bare test-page wiring below. This block is what proves the
-   lock out on GitHub Pages before anything else gets built on
-   top of it. It renders unlock status + a live countdown to the
-   birthday, refreshed every second from TimeLock, never from the
-   device clock.
-   ============================================================ */
-(async function runTestPage() {
-  const root = document.getElementById("lock-test");
-  if (!root) return; // this page isn't the bare test page
+   Content decryption. Each day's real content lives encrypted at
+   content/dayN.enc — fetched and decrypted only after TimeLock says
+   that day is actually unlocked. View-source shows nothing but a
+   scrambled binary blob.
 
-  root.textContent = "Checking the time…";
+   File layout: [12-byte IV][ciphertext + 16-byte auth tag] — exactly
+   what SubtleCrypto's AES-GCM decrypt() expects as one blob.
+
+   Known limit (accepted, see build brief): anyone can pull this key
+   out of the JS with dev tools. That's fine — the key isn't the
+   thing being protected, the *clock* is. This stops her phone's
+   clock from lying to the page; it was never meant to stop someone
+   determined to read the source.
+   ============================================================ */
+const ContentVault = (function () {
+  const KEY_HEX = "19b0ae7903a6031bea3a99fc5cc8f56cc2ccddee9f8d7bc313204b0afbaf9e54";
+
+  let keyPromise = null;
+  function getKey() {
+    if (!keyPromise) {
+      const bytes = new Uint8Array(KEY_HEX.match(/../g).map((b) => parseInt(b, 16)));
+      keyPromise = crypto.subtle.importKey("raw", bytes, { name: "AES-GCM" }, false, ["decrypt"]);
+    }
+    return keyPromise;
+  }
+
+  const cache = new Map();
+  async function loadDay(id) {
+    if (cache.has(id)) return cache.get(id);
+    const promise = (async () => {
+      const res = await fetch(`content/${id}.enc`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`content/${id}.enc missing (${res.status})`);
+      const buf = new Uint8Array(await res.arrayBuffer());
+      const iv = buf.slice(0, 12);
+      const data = buf.slice(12);
+      const key = await getKey();
+      const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+      return JSON.parse(new TextDecoder().decode(plainBuf));
+    })();
+    cache.set(id, promise);
+    return promise;
+  }
+
+  return { loadDay };
+})();
+
+/* ============================================================
+   Little inline-SVG "visuals" a day's payload can ask for by name,
+   e.g. { "visual": "cupid-arrow" }. New days can add new names here
+   without touching the reveal/overlay logic below.
+   ============================================================ */
+const DAY_VISUALS = {
+  "cupid-arrow": () => `
+    <svg class="day-visual cupid-arrow" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <line x1="10" y1="30" x2="150" y2="30" stroke="currentColor" stroke-width="3"/>
+      <path d="M150 30 L130 18 L136 30 L130 42 Z" fill="currentColor"/>
+      <path d="M10 30 q10 -16 20 0 q10 16 20 0" fill="none" stroke="currentColor" stroke-width="3"/>
+    </svg>`,
+};
+
+/* ============================================================
+   Site chrome: the day-card grid, the opened-day stamps, the
+   birthday countdown, and the full-screen reveal overlay. Reads
+   time exclusively through window.TimeLock — never the device
+   clock, same rule as everything else in this file.
+   ============================================================ */
+(async function runSite() {
+  const appEl = document.getElementById("app");
+  const lockedOutEl = document.getElementById("locked-out");
+  if (!appEl) return; // not this page
 
   const ok = await window.TimeLock.init();
-
   if (!ok) {
-    root.innerHTML = `<p class="locked-message">Connect to the internet to open this.</p>`;
+    lockedOutEl.hidden = false;
     return;
   }
+  appEl.hidden = false;
 
-  const sourceNote = document.createElement("p");
-  sourceNote.className = "dev-note";
-  root.before(sourceNote);
+  const stampsEl = document.getElementById("stamps");
+  const gridEl = document.getElementById("day-grid");
+  const countdownEl = document.getElementById("birthday-countdown");
+  const overlayEl = document.getElementById("day-overlay");
+  const overlayContentEl = document.getElementById("day-overlay-content");
+  const overlayCloseEl = document.getElementById("day-overlay-close");
 
-  const list = document.createElement("div");
-  list.className = "unlock-list";
-  root.innerHTML = "";
-  root.appendChild(list);
+  const DAY_IDS = ["day1", "day2", "day3", "day4", "day5", "day6", "day7"];
 
-  // Display only — purely cosmetic, so it can safely use Intl's real
-  // timezone database (handles DST correctly). The actual unlock
-  // decisions never touch this; they only ever compare against the
-  // fixed UTC epoch numbers in UNLOCKS.
-  const arlingtonFormatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Chicago",
-    dateStyle: "medium",
-    timeStyle: "medium",
-  });
-
-  function render() {
-    const nowMs = window.TimeLock.now();
-    const nowDate = new Date(nowMs);
-    sourceNote.textContent =
-      "Trusted time: " + nowDate.toUTCString() +
-      "  |  Arlington, TX: " + arlingtonFormatter.format(nowDate) +
-      "  (never read from this device's clock)";
-
-    const rows = window.TimeLock.unlocks();
-    list.innerHTML = rows
-      .map((u) => {
-        const status = u.unlocked
-          ? "UNLOCKED"
-          : window.TimeLock.formatDuration(u.msRemaining) + " remaining";
-        return `<div class="unlock-row ${u.unlocked ? "is-unlocked" : ""}">
-          <span class="unlock-label">${u.label}</span>
-          <span class="unlock-status">${status}</span>
-        </div>`;
-      })
-      .join("");
+  function openedDays() {
+    try {
+      return JSON.parse(localStorage.getItem("amirachi:opened") || "{}");
+    } catch {
+      return {};
+    }
+  }
+  function markOpened(id) {
+    const opened = openedDays();
+    opened[id] = true;
+    localStorage.setItem("amirachi:opened", JSON.stringify(opened));
   }
 
-  render();
-  setInterval(render, 1000);
+  async function openDay(id) {
+    overlayContentEl.innerHTML = `<p class="dev-note">opening…</p>`;
+    overlayEl.hidden = false;
+    try {
+      const data = await ContentVault.loadDay(id);
+      const visual = data.visual && DAY_VISUALS[data.visual] ? DAY_VISUALS[data.visual]() : "";
+      overlayContentEl.innerHTML = `
+        <h2 class="day-overlay-title">${data.title ?? ""}</h2>
+        ${visual}
+        ${data.body ? `<p class="day-overlay-body">${data.body}</p>` : ""}
+      `;
+      markOpened(id);
+      renderGrid();
+    } catch (err) {
+      console.warn(`couldn't open ${id}:`, err);
+      overlayContentEl.innerHTML = `<p class="dev-note">Couldn't load this one — try again in a moment.</p>`;
+    }
+  }
+
+  overlayCloseEl.addEventListener("click", () => {
+    overlayEl.hidden = true;
+  });
+
+  function shake(el) {
+    el.classList.remove("is-shaking");
+    void el.offsetWidth; // restart the animation if it's already running
+    el.classList.add("is-shaking");
+  }
+
+  function renderGrid() {
+    const unlocks = window.TimeLock.unlocks();
+    const opened = openedDays();
+
+    stampsEl.innerHTML = DAY_IDS.map((id, i) => {
+      const isOpen = !!opened[id];
+      return `<span class="stamp ${isOpen ? "is-filled" : ""}">${i + 1}</span>`;
+    }).join("");
+
+    gridEl.innerHTML = "";
+    DAY_IDS.forEach((id, i) => {
+      const u = unlocks.find((x) => x.id === id);
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "day-card";
+      card.dataset.day = id;
+
+      if (u.unlocked) {
+        card.classList.add(opened[id] ? "is-opened" : "is-unlocked");
+        card.innerHTML = `<span class="day-card-number">Day ${i + 1}</span>
+          <span class="day-card-hint">${opened[id] ? "tap to reopen" : "tap to open"}</span>`;
+        card.addEventListener("click", () => openDay(id));
+      } else {
+        card.classList.add("is-locked");
+        card.innerHTML = `<span class="day-card-number">Day ${i + 1}</span>
+          <span class="day-card-hint">${window.TimeLock.formatDuration(u.msRemaining)}</span>`;
+        card.addEventListener("click", () => shake(card));
+      }
+      gridEl.appendChild(card);
+    });
+  }
+
+  function renderCountdown() {
+    const unlocks = window.TimeLock.unlocks();
+    const birthday = unlocks.find((u) => u.id === "birthday");
+    countdownEl.textContent = birthday.unlocked
+      ? "it's her birthday"
+      : window.TimeLock.formatDuration(birthday.msRemaining) + " until Amirachi's birthday";
+  }
+
+  function tick() {
+    renderGrid();
+    renderCountdown();
+  }
+
+  tick();
+  setInterval(tick, 1000);
 })();
