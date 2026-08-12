@@ -240,9 +240,48 @@ const DEFAULT_ACCENT = "#ff5c8a";
    time exclusively through window.TimeLock — never the device
    clock, same rule as everything else in this file.
    ============================================================ */
+// Laptop only: the chase, the coach, and the peeper all need a real
+// cursor. Touch-primary devices get a small, honest screen instead of
+// a broken experience — same time lock, just no dead end.
+function isTouchPrimaryDevice() {
+  return window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+}
+
+function wireMute() {
+  const btn = document.getElementById("mute-btn");
+  if (!btn) return;
+  let muted = false;
+  btn.addEventListener("click", () => {
+    muted = !muted;
+    btn.textContent = muted ? "🔇" : "🔊";
+    document.querySelectorAll("audio").forEach((a) => (a.muted = muted));
+  });
+}
+
+function wireReplayControls() {
+  const startBtn = document.getElementById("replay-start");
+  const skipBtn = document.getElementById("replay-skip");
+  const jumpEl = document.getElementById("replay-jump");
+  if (!startBtn) return;
+  startBtn.addEventListener("click", () => Birthday.goToAct(1));
+  skipBtn.addEventListener("click", () => {
+    if (jumpEl.hidden) {
+      jumpEl.innerHTML = Array.from({ length: 9 }, (_, i) => {
+        const n = i + 1;
+        return `<button type="button" data-jump="${n}">act ${n}</button>`;
+      }).join("");
+      jumpEl.querySelectorAll("[data-jump]").forEach((b) => {
+        b.addEventListener("click", () => Birthday.goToAct(parseInt(b.dataset.jump, 10)));
+      });
+    }
+    jumpEl.hidden = !jumpEl.hidden;
+  });
+}
+
 (async function runSite() {
   const appEl = document.getElementById("app");
   const lockedOutEl = document.getElementById("locked-out");
+  const phoneBlockEl = document.getElementById("phone-block");
   if (!appEl) return; // not this page
 
   const ok = await window.TimeLock.init();
@@ -250,6 +289,36 @@ const DEFAULT_ACCENT = "#ff5c8a";
     lockedOutEl.hidden = false;
     return;
   }
+
+  if (isTouchPrimaryDevice()) {
+    phoneBlockEl.hidden = false;
+    const phoneCountdownEl = document.getElementById("phone-countdown");
+    function tickPhone() {
+      const unlocks = window.TimeLock.unlocks();
+      const birthday = unlocks.find((u) => u.id === "birthday");
+      phoneCountdownEl.textContent = birthday.unlocked
+        ? "it's her birthday"
+        : window.TimeLock.formatDuration(birthday.msRemaining) + " until Amirachi's birthday";
+    }
+    tickPhone();
+    setInterval(tickPhone, 1000);
+    return;
+  }
+
+  // Dev shortcut: ?act=N always jumps straight into the birthday
+  // sequence for testing, regardless of the real unlock time.
+  const params = new URLSearchParams(location.search);
+  const devAct = parseInt(params.get("act"), 10);
+  const birthdayUnlocked = window.TimeLock.unlocks().find((u) => u.id === "birthday").unlocked;
+  if (devAct >= 1 || birthdayUnlocked) {
+    appEl.hidden = true;
+    wireMute();
+    Cast.startPeeper(document.getElementById("birthday-cast-layer"));
+    wireReplayControls();
+    await Birthday.start();
+    return;
+  }
+
   appEl.hidden = false;
 
   const stampsEl = document.getElementById("stamps");
@@ -372,9 +441,23 @@ const DEFAULT_ACCENT = "#ff5c8a";
     overlayCountdownEl.textContent = birthday.unlocked ? remaining : remaining + " until her birthday";
   }
 
+  let birthdayLaunched = false;
   function tick() {
     renderGrid();
     renderCountdown();
+
+    // The instant server time hits the birthday, the sky opens —
+    // even if she's just sitting on the day-grid when it happens.
+    const birthday = window.TimeLock.unlocks().find((u) => u.id === "birthday");
+    if (birthday.unlocked && !birthdayLaunched) {
+      birthdayLaunched = true;
+      appEl.hidden = true;
+      overlayEl.hidden = true;
+      wireMute();
+      Cast.startPeeper(document.getElementById("birthday-cast-layer"));
+      wireReplayControls();
+      Birthday.start();
+    }
   }
 
   tick();

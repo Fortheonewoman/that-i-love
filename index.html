@@ -12,6 +12,11 @@
     <p>Connect to the internet to open this.</p>
   </div>
 
+  <div id="phone-block" class="phone-block" hidden>
+    <p class="birthday-countdown" id="phone-countdown"></p>
+    <p class="phone-message">this one needs your laptop, Amirachi</p>
+  </div>
+
   <div id="app" class="app" hidden>
     <div class="stamps" id="stamps" aria-label="days opened"></div>
 
@@ -29,6 +34,39 @@
     <div class="day-overlay-content" id="day-overlay-content"></div>
   </div>
 
+  <div id="birthday" class="birthday" hidden>
+    <div class="act-progress" id="act-progress"></div>
+    <button type="button" class="act-skip" id="act-skip">skip →</button>
+    <button type="button" class="mute-btn" id="mute-btn" aria-label="mute">🔊</button>
+
+    <div class="act-stage" id="act-stage"></div>
+
+    <!-- Persistent across every act — never wiped by a scene change. -->
+    <div class="cast-layer" id="birthday-cast-layer"></div>
+    <div class="confetti-layer" id="confetti-layer" hidden aria-hidden="true"></div>
+
+    <div class="replay-controls" id="replay-controls" hidden>
+      <button type="button" id="replay-start">start again</button>
+      <button type="button" id="replay-skip">skip to…</button>
+      <div class="replay-jump" id="replay-jump" hidden></div>
+    </div>
+  </div>
+
+  <!-- cast/scenes/director load first so app.js can rely on them
+       existing the instant its own async code resumes — script tags
+       block in order, but a later `await` inside app.js is not
+       guaranteed to lose the race against these otherwise. -->
+  <script src="cast.js"></script>
+  <script src="scenes/act1.js"></script>
+  <script src="scenes/act2.js"></script>
+  <script src="scenes/act3.js"></script>
+  <script src="scenes/act4.js"></script>
+  <script src="scenes/act5.js"></script>
+  <script src="scenes/act6.js"></script>
+  <script src="scenes/act7.js"></script>
+  <script src="scenes/act8.js"></script>
+  <script src="scenes/act9.js"></script>
+  <script src="birthday.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
