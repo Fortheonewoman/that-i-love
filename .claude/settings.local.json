@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth *)",
+      "Bash(git --version)",
+      "Bash(curl -s -m 5 -o /dev/null -w \"%{http_code}\\\\n\" https://worldtimeapi.org/api/timezone/Etc/UTC)",
+      "Bash(curl -s -m 5 -o /dev/null -w \"%{http_code}\\\\n\" \"https://timeapi.io/api/time/current/zone?timeZone=UTC\")",
+      "Bash(curl -s -m 5 -o /dev/null -w \"%{http_code}\\\\n\" http://worldclockapi.com/api/json/utc/now)",
+      "Bash(curl -s -m 5 -o /dev/null -w \"%{http_code}\\\\n\" https://worldclockapi.com/api/json/utc/now)",
+      "Bash(curl -s -m 5 https://worldclockapi.com/api/json/utc/now)",
+      "Bash(curl -s -m 5 -o /dev/null -w \"%{http_code}\\\\n\" http://worldtimeapi.org/api/timezone/Etc/UTC)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git -c user.name=\"Obinna\" -c user.email=\"joann.fields@gmail.com\" commit -q -m \"Time lock: bare test page \\(Day 1-7 + birthday unlock, server-time only\\)\")"
+    ]
+  }
+}
