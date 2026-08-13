@@ -510,7 +510,7 @@ function wireReplayControls() {
       card.style.setProperty("--dodge-y", offsetY + "px");
     }
 
-    // Settling isn't a snap back — it drifts home slowly (2s, eased),
+    // Settling isn't a snap back — it drifts home slowly (1.5s, eased),
     // softening out of "ball" back into a card as it goes.
     function calmDown() {
       excited = false;
@@ -522,7 +522,7 @@ function wireReplayControls() {
       offsetY = 0;
       applyOffset();
       clearTimeout(returnCleanupTimer);
-      returnCleanupTimer = setTimeout(() => card.classList.remove("is-returning"), 2000);
+      returnCleanupTimer = setTimeout(() => card.classList.remove("is-returning"), 1500);
     }
 
     function scheduleCalm() {

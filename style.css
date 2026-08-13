@@ -205,19 +205,8 @@ h1, h2, h3 {
 }
 
 /* Day 7's chase gag — green and a little skittish while she's after it.
-   Excited: it rounds into a true circle (fixed equal width/height, not
-   an oval) and its face wobbles like it's rolling — that animation
-   lives on the inner .day-card-face, not the card itself, so it never
-   fights with the outer card's own dodge-position transform.
-   Returning: the same ball softens back into a card, slow and
-   easeful over 2s — a settle, not a snap — while it drifts home. */
-.day-card.is-excited,
-.day-card.is-returning {
-  width: 6.75rem;
-  aspect-ratio: 1 / 1;
-  padding: 0.5rem;
-  border-radius: 50%;
-}
+   Stays a normal card shape (no ball/circle), just tinted green and
+   dodging. Returning: settles back over 1.5s, easeful, not a hard snap. */
 .day-card.is-excited {
   opacity: 1;
   position: relative;
@@ -225,26 +214,17 @@ h1, h2, h3 {
   border-color: rgba(63, 174, 107, 0.45);
   background: linear-gradient(165deg, rgba(63, 174, 107, 0.16), rgba(63, 174, 107, 0.03));
   box-shadow: var(--shadow-soft), 0 0 0 1px rgba(63, 174, 107, 0.25);
-  transition: transform 0.3s var(--ease), border-radius 0.4s var(--ease), border-color 0.5s var(--ease), box-shadow 0.5s var(--ease), background 0.5s var(--ease);
-}
-.day-card.is-excited .day-card-face {
-  animation: ball-roll 1.4s ease-in-out infinite;
+  transition: transform 0.3s var(--ease), border-color 0.5s var(--ease), box-shadow 0.5s var(--ease), background 0.5s var(--ease);
 }
 .day-card.is-excited .day-card-number {
-  font-size: 0.85rem;
   text-align: center;
-  line-height: 1.25;
 }
 .day-card.is-excited .day-card-hint {
   display: none;
 }
-@keyframes ball-roll {
-  0%, 100% { transform: rotate(-8deg); }
-  50% { transform: rotate(8deg); }
-}
 
 .day-card.is-returning {
-  transition: transform 2s var(--ease), width 2s var(--ease), border-radius 2s var(--ease), border-color 1.2s var(--ease), box-shadow 1.2s var(--ease), background 1.2s var(--ease);
+  transition: transform 1.5s var(--ease), border-color 1s var(--ease), box-shadow 1s var(--ease), background 1s var(--ease);
 }
 
 .day-card-number {
