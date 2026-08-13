@@ -446,8 +446,9 @@ function wireReplayControls() {
       // The face is a separate inner wrapper so Day 7's "rolling"
       // wobble (an animation on transform) never fights with the
       // outer card's own transform, which handles dodge position.
+      const label = id === "day7" ? "Skip to D-day?" : `Day ${i + 1}`;
       card.innerHTML = `<span class="day-card-face">
-        <span class="day-card-number">Day ${i + 1}</span>
+        <span class="day-card-number">${label}</span>
         <span class="day-card-hint"></span>
       </span>`;
       card.addEventListener("click", () => {
@@ -516,7 +517,8 @@ function wireReplayControls() {
       excited = false;
       card.classList.add("is-returning");
       card.classList.remove("is-excited");
-      if (numberEl) numberEl.textContent = "Day 7";
+      // Label stays "Skip to D-day?" whether excited or not — only
+      // the hint line (the countdown) changes.
       if (hintEl) hintEl.textContent = "";
       offsetX = 0;
       offsetY = 0;
