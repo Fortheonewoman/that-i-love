@@ -207,9 +207,9 @@ const ContentVault = (function () {
 const DAY_VISUALS = {
   "cupid-arrow": () => `
     <svg class="day-visual cupid-arrow" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <line x1="10" y1="30" x2="150" y2="30" stroke="currentColor" stroke-width="3"/>
-      <path d="M150 30 L130 18 L136 30 L130 42 Z" fill="currentColor"/>
-      <path d="M10 30 q10 -16 20 0 q10 16 20 0" fill="none" stroke="currentColor" stroke-width="3"/>
+      <path class="arrow-swirl" d="M10 30 q10 -16 20 0 q10 16 20 0" fill="none" stroke="currentColor" stroke-width="3"/>
+      <line class="arrow-line" x1="50" y1="30" x2="150" y2="30" stroke="currentColor" stroke-width="3"/>
+      <path class="arrow-head" d="M150 30 L130 18 L136 30 L130 42 Z" fill="currentColor"/>
     </svg>`,
 };
 
@@ -373,7 +373,7 @@ function wireReplayControls() {
       const photosHtml = (data.photos || [])
         .map(
           (p, i) => `
-        <figure class="day-photo" style="--tilt:${tilts[i % tilts.length]}deg">
+        <figure class="day-photo" style="--tilt:${tilts[i % tilts.length]}deg; --delay:${0.15 + i * 0.18}s">
           <img src="${p.src}" alt="${p.caption ?? ""}" loading="lazy" />
           ${p.caption ? `<figcaption>${p.caption}</figcaption>` : ""}
         </figure>`
@@ -386,11 +386,15 @@ function wireReplayControls() {
         ? `<button type="button" class="day-overlay-prev" data-prev="${prevId}">← Day ${dayIndex}</button>`
         : "";
 
+      const poemLines = (data.body || "")
+        .split("\n")
+        .map((line, i) => `<span class="poem-line" style="--delay:${0.5 + i * 0.35}s">${line}</span>`)
+        .join("");
       const bodyHtml = data.body
         ? `
         <div class="poem-block">
           ${FLORAL_FLOURISH}
-          <p class="day-overlay-body poem-text">${data.body}</p>
+          <p class="day-overlay-body poem-text">${poemLines}</p>
           ${FLORAL_FLOURISH}
         </div>`
         : "";
@@ -402,6 +406,8 @@ function wireReplayControls() {
         ${bodyHtml}
         ${prevBtn}
       `;
+      overlayContentEl.classList.remove("is-in");
+      requestAnimationFrame(() => requestAnimationFrame(() => overlayContentEl.classList.add("is-in")));
 
       const prevEl = overlayContentEl.querySelector("[data-prev]");
       if (prevEl) prevEl.addEventListener("click", () => openDay(prevEl.dataset.prev));
