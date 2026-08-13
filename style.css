@@ -216,11 +216,8 @@ h1, h2, h3 {
   box-shadow: var(--shadow-soft), 0 0 0 1px rgba(63, 174, 107, 0.25);
   transition: transform 0.3s var(--ease), border-color 0.5s var(--ease), box-shadow 0.5s var(--ease), background 0.5s var(--ease);
 }
-.day-card.is-excited .day-card-number {
-  text-align: center;
-}
 .day-card.is-excited .day-card-hint {
-  display: none;
+  color: #6bd08f;
 }
 
 .day-card.is-returning {
@@ -310,6 +307,70 @@ h1, h2, h3 {
   margin: 0;
 }
 
+/* A title like "O + A" gets a real monogram badge — a slow-drawing
+   ring, italic serif initials, a soft breathing glow. Pizzazz. */
+.title-monogram {
+  position: relative;
+  width: 11.5rem;
+  height: 11.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  color: var(--accent);
+}
+.monogram-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: monogram-breathe 4.5s ease-in-out infinite;
+}
+.monogram-ring circle {
+  stroke-dasharray: 660;
+  stroke-dashoffset: 660;
+  transition: stroke-dashoffset 1.8s var(--ease);
+}
+.monogram-ring circle:nth-child(2) { transition-delay: 0.25s; }
+.day-overlay-content.is-in .monogram-ring circle {
+  stroke-dashoffset: 0;
+}
+@keyframes monogram-breathe {
+  0%, 100% { opacity: 0.75; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.025); }
+}
+.monogram-letters {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.monogram-letter {
+  font-size: 3.4rem;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--fg);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  transition-delay: 0.3s;
+}
+.monogram-letter:last-child { transition-delay: 0.6s; }
+.monogram-plus {
+  font-size: 1.3rem;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+  transition-delay: 0.5s;
+}
+.day-overlay-content.is-in .monogram-letter,
+.day-overlay-content.is-in .monogram-plus {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .day-visual {
   width: 12rem;
   height: auto;
@@ -323,13 +384,13 @@ h1, h2, h3 {
 .cupid-arrow .arrow-swirl {
   stroke-dasharray: 130;
   stroke-dashoffset: 130;
-  transition: stroke-dashoffset 1.1s var(--ease);
+  transition: stroke-dashoffset 2.4s var(--ease) 0.4s;
 }
 .cupid-arrow .arrow-head {
   opacity: 0;
   transform: scale(0.4);
   transform-origin: 150px 30px;
-  transition: opacity 0.35s var(--ease) 1s, transform 0.35s var(--ease) 1s;
+  transition: opacity 0.4s var(--ease) 2.7s, transform 0.4s var(--ease) 2.7s;
 }
 .day-overlay-content.is-in .cupid-arrow .arrow-line,
 .day-overlay-content.is-in .cupid-arrow .arrow-swirl {
@@ -351,8 +412,8 @@ h1, h2, h3 {
 .poem-line {
   display: block;
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+  transform: translateY(10px);
+  transition: opacity 1s var(--ease), transform 1s var(--ease);
   transition-delay: var(--delay, 0s);
 }
 .day-overlay-content.is-in .poem-line {
@@ -382,8 +443,8 @@ h1, h2, h3 {
   margin: 0;
   max-width: 15rem;
   opacity: 0;
-  transform: translateY(16px) rotate(var(--tilt, 0deg));
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  transform: translateY(20px) rotate(var(--tilt, 0deg));
+  transition: opacity 1.3s var(--ease), transform 1.3s var(--ease);
   transition-delay: var(--delay, 0s);
 }
 

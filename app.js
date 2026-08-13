@@ -216,6 +216,27 @@ const DAY_VISUALS = {
 // A small hand-drawn-style sprig used to flank a poem/body of text —
 // currentColor so it always matches whatever accent is live. Two
 // vines reaching toward a little five-petal bloom in the middle.
+// A title like "O + A" gets a real design treatment — a monogram
+// badge with a ring, instead of just sitting there as plain text.
+// Any other title still renders as a normal heading.
+function renderTitle(title) {
+  const match = /^(.{1,3}) \+ (.{1,3})$/.exec((title || "").trim());
+  if (!match) return `<h2 class="day-overlay-title">${title ?? ""}</h2>`;
+  const [, left, right] = match;
+  return `
+    <div class="title-monogram" role="heading" aria-level="2" aria-label="${title}">
+      <svg class="monogram-ring" viewBox="0 0 220 220" aria-hidden="true">
+        <circle cx="110" cy="110" r="102" fill="none" stroke="currentColor" stroke-width="1.25" opacity="0.55"/>
+        <circle cx="110" cy="110" r="90" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+      </svg>
+      <span class="monogram-letters">
+        <span class="monogram-letter">${left}</span>
+        <span class="monogram-plus">+</span>
+        <span class="monogram-letter">${right}</span>
+      </span>
+    </div>`;
+}
+
 const FLORAL_FLOURISH = `
   <svg class="floral-flourish" viewBox="0 0 240 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <path d="M6 22 C50 14 84 26 108 20" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.55"/>
@@ -373,7 +394,7 @@ function wireReplayControls() {
       const photosHtml = (data.photos || [])
         .map(
           (p, i) => `
-        <figure class="day-photo" style="--tilt:${tilts[i % tilts.length]}deg; --delay:${0.15 + i * 0.18}s">
+        <figure class="day-photo" style="--tilt:${tilts[i % tilts.length]}deg; --delay:${0.5 + i * 0.5}s">
           <img src="${p.src}" alt="${p.caption ?? ""}" loading="lazy" />
           ${p.caption ? `<figcaption>${p.caption}</figcaption>` : ""}
         </figure>`
@@ -388,7 +409,7 @@ function wireReplayControls() {
 
       const poemLines = (data.body || "")
         .split("\n")
-        .map((line, i) => `<span class="poem-line" style="--delay:${0.5 + i * 0.35}s">${line}</span>`)
+        .map((line, i) => `<span class="poem-line" style="--delay:${2.8 + i * 0.6}s">${line}</span>`)
         .join("");
       const bodyHtml = data.body
         ? `
@@ -400,7 +421,7 @@ function wireReplayControls() {
         : "";
 
       overlayContentEl.innerHTML = `
-        <h2 class="day-overlay-title">${data.title ?? ""}</h2>
+        ${renderTitle(data.title)}
         ${visual}
         ${photosHtml ? `<div class="day-photos">${photosHtml}</div>` : ""}
         ${bodyHtml}
@@ -446,7 +467,7 @@ function wireReplayControls() {
       // The face is a separate inner wrapper so Day 7's "rolling"
       // wobble (an animation on transform) never fights with the
       // outer card's own transform, which handles dodge position.
-      const label = id === "day7" ? "Skip to D-day?" : `Day ${i + 1}`;
+      const label = id === "day7" ? "Birthday" : `Day ${i + 1}`;
       card.innerHTML = `<span class="day-card-face">
         <span class="day-card-number">${label}</span>
         <span class="day-card-hint"></span>
@@ -482,9 +503,12 @@ function wireReplayControls() {
         hintEl.textContent = opened[id] ? "tap to reopen" : "tap to open";
       } else {
         card.classList.add("is-locked");
-        // Day 7 shows "skip to D-day" instead, while she's chasing it —
-        // don't stomp on that with the countdown text.
-        if (!card.classList.contains("is-excited")) {
+        // Day 7 just says "tap to open" always — no ticking countdown
+        // on the birthday slot. Tapping it early still shakes it (the
+        // lock itself doesn't change, only what's displayed).
+        if (id === "day7") {
+          hintEl.textContent = "tap to open";
+        } else {
           hintEl.textContent = window.TimeLock.formatDuration(u.msRemaining);
         }
       }
@@ -494,12 +518,11 @@ function wireReplayControls() {
   // ---- Day 7's little chase game ------------------------------
   // A gentle nod to the birthday's own chase-the-button gag: while
   // Day 7 is still locked, hovering near it makes it playful — it
-  // turns green, says "skip to D-day", and dodges the cursor. Five
+  // turns green and dodges the cursor. The label ("Birthday" / "tap
+  // to open") never changes, only the colour and position do. Five
   // seconds without her chasing it and it calms back down on its own.
   function wireDay7Chase(card) {
     if (!card) return;
-    const hintEl = card.querySelector(".day-card-hint");
-    const numberEl = card.querySelector(".day-card-number");
     let excited = false;
     let calmTimer = null;
     let returnCleanupTimer = null;
@@ -517,9 +540,6 @@ function wireReplayControls() {
       excited = false;
       card.classList.add("is-returning");
       card.classList.remove("is-excited");
-      // Label stays "Skip to D-day?" whether excited or not — only
-      // the hint line (the countdown) changes.
-      if (hintEl) hintEl.textContent = "";
       offsetX = 0;
       offsetY = 0;
       applyOffset();
@@ -537,8 +557,6 @@ function wireReplayControls() {
       if (!excited) {
         excited = true;
         card.classList.add("is-excited");
-        if (numberEl) numberEl.textContent = "Skip to D-day?";
-        if (hintEl) hintEl.textContent = "";
       }
       scheduleCalm();
     }
