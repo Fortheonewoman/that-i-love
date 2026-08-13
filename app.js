@@ -213,6 +213,22 @@ const DAY_VISUALS = {
     </svg>`,
 };
 
+// A small hand-drawn-style sprig used to flank a poem/body of text —
+// currentColor so it always matches whatever accent is live. Two
+// vines reaching toward a little five-petal bloom in the middle.
+const FLORAL_FLOURISH = `
+  <svg class="floral-flourish" viewBox="0 0 240 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M6 22 C50 14 84 26 108 20" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.55"/>
+    <path d="M132 20 C156 26 190 14 234 22" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.55"/>
+    <g transform="translate(120,19)" opacity="0.85">
+      <circle cx="0" cy="0" r="2.6" fill="currentColor"/>
+      <circle cx="-7" cy="-4" r="3.6" fill="currentColor" opacity="0.6"/>
+      <circle cx="7" cy="-4" r="3.6" fill="currentColor" opacity="0.6"/>
+      <circle cx="-7" cy="4" r="3.6" fill="currentColor" opacity="0.6"/>
+      <circle cx="7" cy="4" r="3.6" fill="currentColor" opacity="0.6"/>
+    </g>
+  </svg>`;
+
 /* ============================================================
    The seven-day palette. Each day "wears" its own colour the
    moment it's opened — set as the --accent CSS variable on the
@@ -353,10 +369,11 @@ function wireReplayControls() {
       const data = await ContentVault.loadDay(id);
       const visual = data.visual && DAY_VISUALS[data.visual] ? DAY_VISUALS[data.visual]() : "";
 
+      const tilts = [-3, 2.5, -1.5, 3]; // gentle alternating tilt, scrapbook-soft not chaotic
       const photosHtml = (data.photos || [])
         .map(
-          (p) => `
-        <figure class="day-photo">
+          (p, i) => `
+        <figure class="day-photo" style="--tilt:${tilts[i % tilts.length]}deg">
           <img src="${p.src}" alt="${p.caption ?? ""}" loading="lazy" />
           ${p.caption ? `<figcaption>${p.caption}</figcaption>` : ""}
         </figure>`
@@ -369,11 +386,20 @@ function wireReplayControls() {
         ? `<button type="button" class="day-overlay-prev" data-prev="${prevId}">← Day ${dayIndex}</button>`
         : "";
 
+      const bodyHtml = data.body
+        ? `
+        <div class="poem-block">
+          ${FLORAL_FLOURISH}
+          <p class="day-overlay-body poem-text">${data.body}</p>
+          ${FLORAL_FLOURISH}
+        </div>`
+        : "";
+
       overlayContentEl.innerHTML = `
         <h2 class="day-overlay-title">${data.title ?? ""}</h2>
         ${visual}
         ${photosHtml ? `<div class="day-photos">${photosHtml}</div>` : ""}
-        ${data.body ? `<p class="day-overlay-body">${data.body}</p>` : ""}
+        ${bodyHtml}
         ${prevBtn}
       `;
 
