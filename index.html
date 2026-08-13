@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
   <title>Amirachi</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=7" />
 </head>
 <body>
   <div id="locked-out" class="locked-out floral-decor" hidden>
@@ -55,18 +55,23 @@
   <!-- cast/scenes/director load first so app.js can rely on them
        existing the instant its own async code resumes — script tags
        block in order, but a later `await` inside app.js is not
-       guaranteed to lose the race against these otherwise. -->
-  <script src="cast.js"></script>
-  <script src="scenes/act1.js"></script>
-  <script src="scenes/act2.js"></script>
-  <script src="scenes/act3.js"></script>
-  <script src="scenes/act4.js"></script>
-  <script src="scenes/act5.js"></script>
-  <script src="scenes/act6.js"></script>
-  <script src="scenes/act7.js"></script>
-  <script src="scenes/act8.js"></script>
-  <script src="scenes/act9.js"></script>
-  <script src="birthday.js"></script>
-  <script src="app.js"></script>
+       guaranteed to lose the race against these otherwise.
+
+       The ?v=N on every file below is a cache-buster — browsers (and
+       GitHub Pages itself) cache JS/CSS aggressively, so without this
+       a pushed fix can silently not show up until a hard refresh.
+       Bump this number whenever any of these files change. -->
+  <script src="cast.js?v=7"></script>
+  <script src="scenes/act1.js?v=7"></script>
+  <script src="scenes/act2.js?v=7"></script>
+  <script src="scenes/act3.js?v=7"></script>
+  <script src="scenes/act4.js?v=7"></script>
+  <script src="scenes/act5.js?v=7"></script>
+  <script src="scenes/act6.js?v=7"></script>
+  <script src="scenes/act7.js?v=7"></script>
+  <script src="scenes/act8.js?v=7"></script>
+  <script src="scenes/act9.js?v=7"></script>
+  <script src="birthday.js?v=7"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

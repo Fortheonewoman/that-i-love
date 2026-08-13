@@ -24,7 +24,7 @@ window.Acts.act2 = (function () {
   return {
     async enter({ container, go }) {
       container.innerHTML = `
-        <div class="act2-stage">
+        <div class="act2-stage floral-decor">
           <div class="flood-field" id="flood-field"></div>
           <h1 class="act2-title" id="act2-title">you are soooo beautiful</h1>
         </div>`;

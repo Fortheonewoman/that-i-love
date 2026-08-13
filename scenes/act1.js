@@ -17,14 +17,23 @@ window.Acts.act1 = (function () {
   function cloudSvg(cls) {
     return `
       <svg class="cloud-panel ${cls}" viewBox="0 0 400 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="400" height="800" fill="#7ec8f2"/>
-        <g fill="#ffffff">
-          <ellipse class="drift drift-a" cx="120" cy="180" rx="140" ry="70"/>
-          <ellipse class="drift drift-a" cx="260" cy="150" rx="110" ry="55"/>
-          <ellipse class="drift drift-b" cx="100" cy="420" rx="160" ry="80"/>
-          <ellipse class="drift drift-b" cx="280" cy="460" rx="120" ry="60"/>
-          <ellipse class="drift drift-c" cx="150" cy="680" rx="150" ry="75"/>
-          <ellipse class="drift drift-c" cx="300" cy="640" rx="100" ry="50"/>
+        <defs>
+          <linearGradient id="sky-${cls}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#a9d8f5"/>
+            <stop offset="100%" stop-color="#6fb8e8"/>
+          </linearGradient>
+          <filter id="soft-${cls}" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3"/>
+          </filter>
+        </defs>
+        <rect width="400" height="800" fill="url(#sky-${cls})"/>
+        <g fill="#ffffff" filter="url(#soft-${cls})" opacity="0.96">
+          <ellipse class="drift drift-a" cx="120" cy="180" rx="140" ry="68"/>
+          <ellipse class="drift drift-a" cx="260" cy="152" rx="108" ry="52"/>
+          <ellipse class="drift drift-b" cx="100" cy="420" rx="158" ry="76"/>
+          <ellipse class="drift drift-b" cx="280" cy="458" rx="118" ry="56"/>
+          <ellipse class="drift drift-c" cx="150" cy="680" rx="148" ry="70"/>
+          <ellipse class="drift drift-c" cx="300" cy="642" rx="98" ry="46"/>
         </g>
       </svg>`;
   }

@@ -41,6 +41,22 @@ window.Acts.act7 = (function () {
       },
     },
     {
+      key: "favouriteSong",
+      prompt: "what's your favourite song right now?",
+      after(container, answer, ctx) {
+        ctx.favouriteSong = answer;
+        return "it might already be tonight's.";
+      },
+    },
+    {
+      key: "wantToDo",
+      prompt: "one thing you want us to do together this year?",
+      after(container, answer, ctx) {
+        ctx.wantToDo = answer;
+        return "consider it already planned.";
+      },
+    },
+    {
       key: "stateAnswer",
       prompt: "which state are you in, right now?",
       after(container, answer, ctx) {

@@ -9,14 +9,17 @@
    ============================================================ */
 window.Acts = window.Acts || {};
 window.Acts.act4 = (function () {
+  // Muted, gallery-quality tones rather than poster-bright ones —
+  // the same seven-day hues, just turned down so they wash the
+  // screen instead of shouting at it.
   const CARDS = [
-    { text: "This year, with you —", color: "#C0142B" },
-    { text: "[a number worth bragging about]", color: "#FF6F59" },
-    { text: "[an inside joke goes here]", color: "#E8A33D" },
-    { text: "[another one]", color: "#A8447E" },
-    { text: "[something only the two of you would get]", color: "#2FA89C" },
-    { text: "[one more]", color: "#6C63FF" },
-    { text: "happy birthday, Amirachi", color: "#E63E8C", final: true },
+    { text: "This year, with you —", color: "#B3475A" },
+    { text: "[a number worth bragging about]", color: "#C97C63" },
+    { text: "[an inside joke goes here]", color: "#C39A5C" },
+    { text: "[another one]", color: "#93547E" },
+    { text: "[something only the two of you would get]", color: "#4F958C" },
+    { text: "[one more]", color: "#7871B8" },
+    { text: "happy birthday, Amirachi", color: "#B8567F", final: true },
   ];
 
   let idx = 0;
@@ -43,7 +46,9 @@ window.Acts.act4 = (function () {
         go(5);
       }
     };
-    container.querySelector(".act4-stage").addEventListener("click", clickHandler);
+    const stageEl = container.querySelector(".act4-stage");
+    stageEl.addEventListener("click", clickHandler);
+    requestAnimationFrame(() => stageEl.classList.add("is-in"));
   }
 
   return {

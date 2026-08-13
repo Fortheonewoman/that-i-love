@@ -16,6 +16,10 @@ window.Acts.act9 = (function () {
     timers = [];
   }
 
+  // A little variety in what's falling — still reads as "confetti",
+  // not a single sticker raining down.
+  const CONFETTI_SYMBOLS = ["🧡", "💛", "🌸", "✨", "💕", "🌷"];
+
   function startConfettiForever() {
     const layer = document.getElementById("confetti-layer");
     if (!layer || layer.dataset.running) return;
@@ -24,7 +28,7 @@ window.Acts.act9 = (function () {
     function drop() {
       const piece = document.createElement("span");
       piece.className = "confetti-piece";
-      piece.textContent = "🧡";
+      piece.textContent = CONFETTI_SYMBOLS[Math.floor(Math.random() * CONFETTI_SYMBOLS.length)];
       piece.style.left = Math.random() * 100 + "%";
       piece.style.animationDuration = 3.5 + Math.random() * 2.5 + "s";
       piece.style.fontSize = 12 + Math.random() * 14 + "px";
@@ -53,6 +57,7 @@ window.Acts.act9 = (function () {
             <div class="act9-figure act9-him" id="act9-him"></div>
           </div>
           <div class="act9-helmet" id="act9-helmet"></div>
+          <p class="act9-message" id="act9-message">Happy Birthday, Amirachi 🎂🧡</p>
         </div>`;
 
       const herSlot = container.querySelector("#act9-her");
@@ -98,6 +103,8 @@ window.Acts.act9 = (function () {
       after(15000, () => {
         startConfettiForever();
         showReplayControls();
+        const msg = document.getElementById("act9-message");
+        if (msg) msg.classList.add("is-shown");
       });
     },
     exit() {
@@ -111,6 +118,8 @@ window.Acts.act9 = (function () {
       showReplayControls();
       const red = document.getElementById("act9-red");
       if (red) red.classList.add("is-bleeding");
+      const msg = document.getElementById("act9-message");
+      if (msg) msg.classList.add("is-shown");
     },
   };
 })();

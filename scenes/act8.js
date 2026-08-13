@@ -33,15 +33,26 @@ window.Acts.act8 = (function () {
 
       const figureSlot = container.querySelector("#act8-figure");
       const caption = container.querySelector("#act8-caption");
-      const figure = Cast.makeFigure({ name: "obinna", expression: "delighted", colorVar: "var(--accent)", size: 96 });
+      // He's been running all night in whatever he had on. For this
+      // entrance he's in a suit — the formal, "I'm actually here now"
+      // version of the same guy.
+      const figure = Cast.makeFigure({ name: "obinna", expression: "delighted", colorVar: "#232a3d", size: 96 });
       figure.classList.add("act8-obinna", ctx.peeperCaughtBeforeAct8 || Cast.hasCaughtPeeper() ? "already-turned" : "turning");
       figureSlot.appendChild(figure);
       requestAnimationFrame(() => figure.classList.add("is-in"));
 
       Cast.stopPeeper();
 
-      after(400, () => {
-        caption.textContent = "it's him.";
+      after(500, () => {
+        caption.textContent = "here he is.";
+        caption.classList.remove("is-shown");
+        void caption.offsetWidth;
+        caption.classList.add("is-shown");
+      });
+      after(2400, () => {
+        caption.textContent = "i brought him for you.";
+        caption.classList.remove("is-shown");
+        void caption.offsetWidth;
         caption.classList.add("is-shown");
       });
 

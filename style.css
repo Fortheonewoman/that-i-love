@@ -7,9 +7,23 @@
 
 :root {
   --bg: #170f12; /* warm near-black, not cold navy-black */
+  --bg-soft: #1d1417;
   --fg: #f5f2ec;
   --dim: #a89ba0;
   --accent: #ff5c8a; /* placeholder — replaced by her favourite colour in act 7 */
+
+  /* A calm, deliberate design system — used everywhere instead of
+     one-off values, so the whole site reads as one considered
+     surface rather than a pile of separately-styled blocks. */
+  --surface: rgba(245, 242, 236, 0.045);
+  --surface-hover: rgba(245, 242, 236, 0.07);
+  --border-soft: rgba(245, 242, 236, 0.10);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.18), 0 12px 32px -12px rgba(0, 0, 0, 0.5);
+  --radius-sm: 0.65rem;
+  --radius-md: 1.1rem;
+  --radius-lg: 1.75rem;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1); /* calm "expo-out" — nothing snaps */
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -27,11 +41,20 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--fg);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
 .test-page {
@@ -107,18 +130,20 @@ body {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  border: 1px solid rgba(245, 242, 236, 0.25);
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--dim);
+  transition: all 0.4s var(--ease);
 }
 
 .stamp.is-filled {
-  border-color: var(--accent);
+  border-color: rgba(255, 92, 138, 0.4);
   color: var(--accent);
-  background: rgba(255, 92, 138, 0.12);
+  background: rgba(255, 92, 138, 0.1);
 }
 
 .hero {
@@ -126,31 +151,34 @@ body {
 }
 
 .hero-title {
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  margin: 0 0 0.75rem;
-  letter-spacing: 0.01em;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 600;
+  margin: 0 0 0.9rem;
+  letter-spacing: -0.03em;
 }
 
 .birthday-countdown {
   color: var(--dim);
   font-variant-numeric: tabular-nums;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
 .day-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 1.1rem;
   width: 100%;
   max-width: 56rem;
 }
 
 .day-card {
   appearance: none;
-  border: 1px solid rgba(245, 242, 236, 0.15);
-  background: rgba(245, 242, 236, 0.03);
-  border-radius: 0.75rem;
-  padding: 1.5rem 1rem;
+  border: 1px solid var(--border-soft);
+  background: linear-gradient(165deg, var(--surface), rgba(245, 242, 236, 0.015));
+  border-radius: var(--radius-md);
+  padding: 1.75rem 1.1rem;
   color: var(--fg);
   font: inherit;
   cursor: pointer;
@@ -158,35 +186,39 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
 }
 
 .day-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  border-color: var(--border-soft);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 20px 40px -16px rgba(0,0,0,0.55);
 }
 
 .day-card-number {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .day-card-hint {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
 }
 
 .day-card.is-locked {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .day-card.is-unlocked {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(255, 92, 138, 0.25);
+  border-color: rgba(255, 92, 138, 0.35);
+  box-shadow: var(--shadow-soft), 0 0 0 1px rgba(255, 92, 138, 0.18);
 }
 
 .day-card.is-opened {
-  border-color: rgba(255, 92, 138, 0.4);
+  border-color: rgba(255, 92, 138, 0.22);
 }
 
 .day-card.is-shaking {
@@ -234,7 +266,9 @@ body {
 }
 
 .day-overlay-title {
-  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
   margin: 0;
 }
 
@@ -245,8 +279,10 @@ body {
 }
 
 .day-overlay-body {
-  font-size: 1.2rem;
-  line-height: 1.6;
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--fg);
   white-space: pre-wrap;
 }
 
@@ -286,19 +322,21 @@ body {
 
 .day-overlay-prev {
   appearance: none;
-  border: 1px solid rgba(245, 242, 236, 0.25);
-  background: none;
-  color: var(--fg);
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  color: var(--dim);
   border-radius: 999px;
-  padding: 0.5rem 1.1rem;
+  padding: 0.55rem 1.2rem;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
+  transition: border-color 0.3s var(--ease), color 0.3s var(--ease), background 0.3s var(--ease);
 }
 
 .day-overlay-prev:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: var(--surface-hover);
 }
 
 /* ============================================================
@@ -358,15 +396,18 @@ body {
   right: 1.5rem;
   z-index: 30;
   appearance: none;
-  border: 1px solid rgba(245, 242, 236, 0.25);
-  background: none;
-  color: var(--fg);
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  backdrop-filter: blur(6px);
+  color: var(--dim);
   border-radius: 999px;
-  padding: 0.4rem 0.9rem;
+  padding: 0.45rem 1rem;
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   cursor: pointer;
+  transition: all 0.3s var(--ease);
 }
+.act-skip:hover { color: var(--fg); border-color: var(--border-soft); background: var(--surface-hover); }
 
 .mute-btn {
   position: absolute;
@@ -374,14 +415,17 @@ body {
   right: 1.5rem;
   z-index: 30;
   appearance: none;
-  border: none;
-  background: rgba(245, 242, 236, 0.08);
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  backdrop-filter: blur(6px);
   border-radius: 50%;
   width: 2.5rem;
   height: 2.5rem;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   cursor: pointer;
+  transition: all 0.3s var(--ease);
 }
+.mute-btn:hover { background: var(--surface-hover); }
 
 /* ============================================================
    Act 1 — clouds.
@@ -425,11 +469,12 @@ body {
   justify-content: center;
   text-align: center;
   margin: 0;
-  font-size: clamp(2.5rem, 9vw, 6rem);
-  line-height: 1.05;
-  letter-spacing: 0.02em;
-  color: #1a1a1a;
-  text-shadow: 0 2px 0 rgba(255,255,255,0.4);
+  font-size: clamp(2.5rem, 9vw, 5.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #24211f;
+  text-shadow: 0 2px 0 rgba(255,255,255,0.35);
   z-index: 5;
 }
 
@@ -496,8 +541,10 @@ body {
 }
 .act3-name {
   margin: 0;
-  font-size: clamp(2.5rem, 8vw, 5.5rem);
-  transform: scale(0.9);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  transform: scale(0.94);
   opacity: 0;
 }
 .act3-name.is-pop {
@@ -516,16 +563,19 @@ body {
 .act4-stage {
   position: absolute;
   inset: 0;
-  background: var(--card-color);
+  background: radial-gradient(ellipse 80% 65% at 50% 38%, var(--card-color) 0%, var(--bg) 145%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 2.25rem;
   cursor: pointer;
   padding: 2rem;
   text-align: center;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
 }
+.act4-stage.is-in { opacity: 1; }
 .act4-progress {
   position: absolute;
   top: 4rem;
@@ -533,24 +583,29 @@ body {
   gap: 0.4rem;
 }
 .act4-dot {
-  width: 1.5rem;
-  height: 0.25rem;
+  width: 1.25rem;
+  height: 0.2rem;
   border-radius: 999px;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.28);
+  transition: background 0.4s var(--ease);
 }
-.act4-dot.is-done { background: #fff; }
+.act4-dot.is-done { background: rgba(255,255,255,0.85); }
 .act4-text {
   margin: 0;
-  font-size: clamp(2rem, 7vw, 4rem);
-  font-weight: 700;
-  color: #fff;
-  max-width: 44rem;
+  font-size: clamp(1.9rem, 6vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: rgba(255,255,255,0.96);
+  text-shadow: 0 2px 24px rgba(0,0,0,0.2);
+  max-width: 40rem;
 }
 .act4-tap-hint {
   position: absolute;
   bottom: 3rem;
-  color: rgba(255,255,255,0.7);
-  font-size: 0.9rem;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
 }
 
 /* ============================================================
@@ -580,31 +635,38 @@ body {
   pointer-events: none;
   z-index: 0;
 }
-.act5-watermark.is-shown { color: rgba(255,92,138,0.08); }
-.act5-question { margin: 0; font-size: clamp(1.6rem, 5vw, 2.8rem); z-index: 1; }
-.act5-hint { color: var(--dim); min-height: 1.2rem; z-index: 1; }
-.act5-form { display: flex; gap: 0.5rem; z-index: 1; }
+.act5-watermark.is-shown { color: rgba(255,92,138,0.07); }
+.act5-question { margin: 0; font-size: clamp(1.6rem, 5vw, 2.6rem); font-weight: 600; letter-spacing: -0.02em; z-index: 1; }
+.act5-hint { color: var(--dim); min-height: 1.2rem; font-size: 0.95rem; z-index: 1; }
+.act5-form { display: flex; gap: 0.6rem; z-index: 1; }
 .act5-input {
   font: inherit;
-  padding: 0.7rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(245,242,236,0.25);
-  background: rgba(245,242,236,0.05);
+  padding: 0.8rem 1.1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
   color: var(--fg);
   min-width: 16rem;
+  box-shadow: var(--shadow-soft);
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
 }
+.act5-input:focus { outline: none; border-color: rgba(255,92,138,0.4); background: var(--surface-hover); }
 .act5-submit, .act5-anyway {
   font: inherit;
-  padding: 0.7rem 1.2rem;
-  border-radius: 0.5rem;
+  padding: 0.8rem 1.3rem;
+  border-radius: var(--radius-sm);
   border: none;
   background: var(--accent);
   color: #1a1a1a;
   cursor: pointer;
   font-weight: 600;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
 }
-.act5-reply { min-height: 1.4rem; color: var(--accent); z-index: 1; }
-.act5-anyway { background: none; border: 1px solid var(--accent); color: var(--accent); z-index: 1; }
+.act5-submit:hover { transform: translateY(-1px); }
+.act5-reply { min-height: 1.4rem; color: var(--accent); font-size: 0.95rem; z-index: 1; }
+.act5-anyway { background: none; border: 1px solid var(--border-soft); color: var(--dim); z-index: 1; box-shadow: none; }
+.act5-anyway:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ============================================================
    Act 6 — chase and coach.
@@ -624,13 +686,14 @@ body {
   position: absolute;
   transform: translate(-50%,-50%);
   font: inherit;
-  font-weight: 700;
-  padding: 1rem 2rem;
+  font-weight: 600;
+  padding: 1rem 2.1rem;
   border-radius: 999px;
   border: none;
   background: var(--accent);
   color: #1a1a1a;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 16px 32px -12px rgba(0,0,0,0.5);
   transition: left 0.18s cubic-bezier(.3,1.5,.4,1), top 0.18s cubic-bezier(.3,1.5,.4,1);
 }
 .act6-button.is-smashable { transition: left 0.12s ease, top 0.12s ease; }
@@ -670,36 +733,43 @@ body {
   padding: 2rem;
   text-align: center;
 }
-.act7-prompt { margin: 0; font-size: clamp(1.6rem, 5vw, 2.6rem); }
-.act7-form { display: flex; gap: 0.5rem; }
+.act7-prompt { margin: 0; font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 600; letter-spacing: -0.02em; }
+.act7-form { display: flex; gap: 0.6rem; }
 .act7-input {
   font: inherit;
-  padding: 0.7rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(245,242,236,0.25);
-  background: rgba(245,242,236,0.05);
+  padding: 0.8rem 1.1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
   color: var(--fg);
   min-width: 18rem;
+  box-shadow: var(--shadow-soft);
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
 }
+.act7-input:focus { outline: none; border-color: rgba(255,92,138,0.4); background: var(--surface-hover); }
 .act7-submit {
   font: inherit;
-  padding: 0.7rem 1.1rem;
-  border-radius: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--radius-sm);
   border: none;
   background: var(--accent);
   color: #1a1a1a;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.3s var(--ease);
 }
-.act7-reply { min-height: 1.4rem; color: var(--accent); }
+.act7-submit:hover { transform: translateY(-1px); }
+.act7-reply { min-height: 1.4rem; color: var(--accent); font-size: 0.95rem; }
 .act7-distance-row {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  font-size: clamp(1rem, 3vw, 1.6rem);
+  gap: 1.75rem;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-weight: 400;
 }
 .act7-city { color: var(--dim); }
-.act7-distance-number { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); }
+.act7-distance-number { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--accent); letter-spacing: -0.01em; }
 
 /* ============================================================
    Act 8 — the reveal.
@@ -772,6 +842,25 @@ body {
   transition: transform 0.3s ease;
   transform: translate(-3.4rem, 25rem) scale(0.8);
 }
+
+.act9-message {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9rem;
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: rgba(255,255,255,0.96);
+  text-shadow: 0 4px 30px rgba(0,0,0,0.35);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1.4s var(--ease), transform 1.4s var(--ease);
+  z-index: 12;
+}
+.act9-message.is-shown { opacity: 1; transform: translateY(0); }
 
 /* ============================================================
    Cast — coach and peeper.
@@ -893,13 +982,20 @@ body {
 }
 .replay-controls button {
   font: inherit;
-  padding: 0.6rem 1.3rem;
+  font-weight: 500;
+  padding: 0.65rem 1.4rem;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.4);
-  background: rgba(0,0,0,0.3);
-  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(8px);
+  color: rgba(255,255,255,0.92);
   cursor: pointer;
   margin: 0 0.3rem;
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.replay-controls button:hover {
+  background: rgba(0,0,0,0.4);
+  border-color: rgba(255,255,255,0.5);
 }
 .replay-jump {
   display: flex;
@@ -924,19 +1020,31 @@ body {
 .floral-decor::after {
   content: "";
   position: absolute;
-  width: 7rem;
-  height: 8.75rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 100'%3E%3Cg fill='none' stroke='%23e8b7a6' stroke-width='2' opacity='0.9'%3E%3Cpath d='M40 95 C40 70 35 55 40 40'/%3E%3Cpath d='M40 70 C30 65 25 68 20 75'/%3E%3Cpath d='M40 60 C50 55 55 58 58 65'/%3E%3C/g%3E%3Cg fill='%23f3a6c4'%3E%3Ccircle cx='40' cy='22' r='11'/%3E%3Ccircle cx='55' cy='32' r='11'/%3E%3Ccircle cx='48' cy='48' r='11'/%3E%3Ccircle cx='28' cy='44' r='11'/%3E%3Ccircle cx='25' cy='26' r='11'/%3E%3C/g%3E%3Ccircle cx='40' cy='34' r='8' fill='%23f4d37a'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-size: contain;
-  opacity: 0.28;
+  inset: 0;
+  background-repeat: no-repeat, no-repeat;
+  opacity: 0.32;
   pointer-events: none;
   z-index: 0;
 }
-.floral-decor::before { top: -0.5rem; left: -0.5rem; }
-.floral-decor::after { bottom: -0.5rem; right: -0.5rem; transform: rotate(180deg); }
+/* Two flowers each in ::before and ::after — four scattered around
+   the screen instead of two, so it reads as "growing here" rather
+   than "a sticker in the corner". */
+.floral-decor::before {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 100'%3E%3Cg fill='none' stroke='%23e8b7a6' stroke-width='2' opacity='0.9'%3E%3Cpath d='M40 95 C40 70 35 55 40 40'/%3E%3Cpath d='M40 70 C30 65 25 68 20 75'/%3E%3Cpath d='M40 60 C50 55 55 58 58 65'/%3E%3C/g%3E%3Cg fill='%23f3a6c4'%3E%3Ccircle cx='40' cy='22' r='11'/%3E%3Ccircle cx='55' cy='32' r='11'/%3E%3Ccircle cx='48' cy='48' r='11'/%3E%3Ccircle cx='28' cy='44' r='11'/%3E%3Ccircle cx='25' cy='26' r='11'/%3E%3C/g%3E%3Ccircle cx='40' cy='34' r='8' fill='%23f4d37a'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 100'%3E%3Cg fill='none' stroke='%23e8b7a6' stroke-width='2' opacity='0.9'%3E%3Cpath d='M40 95 C40 70 35 55 40 40'/%3E%3Cpath d='M40 70 C30 65 25 68 20 75'/%3E%3Cpath d='M40 60 C50 55 55 58 58 65'/%3E%3C/g%3E%3Cg fill='%23f3a6c4'%3E%3Ccircle cx='40' cy='22' r='11'/%3E%3Ccircle cx='55' cy='32' r='11'/%3E%3Ccircle cx='48' cy='48' r='11'/%3E%3Ccircle cx='28' cy='44' r='11'/%3E%3Ccircle cx='25' cy='26' r='11'/%3E%3C/g%3E%3Ccircle cx='40' cy='34' r='8' fill='%23f4d37a'/%3E%3C/svg%3E");
+  background-position: -1rem -0.5rem, 104% 6%;
+  background-size: 6.5rem, 4rem;
+}
+.floral-decor::after {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 100'%3E%3Cg fill='none' stroke='%23e8b7a6' stroke-width='2' opacity='0.9'%3E%3Cpath d='M40 95 C40 70 35 55 40 40'/%3E%3Cpath d='M40 70 C30 65 25 68 20 75'/%3E%3Cpath d='M40 60 C50 55 55 58 58 65'/%3E%3C/g%3E%3Cg fill='%23f3a6c4'%3E%3Ccircle cx='40' cy='22' r='11'/%3E%3Ccircle cx='55' cy='32' r='11'/%3E%3Ccircle cx='48' cy='48' r='11'/%3E%3Ccircle cx='28' cy='44' r='11'/%3E%3Ccircle cx='25' cy='26' r='11'/%3E%3C/g%3E%3Ccircle cx='40' cy='34' r='8' fill='%23f4d37a'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 100'%3E%3Cg fill='none' stroke='%23e8b7a6' stroke-width='2' opacity='0.9'%3E%3Cpath d='M40 95 C40 70 35 55 40 40'/%3E%3Cpath d='M40 70 C30 65 25 68 20 75'/%3E%3Cpath d='M40 60 C50 55 55 58 58 65'/%3E%3C/g%3E%3Cg fill='%23f3a6c4'%3E%3Ccircle cx='40' cy='22' r='11'/%3E%3Ccircle cx='55' cy='32' r='11'/%3E%3Ccircle cx='48' cy='48' r='11'/%3E%3Ccircle cx='28' cy='44' r='11'/%3E%3Ccircle cx='25' cy='26' r='11'/%3E%3C/g%3E%3Ccircle cx='40' cy='34' r='8' fill='%23f4d37a'/%3E%3C/svg%3E");
+  background-position: 96% 98%, -2% 62%;
+  background-size: 6rem, 3.25rem;
+}
 @media (max-width: 700px) {
-  .floral-decor::before, .floral-decor::after { width: 4.5rem; height: 5.6rem; }
+  .floral-decor::before, .floral-decor::after { background-size: 4.2rem, 2.6rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
