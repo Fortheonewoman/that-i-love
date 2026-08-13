@@ -431,7 +431,32 @@ function wireReplayControls() {
     el.classList.add("is-shaking");
   }
 
+  // Day cards are built ONCE and updated in place on every tick —
+  // not torn down and recreated — so a card with its own transient
+  // state (Day 7's little chase game, below) doesn't lose that state
+  // every second.
+  const dayCardEls = {};
+  function ensureDayCards() {
+    if (Object.keys(dayCardEls).length) return;
+    DAY_IDS.forEach((id, i) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "day-card";
+      card.dataset.day = id;
+      card.innerHTML = `<span class="day-card-number">Day ${i + 1}</span>
+        <span class="day-card-hint"></span>`;
+      card.addEventListener("click", () => {
+        if (card.classList.contains("is-locked")) shake(card);
+        else openDay(id);
+      });
+      gridEl.appendChild(card);
+      dayCardEls[id] = card;
+    });
+    wireDay7Chase(dayCardEls.day7);
+  }
+
   function renderGrid() {
+    ensureDayCards();
     const unlocks = window.TimeLock.unlocks();
     const opened = openedDays();
 
@@ -440,26 +465,98 @@ function wireReplayControls() {
       return `<span class="stamp ${isOpen ? "is-filled" : ""}">${i + 1}</span>`;
     }).join("");
 
-    gridEl.innerHTML = "";
-    DAY_IDS.forEach((id, i) => {
+    DAY_IDS.forEach((id) => {
       const u = unlocks.find((x) => x.id === id);
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "day-card";
-      card.dataset.day = id;
+      const card = dayCardEls[id];
+      const hintEl = card.querySelector(".day-card-hint");
 
+      card.classList.remove("is-locked", "is-unlocked", "is-opened");
       if (u.unlocked) {
         card.classList.add(opened[id] ? "is-opened" : "is-unlocked");
-        card.innerHTML = `<span class="day-card-number">Day ${i + 1}</span>
-          <span class="day-card-hint">${opened[id] ? "tap to reopen" : "tap to open"}</span>`;
-        card.addEventListener("click", () => openDay(id));
+        hintEl.textContent = opened[id] ? "tap to reopen" : "tap to open";
       } else {
         card.classList.add("is-locked");
-        card.innerHTML = `<span class="day-card-number">Day ${i + 1}</span>
-          <span class="day-card-hint">${window.TimeLock.formatDuration(u.msRemaining)}</span>`;
-        card.addEventListener("click", () => shake(card));
+        // Day 7 shows "skip to D-day" instead, while she's chasing it —
+        // don't stomp on that with the countdown text.
+        if (!card.classList.contains("is-excited")) {
+          hintEl.textContent = window.TimeLock.formatDuration(u.msRemaining);
+        }
       }
-      gridEl.appendChild(card);
+    });
+  }
+
+  // ---- Day 7's little chase game ------------------------------
+  // A gentle nod to the birthday's own chase-the-button gag: while
+  // Day 7 is still locked, hovering near it makes it playful — it
+  // turns green, says "skip to D-day", and dodges the cursor. Five
+  // seconds without her chasing it and it calms back down on its own.
+  function wireDay7Chase(card) {
+    if (!card) return;
+    const hintEl = card.querySelector(".day-card-hint");
+    let excited = false;
+    let calmTimer = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    function applyOffset() {
+      card.style.setProperty("--dodge-x", offsetX + "px");
+      card.style.setProperty("--dodge-y", offsetY + "px");
+    }
+
+    function calmDown() {
+      excited = false;
+      card.classList.remove("is-excited");
+      offsetX = 0;
+      offsetY = 0;
+      applyOffset();
+    }
+
+    function scheduleCalm() {
+      clearTimeout(calmTimer);
+      calmTimer = setTimeout(calmDown, 5000);
+    }
+
+    function excite() {
+      if (!card.classList.contains("is-locked")) return;
+      if (!excited) {
+        excited = true;
+        card.classList.add("is-excited");
+        if (hintEl) hintEl.textContent = "skip to D-day";
+      }
+      scheduleCalm();
+    }
+
+    function dodgeFrom(clientX, clientY) {
+      const r = card.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      let dx = cx - clientX;
+      let dy = cy - clientY;
+      const len = Math.hypot(dx, dy) || 1;
+      dx /= len;
+      dy /= len;
+      const jump = 46 + Math.random() * 26;
+      const MAX = 90;
+      offsetX = Math.max(-MAX, Math.min(MAX, offsetX + dx * jump));
+      offsetY = Math.max(-MAX, Math.min(MAX, offsetY + dy * jump));
+      applyOffset();
+    }
+
+    card.addEventListener("mouseenter", () => {
+      if (!card.classList.contains("is-locked")) return;
+      excite();
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!excited || !card.classList.contains("is-locked")) return;
+      const r = card.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+      if (dist < 110) {
+        dodgeFrom(e.clientX, e.clientY);
+        scheduleCalm();
+      }
     });
   }
 
