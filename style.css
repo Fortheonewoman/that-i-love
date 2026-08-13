@@ -125,7 +125,26 @@ h1, h2, h3 {
   padding: 3rem 1.5rem 5rem;
   gap: 3.5rem;
   position: relative;
+  overflow: hidden; /* lets the bottom bloom bleed off-canvas cleanly */
 }
+/* An oversized bloom bleeding off the bottom-right corner — the page
+   shouldn't just run out of content and stop in empty space. */
+.app::after {
+  content: "";
+  position: absolute;
+  right: -6rem;
+  bottom: -8rem;
+  width: 26rem;
+  height: 26rem;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 320'%3E%3Cpath d='M70 318 C68 250 66 200 70 150 C74 110 68 90 70 70' fill='none' stroke='%2396A87F' stroke-width='3'/%3E%3Cg transform='translate(70,62)'%3E%3Cellipse rx='24' ry='34' fill='%23F0B8C6'/%3E%3Cellipse rx='24' ry='34' transform='rotate(60)' fill='%23F0B8C6'/%3E%3Cellipse rx='24' ry='34' transform='rotate(120)' fill='%23F0B8C6'/%3E%3Cellipse rx='24' ry='34' transform='rotate(180)' fill='%23EA9FB3'/%3E%3Cellipse rx='24' ry='34' transform='rotate(240)' fill='%23EA9FB3'/%3E%3Cellipse rx='24' ry='34' transform='rotate(300)' fill='%23EA9FB3'/%3E%3Ccircle r='11' fill='%23F3C15F'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+  transform: rotate(35deg);
+}
+.app > * { position: relative; z-index: 1; }
 
 .stamps {
   display: flex;
@@ -164,15 +183,17 @@ h1, h2, h3 {
 
 .hero-bloom {
   position: absolute;
-  top: -4.5rem;
   width: 7.5rem;
   height: auto;
   pointer-events: none;
   opacity: 0.85;
   filter: drop-shadow(0 20px 30px rgba(60, 38, 20, 0.12));
 }
-.hero-bloom-left { left: -3.5rem; transform: rotate(-8deg); }
-.hero-bloom-right { right: -3.5rem; transform: rotate(8deg) scaleX(-1); }
+/* Deliberately NOT a mirror image of itself — one taller and higher,
+   one smaller and lower, so the hero reads as composed rather than
+   a template with a flower stamped on each corner. */
+.hero-bloom-left { top: -5.5rem; left: -4.5rem; width: 8.5rem; transform: rotate(-11deg); }
+.hero-bloom-right { top: -2.5rem; right: -3rem; width: 6rem; transform: rotate(14deg) scaleX(-1); opacity: 0.75; }
 
 .hero-eyebrow {
   margin: 0 0 0.6rem;
@@ -220,7 +241,7 @@ h1, h2, h3 {
   position: relative;
   border: 1px solid var(--border-soft);
   background:
-    linear-gradient(165deg, color-mix(in srgb, var(--day-color, var(--accent)) 10%, var(--paper)) 0%, var(--paper) 65%);
+    linear-gradient(165deg, color-mix(in srgb, var(--day-color, var(--accent)) 24%, var(--paper)) 0%, var(--paper) 72%);
   border-radius: var(--radius-md);
   width: 100%;
   padding: 1.9rem 1.1rem;
@@ -232,24 +253,30 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-soft);
-  transform: translate(var(--dodge-x, 0px), var(--dodge-y, 0px));
+  transform: translate(var(--dodge-x, 0px), var(--dodge-y, 0px)) rotate(var(--card-tilt, 0deg));
   transition: transform 0.35s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease), background 0.4s var(--ease);
 }
 .day-card::before {
   content: "";
   position: absolute;
-  left: 1.1rem;
-  right: 1.1rem;
-  top: 0;
-  height: 3px;
-  border-radius: 0 0 4px 4px;
+  left: 0.9rem;
+  top: 0.9rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
   background: var(--day-color, var(--accent));
-  opacity: 0.55;
-  transition: opacity 0.4s var(--ease);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--day-color, var(--accent)) 20%, transparent);
+  transition: transform 0.3s var(--ease);
 }
-.day-grid > .day-card:nth-child(3n+1) { margin-top: 0; }
-.day-grid > .day-card:nth-child(3n+2) { margin-top: 1rem; }
-.day-grid > .day-card:nth-child(3n) { margin-top: -0.4rem; }
+.day-card:hover::before { transform: scale(1.3); }
+/* A real, held tilt per card — not a template grid — while Day 7
+   (last child) stays upright since it's already busy dodging. */
+.day-grid > .day-card:nth-child(1) { --card-tilt: -1.4deg; margin-top: 0.2rem; }
+.day-grid > .day-card:nth-child(2) { --card-tilt: 1deg; margin-top: 1.3rem; }
+.day-grid > .day-card:nth-child(3) { --card-tilt: -0.8deg; margin-top: -0.3rem; }
+.day-grid > .day-card:nth-child(4) { --card-tilt: 1.6deg; margin-top: 0.8rem; }
+.day-grid > .day-card:nth-child(5) { --card-tilt: -1.2deg; margin-top: -0.2rem; }
+.day-grid > .day-card:nth-child(6) { --card-tilt: 0.9deg; margin-top: 1rem; }
 
 .day-card-face {
   display: flex;
@@ -259,11 +286,10 @@ h1, h2, h3 {
 }
 
 .day-card:hover {
-  transform: translate(var(--dodge-x, 0px), var(--dodge-y, 0px)) translateY(-4px);
+  transform: translate(var(--dodge-x, 0px), var(--dodge-y, 0px)) rotate(var(--card-tilt, 0deg)) translateY(-4px) scale(1.015);
   border-color: color-mix(in srgb, var(--day-color, var(--accent)) 35%, var(--border-soft));
   box-shadow: var(--shadow-lift);
 }
-.day-card:hover::before { opacity: 1; }
 
 /* Day 7's chase gag — green and a little skittish while she's after it.
    Stays a normal card shape (no ball/circle), just tinted green and
@@ -449,12 +475,17 @@ h1, h2, h3 {
   margin: 0;
   max-width: 15rem;
   opacity: 0;
-  transform: translateY(20px) rotate(var(--tilt, 0deg));
+  transform: translateY(calc(20px + var(--lift, 0rem))) rotate(var(--tilt, 0deg));
   transition: opacity 1.3s var(--ease), transform 1.3s var(--ease);
   transition-delay: var(--delay, 0s);
 }
-.day-overlay-content.is-in .day-photo { opacity: 1; transform: translateY(0) rotate(var(--tilt, 0deg)); }
-.day-overlay-content.is-in .day-photo:hover { transform: translateY(-4px) rotate(var(--tilt, 0deg)) scale(1.02); transition-delay: 0s; }
+.day-overlay-content.is-in .day-photo { opacity: 1; transform: translateY(var(--lift, 0rem)) rotate(var(--tilt, 0deg)); }
+.day-overlay-content.is-in .day-photo:hover { transform: translateY(calc(var(--lift, 0rem) - 4px)) rotate(var(--tilt, 0deg)) scale(1.02); transition-delay: 0s; z-index: 2; }
+
+/* Not every photo is the same rectangle — the first is the hero
+   moment, the rest are smaller, scrapbook-pinned accents around it. */
+.day-photo-hero { max-width: 17rem; z-index: 1; }
+.day-photo-scrap { max-width: 11.5rem; }
 
 .day-photo img {
   display: block;
@@ -731,14 +762,17 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 18vw;
-  font-weight: 700;
+  font-style: italic;
+  font-size: 20vw;
+  font-weight: 620;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
   color: color-mix(in srgb, var(--accent) 0%, transparent);
-  transition: color 2s ease;
+  transition: color 2.5s ease;
   pointer-events: none;
   z-index: 0;
 }
-.act5-watermark.is-shown { color: color-mix(in srgb, var(--accent) 12%, transparent); }
+.act5-watermark.is-shown { color: color-mix(in srgb, var(--accent) 16%, transparent); }
 .act5-question { margin: 0; font-family: var(--font-display); font-style: italic; font-size: clamp(1.8rem, 5.5vw, 2.9rem); font-weight: 560; letter-spacing: -0.02em; z-index: 1; }
 .act5-hint { color: var(--dim); min-height: 1.2rem; font-size: 0.95rem; z-index: 1; }
 .act5-form { display: flex; gap: 0.6rem; z-index: 1; }

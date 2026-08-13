@@ -33,7 +33,7 @@ window.Acts.act5 = (function () {
     async enter({ container, go }) {
       container.innerHTML = `
         <div class="act5-stage floral-decor">
-          <div class="act5-watermark" id="act5-watermark"></div>
+          <div class="act5-watermark" id="act5-watermark" aria-hidden="true">OBINNA</div>
           <h1 class="act5-question">Do you want to continue?</h1>
           <p class="act5-hint" id="act5-hint"></p>
           <form class="act5-form" id="act5-form" autocomplete="off">

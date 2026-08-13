@@ -395,10 +395,11 @@ function wireReplayControls() {
       const visual = data.visual && DAY_VISUALS[data.visual] ? DAY_VISUALS[data.visual]() : "";
 
       const tilts = [-3, 2.5, -1.5, 3]; // gentle alternating tilt, scrapbook-soft not chaotic
+      const lifts = [0, 2.2, -1.4, 1.6]; // rem — staggered vertically, not a clean row
       const photosHtml = (data.photos || [])
         .map(
           (p, i) => `
-        <figure class="day-photo" style="--tilt:${tilts[i % tilts.length]}deg; --delay:${0.5 + i * 0.5}s">
+        <figure class="day-photo ${i === 0 ? "day-photo-hero" : "day-photo-scrap"}" style="--tilt:${tilts[i % tilts.length]}deg; --lift:${lifts[i % lifts.length]}rem; --delay:${0.5 + i * 0.5}s">
           <img src="${p.src}" alt="${p.caption ?? ""}" loading="lazy" />
           ${p.caption ? `<figcaption>${p.caption}</figcaption>` : ""}
         </figure>`
