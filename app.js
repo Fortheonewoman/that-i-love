@@ -443,8 +443,13 @@ function wireReplayControls() {
       card.type = "button";
       card.className = "day-card";
       card.dataset.day = id;
-      card.innerHTML = `<span class="day-card-number">Day ${i + 1}</span>
-        <span class="day-card-hint"></span>`;
+      // The face is a separate inner wrapper so Day 7's "rolling"
+      // wobble (an animation on transform) never fights with the
+      // outer card's own transform, which handles dodge position.
+      card.innerHTML = `<span class="day-card-face">
+        <span class="day-card-number">Day ${i + 1}</span>
+        <span class="day-card-hint"></span>
+      </span>`;
       card.addEventListener("click", () => {
         if (card.classList.contains("is-locked")) shake(card);
         else openDay(id);
@@ -493,8 +498,10 @@ function wireReplayControls() {
   function wireDay7Chase(card) {
     if (!card) return;
     const hintEl = card.querySelector(".day-card-hint");
+    const numberEl = card.querySelector(".day-card-number");
     let excited = false;
     let calmTimer = null;
+    let returnCleanupTimer = null;
     let offsetX = 0;
     let offsetY = 0;
 
@@ -503,12 +510,19 @@ function wireReplayControls() {
       card.style.setProperty("--dodge-y", offsetY + "px");
     }
 
+    // Settling isn't a snap back — it drifts home slowly (2s, eased),
+    // softening out of "ball" back into a card as it goes.
     function calmDown() {
       excited = false;
+      card.classList.add("is-returning");
       card.classList.remove("is-excited");
+      if (numberEl) numberEl.textContent = "Day 7";
+      if (hintEl) hintEl.textContent = "";
       offsetX = 0;
       offsetY = 0;
       applyOffset();
+      clearTimeout(returnCleanupTimer);
+      returnCleanupTimer = setTimeout(() => card.classList.remove("is-returning"), 2000);
     }
 
     function scheduleCalm() {
@@ -521,12 +535,16 @@ function wireReplayControls() {
       if (!excited) {
         excited = true;
         card.classList.add("is-excited");
-        if (hintEl) hintEl.textContent = "skip to D-day";
+        if (numberEl) numberEl.textContent = "Skip to D-day?";
+        if (hintEl) hintEl.textContent = "";
       }
       scheduleCalm();
     }
 
-    function dodgeFrom(clientX, clientY) {
+    // The cursor must never actually touch it. It reacts well before
+    // contact, and if she somehow gets close anyway, it takes a much
+    // bigger startled leap rather than a normal dodge.
+    function dodgeFrom(clientX, clientY, distNow) {
       const r = card.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
@@ -535,8 +553,9 @@ function wireReplayControls() {
       const len = Math.hypot(dx, dy) || 1;
       dx /= len;
       dy /= len;
-      const jump = 46 + Math.random() * 26;
-      const MAX = 90;
+      const cornered = distNow < 70;
+      const jump = cornered ? 100 + Math.random() * 50 : 65 + Math.random() * 35;
+      const MAX = cornered ? 170 : 140;
       offsetX = Math.max(-MAX, Math.min(MAX, offsetX + dx * jump));
       offsetY = Math.max(-MAX, Math.min(MAX, offsetY + dy * jump));
       applyOffset();
@@ -553,8 +572,10 @@ function wireReplayControls() {
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
       const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
-      if (dist < 110) {
-        dodgeFrom(e.clientX, e.clientY);
+      // Reacts at a distance comfortably wider than the card itself,
+      // so it's already moving away long before the cursor arrives.
+      if (dist < 170) {
+        dodgeFrom(e.clientX, e.clientY, dist);
         scheduleCalm();
       }
     });
