@@ -288,8 +288,8 @@ h1, h2, h3 {
   inset: 0;
   background: var(--bg);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   padding: 2rem;
   overflow-y: auto;
   z-index: 10;
@@ -311,10 +311,16 @@ h1, h2, h3 {
 .day-overlay-content {
   text-align: center;
   max-width: 40rem;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
+  /* Auto vertical margins centre it when it fits, and collapse to 0
+     when it's taller than the viewport — so tall content (like Day
+     1's two photos + poem) starts flush at the top and is fully
+     scrollable, instead of centring and clipping the overflow. */
+  margin: auto 0;
 }
 
 .day-overlay-title {
