@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
   <title>Amirachi</title>
-  <link rel="stylesheet" href="style.css?v=8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,460;0,9..144,560;0,9..144,650;1,9..144,460;1,9..144,560&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css?v=9" />
 </head>
 <body>
+  <div class="grain-overlay" aria-hidden="true"></div>
+
   <div id="locked-out" class="locked-out floral-decor" hidden>
     <p>Connect to the internet to open this.</p>
   </div>
@@ -20,7 +28,36 @@
   <div id="app" class="app" hidden>
     <div class="stamps" id="stamps" aria-label="days opened"></div>
 
-    <main class="hero floral-decor">
+    <main class="hero">
+      <svg class="hero-bloom hero-bloom-left" viewBox="0 0 140 320" aria-hidden="true">
+        <path d="M70 318 C68 250 66 200 70 150 C74 110 68 90 70 70" fill="none" stroke="#96A87F" stroke-width="3" opacity="0.9"/>
+        <path d="M70 236 C50 230 38 238 30 252 C46 254 60 250 70 236Z" fill="#A6B78F" opacity="0.9"/>
+        <path d="M70 196 C92 188 106 196 114 210 C96 214 82 208 70 196Z" fill="#96A87F" opacity="0.9"/>
+        <g transform="translate(70,62)">
+          <ellipse rx="24" ry="34" fill="#F0B8C6" opacity="0.95"/>
+          <ellipse rx="24" ry="34" transform="rotate(60)" fill="#F0B8C6" opacity="0.9"/>
+          <ellipse rx="24" ry="34" transform="rotate(120)" fill="#F0B8C6" opacity="0.85"/>
+          <ellipse rx="24" ry="34" transform="rotate(180)" fill="#EA9FB3" opacity="0.9"/>
+          <ellipse rx="24" ry="34" transform="rotate(240)" fill="#EA9FB3" opacity="0.85"/>
+          <ellipse rx="24" ry="34" transform="rotate(300)" fill="#EA9FB3" opacity="0.9"/>
+          <circle r="11" fill="#F3C15F"/>
+        </g>
+      </svg>
+      <svg class="hero-bloom hero-bloom-right" viewBox="0 0 140 320" aria-hidden="true">
+        <path d="M70 318 C68 250 66 200 70 150 C74 110 68 90 70 70" fill="none" stroke="#96A87F" stroke-width="3" opacity="0.9"/>
+        <path d="M70 236 C50 230 38 238 30 252 C46 254 60 250 70 236Z" fill="#A6B78F" opacity="0.9"/>
+        <path d="M70 196 C92 188 106 196 114 210 C96 214 82 208 70 196Z" fill="#96A87F" opacity="0.9"/>
+        <g transform="translate(70,62)">
+          <ellipse rx="24" ry="34" fill="#FFD08A" opacity="0.95"/>
+          <ellipse rx="24" ry="34" transform="rotate(60)" fill="#FFD08A" opacity="0.9"/>
+          <ellipse rx="24" ry="34" transform="rotate(120)" fill="#FFD08A" opacity="0.85"/>
+          <ellipse rx="24" ry="34" transform="rotate(180)" fill="#FF9E7A" opacity="0.9"/>
+          <ellipse rx="24" ry="34" transform="rotate(240)" fill="#FF9E7A" opacity="0.85"/>
+          <ellipse rx="24" ry="34" transform="rotate(300)" fill="#FF9E7A" opacity="0.9"/>
+          <circle r="11" fill="#E85C6B"/>
+        </g>
+      </svg>
+      <p class="hero-eyebrow">a week of small things, then everything</p>
       <h1 class="hero-title">My Amirah</h1>
       <p class="birthday-countdown" id="birthday-countdown"></p>
     </main>
@@ -61,17 +98,17 @@
        GitHub Pages itself) cache JS/CSS aggressively, so without this
        a pushed fix can silently not show up until a hard refresh.
        Bump this number whenever any of these files change. -->
-  <script src="cast.js?v=8"></script>
-  <script src="scenes/act1.js?v=8"></script>
-  <script src="scenes/act2.js?v=8"></script>
-  <script src="scenes/act3.js?v=8"></script>
-  <script src="scenes/act4.js?v=8"></script>
-  <script src="scenes/act5.js?v=8"></script>
-  <script src="scenes/act6.js?v=8"></script>
-  <script src="scenes/act7.js?v=8"></script>
-  <script src="scenes/act8.js?v=8"></script>
-  <script src="scenes/act9.js?v=8"></script>
-  <script src="birthday.js?v=8"></script>
-  <script src="app.js?v=8"></script>
+  <script src="cast.js?v=9"></script>
+  <script src="scenes/act1.js?v=9"></script>
+  <script src="scenes/act2.js?v=9"></script>
+  <script src="scenes/act3.js?v=9"></script>
+  <script src="scenes/act4.js?v=9"></script>
+  <script src="scenes/act5.js?v=9"></script>
+  <script src="scenes/act6.js?v=9"></script>
+  <script src="scenes/act7.js?v=9"></script>
+  <script src="scenes/act8.js?v=9"></script>
+  <script src="scenes/act9.js?v=9"></script>
+  <script src="birthday.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

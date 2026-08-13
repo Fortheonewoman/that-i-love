@@ -261,15 +261,15 @@ const FLORAL_FLOURISH = `
    become her actual favourite once we know it, not before.
    ============================================================ */
 const DAY_PALETTE = {
-  day1: "#C0142B", // deep rose red — roses are red
-  day2: "#FF6F59", // coral
-  day3: "#E8A33D", // amber gold
-  day4: "#A8447E", // placeholder — replace with her favourite colour later
-  day5: "#2FA89C", // teal
-  day6: "#6C63FF", // indigo
-  day7: "#E63E8C", // magenta pink
+  day1: "#C81E3A", // rich red — roses are red
+  day2: "#FF6F5E", // coral
+  day3: "#F2B705", // butter yellow
+  day4: "#9B6FD4", // lilac — placeholder, replace with her favourite colour later
+  day5: "#2E9E6B", // fresh green
+  day6: "#3B5BFF", // electric blue
+  day7: "#FF3D7A", // hot pink
 };
-const DEFAULT_ACCENT = "#ff5c8a";
+const DEFAULT_ACCENT = "#FF6F5E";
 
 /* ============================================================
    Site chrome: the day-card grid, the opened-day stamps, the
@@ -327,7 +327,16 @@ function wireReplayControls() {
     return;
   }
 
-  if (isTouchPrimaryDevice()) {
+  // Laptop-only applies to the birthday ACT SEQUENCE specifically —
+  // that's the part that needs a real cursor (the chase, the peeper).
+  // The seven-day countdown itself is just tapping cards, which
+  // works fine on a phone, so it isn't gated at all.
+  const params = new URLSearchParams(location.search);
+  const devAct = parseInt(params.get("act"), 10);
+  const birthdayUnlocked = window.TimeLock.unlocks().find((u) => u.id === "birthday").unlocked;
+  const wantsBirthdaySequence = devAct >= 1 || birthdayUnlocked;
+
+  if (wantsBirthdaySequence && isTouchPrimaryDevice()) {
     phoneBlockEl.hidden = false;
     const phoneCountdownEl = document.getElementById("phone-countdown");
     function tickPhone() {
@@ -342,12 +351,7 @@ function wireReplayControls() {
     return;
   }
 
-  // Dev shortcut: ?act=N always jumps straight into the birthday
-  // sequence for testing, regardless of the real unlock time.
-  const params = new URLSearchParams(location.search);
-  const devAct = parseInt(params.get("act"), 10);
-  const birthdayUnlocked = window.TimeLock.unlocks().find((u) => u.id === "birthday").unlocked;
-  if (devAct >= 1 || birthdayUnlocked) {
+  if (wantsBirthdaySequence) {
     appEl.hidden = true;
     wireMute();
     Cast.startPeeper(document.getElementById("birthday-cast-layer"));
@@ -464,6 +468,10 @@ function wireReplayControls() {
       card.type = "button";
       card.className = "day-card";
       card.dataset.day = id;
+      // Each day wears its own colour even while locked — a preview
+      // wash, not the full accent yet — so the row reads as seven
+      // distinct chapters, not seven identical grey boxes.
+      card.style.setProperty("--day-color", DAY_PALETTE[id] || DEFAULT_ACCENT);
       // The face is a separate inner wrapper so Day 7's "rolling"
       // wobble (an animation on transform) never fights with the
       // outer card's own transform, which handles dodge position.
@@ -489,7 +497,8 @@ function wireReplayControls() {
 
     stampsEl.innerHTML = DAY_IDS.map((id, i) => {
       const isOpen = !!opened[id];
-      return `<span class="stamp ${isOpen ? "is-filled" : ""}">${i + 1}</span>`;
+      const color = DAY_PALETTE[id] || DEFAULT_ACCENT;
+      return `<span class="stamp ${isOpen ? "is-filled" : ""}" style="--day-color:${color}">${i + 1}</span>`;
     }).join("");
 
     DAY_IDS.forEach((id) => {
@@ -613,6 +622,14 @@ function wireReplayControls() {
 
   let birthdayLaunched = false;
   function tick() {
+    const phoneBlockEl = document.getElementById("phone-block");
+    if (!phoneBlockEl.hidden) {
+      const birthday = window.TimeLock.unlocks().find((u) => u.id === "birthday");
+      document.getElementById("phone-countdown").textContent = birthday.unlocked
+        ? "it's her birthday"
+        : window.TimeLock.formatDuration(birthday.msRemaining) + " until Amirachi's birthday";
+      return; // nothing else to update once she's parked on this screen
+    }
     renderGrid();
     renderCountdown();
 
@@ -621,6 +638,15 @@ function wireReplayControls() {
     const birthday = window.TimeLock.unlocks().find((u) => u.id === "birthday");
     if (birthday.unlocked && !birthdayLaunched) {
       birthdayLaunched = true;
+      if (isTouchPrimaryDevice()) {
+        // She's on her phone right as it unlocks — keep her on the
+        // (already gorgeous) countdown view instead of launching a
+        // cursor-dependent sequence she can't drive from touch.
+        document.getElementById("phone-block").hidden = false;
+        appEl.hidden = true;
+        overlayEl.hidden = true;
+        return;
+      }
       appEl.hidden = true;
       overlayEl.hidden = true;
       wireMute();
