@@ -488,4 +488,12 @@ function wireReplayControls() {
 
   tick();
   setInterval(tick, 1000);
+
+  // Dev convenience only — doesn't touch the lock. ?preview=day1
+  // just pops that day's real card open on load so it can be
+  // checked without waiting for the actual unlock time.
+  const previewId = new URLSearchParams(location.search).get("preview");
+  if (previewId && DAY_IDS.includes(previewId)) {
+    openDay(previewId);
+  }
 })();
