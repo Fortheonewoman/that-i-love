@@ -1374,6 +1374,19 @@ h1, h2, h3 {
 }
 .d2-photo-plus { font-size: 1.4rem; color: color-mix(in srgb, var(--ink) 35%, transparent); }
 
+/* a real photo, once one exists for this slot — same footprint,
+   framed like a little printed scrapbook photo */
+.d2-item-photo .d2-photo-real {
+  margin: 0;
+  width: 6rem;
+  border: 6px solid #FFFDF8;
+  box-shadow: var(--shadow-lift);
+  border-radius: 0.15rem;
+  overflow: hidden;
+  line-height: 0;
+}
+.d2-photo-real img { display: block; width: 100%; height: 6rem; object-fit: cover; }
+
 /* 10 — a colour that's hers now */
 .d2-item-swatch { width: 5.5rem; }
 .d2-swatch-card {

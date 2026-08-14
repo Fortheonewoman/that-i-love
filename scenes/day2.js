@@ -37,8 +37,11 @@ window.Day2Scene = (function () {
     { id: "envelope1", kind: "envelope", x: 9, y: 82, rot: 2, text: LITTLE_TEXTS[2] },
     { id: "tag1", kind: "tag", x: 62, y: 84, rot: -3, text: LITTLE_TEXTS[3] },
     { id: "scrap1", kind: "scrap", x: 36, y: 32, rot: 9, text: LITTLE_TEXTS[4] },
-    { id: "photo1", kind: "photo", x: 88, y: 36, rot: 4 },
+    { id: "photo1", kind: "photo", x: 88, y: 36, rot: 4, src: "img/day2-facetime.jpg", caption: "a comfort logo." },
     { id: "swatch", kind: "swatch", x: 56, y: 22, rot: -5 },
+    { id: "photo2", kind: "photo", x: 30, y: 78, rot: -6, src: "img/day2-socks.jpg", caption: "she makes me wear socks. always." },
+    { id: "photo3", kind: "photo", x: 68, y: 70, rot: 5, src: "img/day2-wallet.jpg", caption: "she bought these. then made them ours." },
+    { id: "photo4", kind: "photo", x: 15, y: 46, rot: -4, src: "img/day2-connection.jpg", caption: "means nothing. reminds me of every dropped call anyway." },
   ];
 
   let activatedOrder = [];
@@ -209,7 +212,13 @@ window.Day2Scene = (function () {
       case "scrap":
         return `<div class="d2-scrap-paper"><span>${item.text}</span></div>`;
       case "photo":
-        return `
+        return item.src
+          ? `
+          <figure class="d2-photo-real">
+            <img src="${item.src}" alt="${item.caption ?? ""}" loading="lazy" />
+          </figure>
+          <p class="d2-reveal-text">${item.caption ?? ""}</p>`
+          : `
           <div class="d2-photo-placeholder">
             <span class="d2-photo-plus">＋</span>
           </div>
