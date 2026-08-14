@@ -390,11 +390,12 @@ function wireReplayControls() {
     overlayEl.hidden = false;
     document.documentElement.style.setProperty("--accent", DAY_PALETTE[id] || DEFAULT_ACCENT);
 
-    // Day 2 is a bespoke interactive scene, not the generic
+    // Days 2 and 3 are bespoke interactive scenes, not the generic
     // title/photo/poem template the other days use.
-    if (id === "day2" && window.Day2Scene) {
-      overlayContentEl.className = "day-overlay-content"; // drop floral-decor — day2 draws its own world
-      window.Day2Scene.render(overlayContentEl, {
+    const bespokeScene = { day2: window.Day2Scene, day3: window.Day3Scene }[id];
+    if (bespokeScene) {
+      overlayContentEl.className = "day-overlay-content"; // drop floral-decor — these draw their own world
+      bespokeScene.render(overlayContentEl, {
         onDone: () => {
           markOpened(id);
           renderGrid();

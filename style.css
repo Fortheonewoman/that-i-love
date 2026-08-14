@@ -1444,3 +1444,352 @@ h1, h2, h3 {
   .d2-canvas { min-height: 46rem; }
   .d2-item { transform: translate(-50%, -50%) rotate(var(--rot)) scale(0.85); }
 }
+
+/* ============================================================
+   Day 3 — "The Distance Machine". An engineer's workbench, not a
+   terminal: cream drafting paper, pencil grid, ruler ticks, and a
+   wire that's always just a bit too short. Colour is graphite and
+   cream at the start and gets slowly invaded by coral/blue/yellow/
+   green as the machine comes together — controlled by [data-stage]
+   on .d3-scene, set from day3.js.
+   ============================================================ */
+.d3-scene { position: relative; width: 100%; min-height: 34rem; }
+
+.d3-opening {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1.5rem;
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+}
+.d3-opening.is-leaving { opacity: 0; transform: translateY(-8px); }
+.d3-eyebrow { margin: 0; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.3em; color: var(--dim); }
+.d3-title { margin: 0; font-family: var(--font-display); font-style: italic; font-weight: 560; font-size: clamp(2rem, 6vw, 3.25rem); }
+.d3-status-line { margin: 0; font-size: 0.85rem; letter-spacing: 0.05em; color: var(--dim); font-variant-numeric: tabular-nums; }
+
+.d3-card {
+  margin-top: 0.5rem;
+  width: 100%;
+  max-width: 22rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: repeating-linear-gradient(0deg, transparent, transparent 27px, color-mix(in srgb, var(--ink) 6%, transparent) 28px), #FFFDF6;
+  box-shadow: var(--shadow-soft);
+  padding: 0.4rem 1rem;
+  text-align: left;
+  font-size: 0.85rem;
+}
+.d3-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--border-soft);
+  font-family: var(--font-body);
+}
+.d3-card-row:last-child { border-bottom: none; }
+.d3-card-row span:first-child { color: var(--dim); }
+.d3-card-row span:last-child { font-weight: 600; text-align: right; }
+
+.d3-continue {
+  margin-top: 0.5rem;
+  appearance: none;
+  border: 1px solid var(--border-soft);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.7rem 1.6rem;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.d3-continue:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+/* ---- the blueprint itself ---- */
+.d3-blueprint {
+  position: relative;
+  width: 100%;
+  min-height: 38rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 23px, color-mix(in srgb, #5C7A94 26%, transparent) 24px),
+    repeating-linear-gradient(90deg, transparent, transparent 23px, color-mix(in srgb, #5C7A94 26%, transparent) 24px),
+    #F7F0E2;
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+  opacity: 0;
+  transition: opacity 0.9s var(--ease);
+  padding: 2rem 1rem 1.5rem;
+}
+.d3-blueprint.is-in { opacity: 1; }
+
+.d3-status {
+  text-align: center;
+  margin: 0 0 1rem;
+  min-height: 1.3rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.d3-track {
+  position: relative;
+  width: 100%;
+  height: 24rem;
+}
+
+.d3-house {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink);
+  z-index: 3;
+}
+.d3-house svg { width: 3rem; height: auto; }
+.d3-house span { font-size: 0.68rem; letter-spacing: 0.12em; font-weight: 600; }
+.d3-house-a { left: 4%; }
+.d3-house-b { right: 4%; }
+
+.d3-wire-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+.d3-wire-svg line { stroke-linecap: round; }
+#d3-cable {
+  stroke: color-mix(in srgb, var(--ink) 68%, transparent);
+  stroke-width: 3;
+  stroke-dasharray: 7 7;
+  transition: stroke 0.6s var(--ease);
+}
+#d3-cable-final {
+  stroke: url(#d3-wire-gradient);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 50%, transparent));
+}
+
+.d3-plug {
+  position: absolute;
+  top: 50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 3px solid color-mix(in srgb, var(--ink) 55%, transparent);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  z-index: 4;
+  box-shadow: var(--shadow-soft);
+  transition: left 0.55s cubic-bezier(0.34, 1.4, 0.64, 1), border-color 0.4s var(--ease);
+  touch-action: none;
+}
+.d3-plug.is-dragging { cursor: grabbing; transition: none; border-color: var(--accent); }
+.d3-plug:hover { border-color: var(--accent); }
+
+.d3-tickets {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 62%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  z-index: 2;
+}
+.d3-ticket {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.35rem 0.6rem;
+  background: #FFFDF6;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.2rem;
+  box-shadow: var(--shadow-soft);
+  color: var(--ink-soft);
+  opacity: 0;
+  transform: translateY(6px) rotate(calc(var(--i, 0) * 2deg - 3deg));
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+.d3-ticket.is-in { opacity: 1; transform: translateY(0) rotate(calc(var(--i, 0) * 2deg - 3deg)); }
+
+.d3-cat {
+  position: absolute;
+  top: 50%;
+  left: 48%;
+  width: 2.6rem;
+  height: 2.6rem;
+  transform: translate(-50%, -50%) scale(0);
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  cursor: pointer;
+  transition: left 0.6s var(--ease), top 0.6s var(--ease), transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.d3-cat.is-sitting { transform: translate(-50%, -50%) scale(1); }
+.d3-cat.is-leaving { transform: translate(-50%, -50%) scale(0) rotate(-30deg); }
+.d3-cat.is-running { transform: translate(-50%, -50%) scale(0.85); transition: left 0.6s ease-in-out, top 0.6s ease-in-out; }
+.d3-cat.is-caught { transform: translate(-50%, -50%) scale(1.3); }
+.d3-cat-loot { position: absolute; top: -0.6rem; right: -0.6rem; font-size: 0.9rem; }
+
+.d3-diagnostics {
+  max-width: 24rem;
+  margin: 1.5rem auto 0;
+  text-align: center;
+}
+.d3-diag-title { margin: 0 0 0.75rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.16em; color: var(--dim); }
+.d3-diag-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.d3-diag-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+.d3-diag-row.is-in { opacity: 1; transform: translateX(0); }
+.d3-diag-check { color: #2E9E6B; font-weight: 700; }
+
+.d3-stat {
+  text-align: center;
+  margin-top: 1.75rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+}
+.d3-stat.is-in { opacity: 1; transform: translateY(0); }
+.d3-stat-big { margin: 0; font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: clamp(1.2rem, 4vw, 1.8rem); }
+.d3-stat-small { margin: 0.3rem 0 0; color: var(--dim); font-size: 0.9rem; }
+
+/* ---- the turn: decluttered, quiet ---- */
+.d3-turn {
+  min-height: 26rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  text-align: center;
+  padding: 2rem;
+  opacity: 0;
+  transition: opacity 1s var(--ease);
+}
+.d3-turn.is-in { opacity: 1; }
+.d3-turn.is-collapsing { opacity: 0; transition: opacity 0.9s var(--ease); }
+.d3-turn-label { margin: 0; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.2em; color: var(--dim); }
+.d3-turn-number {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 8vw, 4rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.d3-turn-number.is-glitching { animation: d3-glitch 0.45s steps(2, end) infinite; }
+.d3-turn-number.is-error { color: var(--accent); font-style: italic; }
+@keyframes d3-glitch {
+  0% { transform: translate(0); }
+  25% { transform: translate(-3px, 2px) skewX(4deg); }
+  50% { transform: translate(3px, -1px) skewX(-4deg); }
+  75% { transform: translate(-2px, 1px); }
+  100% { transform: translate(0); }
+}
+.d3-turn-line {
+  margin: 0;
+  max-width: 30rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.1rem, 3.2vw, 1.5rem);
+  line-height: 1.55;
+  color: var(--ink-soft);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 1.1s var(--ease), transform 1.1s var(--ease);
+}
+.d3-turn-line.is-in { opacity: 1; transform: translateY(0); }
+.d3-turn-line-final { color: var(--ink); font-weight: 500; }
+
+/* ---- ending ---- */
+.d3-end {
+  min-height: 26rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease);
+}
+.d3-end.is-in { opacity: 1; }
+.d3-end-houses { display: flex; align-items: center; gap: 1.4rem; transition: gap 2.2s var(--ease); }
+.d3-end-houses.is-close { gap: 0.3rem; }
+.d3-end-dot { width: 0.9rem; height: 0.9rem; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent); }
+.d3-end-line { width: 6rem; height: 2px; background: linear-gradient(90deg, var(--accent), #FFD65C, #2E9E6B, #3B5BFF, var(--accent)); border-radius: 2px; transition: width 2.2s var(--ease); }
+.d3-end-houses.is-close .d3-end-line { width: 1.2rem; }
+.d3-end-reading { margin: 0; font-family: var(--font-display); font-style: italic; font-size: 1.3rem; color: var(--ink-soft); transition: color 0.6s var(--ease); }
+
+.d3-stamp {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  line-height: 1.5;
+  color: #2E9E6B;
+  border: 3px solid #2E9E6B;
+  border-radius: 0.4rem;
+  padding: 0.7rem 1.1rem;
+  transform: scale(2) rotate(-8deg);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 1.8, 0.4, 1);
+}
+.d3-stamp.is-in { opacity: 0.9; transform: scale(1) rotate(-8deg); }
+
+.d3-back {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--dim);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease), color 0.3s var(--ease);
+}
+.d3-back.is-in { opacity: 1; }
+.d3-back:hover { color: var(--accent); }
+
+/* ---- colour progression: graphite/cream → invaded by colour ---- */
+.d3-scene[data-stage="1"] .d3-plug { border-color: color-mix(in srgb, var(--ink) 55%, transparent); }
+.d3-scene[data-stage="4"] .d3-blueprint,
+.d3-scene[data-stage="5"] .d3-blueprint,
+.d3-scene[data-stage="6"] .d3-blueprint {
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 23px, color-mix(in srgb, var(--accent) 8%, transparent) 24px),
+    repeating-linear-gradient(90deg, transparent, transparent 23px, color-mix(in srgb, #2E9E6B 8%, transparent) 24px),
+    #FBF3E7;
+  transition: background 2s var(--ease);
+}
+.d3-scene[data-stage="4"] .d3-house,
+.d3-scene[data-stage="5"] .d3-house,
+.d3-scene[data-stage="6"] .d3-house { color: var(--accent); transition: color 1.5s var(--ease); }
+
+@media (max-width: 700px) {
+  .d3-track { height: 30rem; }
+  .d3-house svg { width: 2.2rem; }
+  .d3-house-a { left: 2%; }
+  .d3-house-b { right: 2%; }
+  .d3-tickets { top: 66%; }
+}
