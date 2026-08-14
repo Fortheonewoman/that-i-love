@@ -15,7 +15,7 @@ window.Day2Scene = (function () {
 
   const LITTLE_TEXTS = [
     "saw this. thought of you. annoying.",
-    "you've ruined this color for everyone else.",
+    "she has ruined pink for errbody",
     "kept it because it felt like you.",
     "this makes absolutely no sense without you in my head.",
     "another completely unrelated thing you somehow own now.",
@@ -34,11 +34,9 @@ window.Day2Scene = (function () {
     { id: "cole", kind: "music", x: 46, y: 54, rot: -2 },
     { id: "note1", kind: "note", x: 22, y: 62, rot: -7, text: LITTLE_TEXTS[0] },
     { id: "receipt1", kind: "receipt", x: 83, y: 58, rot: 5, text: LITTLE_TEXTS[1] },
-    { id: "envelope1", kind: "envelope", x: 9, y: 82, rot: 2, text: "no idea why I kept this one." },
-    { id: "tag1", kind: "tag", x: 62, y: 84, rot: -3, text: LITTLE_TEXTS[3] },
-    { id: "scrap1", kind: "scrap", x: 36, y: 32, rot: 9, text: LITTLE_TEXTS[4] },
+    { id: "envelope1", kind: "envelope", x: 9, y: 82, rot: 2, text: LITTLE_TEXTS[4] },
+    { id: "tag1", kind: "tag", x: 62, y: 84, rot: -3, text: LITTLE_TEXTS[3] + '<br><span style="font-size:0.85em;opacity:0.65;font-style:italic;">[colored rice]</span>' },
     { id: "photo1", kind: "photo", x: 88, y: 36, rot: 4, src: "img/day2-facetime.jpg", caption: "a comfort logo." },
-    { id: "swatch", kind: "swatch", x: 56, y: 22, rot: -5 },
     { id: "photo2", kind: "photo", x: 30, y: 78, rot: -6, src: "img/day2-socks.jpg", caption: "she makes me wear socks. always." },
     { id: "photo3", kind: "photo", x: 68, y: 70, rot: 5, src: "img/day2-wallet.jpg", caption: "kept this." },
     { id: "photo4", kind: "photo", x: 15, y: 46, rot: -4, src: "img/day2-connection.jpg", caption: "means nothing. reminds me of every dropped call anyway." },
