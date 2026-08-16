@@ -392,7 +392,7 @@ function wireReplayControls() {
 
     // Days 2 and 3 are bespoke interactive scenes, not the generic
     // title/photo/poem template the other days use.
-    const bespokeScene = { day2: window.Day2Scene, day3: window.Day3Scene, day4: window.Day4Scene }[id];
+    const bespokeScene = { day2: window.Day2Scene, day3: window.Day3Scene, day4: window.Day4Scene, day5: window.Day5Scene }[id];
     if (bespokeScene) {
       overlayContentEl.className = "day-overlay-content"; // drop floral-decor — these draw their own world
       bespokeScene.render(overlayContentEl, {
