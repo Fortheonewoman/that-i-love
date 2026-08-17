@@ -284,9 +284,13 @@ window.Day5Scene = (function () {
       steps: [
         { type: "title", text: "SOFTNESS" },
         ...lines(
-          "The version of you that shows up right after the tough one leaves.",
-          "How careful you get with things you've decided are yours to protect.",
-          "You'll deny this file exists."
+          "You never want to be unreachable for the people you love.",
+          "You like people so much it scares you sometimes.",
+          "You're clingy. You'll admit it before I even say it.",
+          "You were mad at me and still showed up with a shirt.",
+          "I hear “aww” out of you more than “idc.” That has to count for something.",
+          "I get an “I love you” every day now.",
+          "You are genuinely kind to the people you love."
         ),
       ],
     },
@@ -295,9 +299,11 @@ window.Day5Scene = (function () {
       steps: [
         { type: "title", text: "STUBBORNNESS" },
         ...lines(
-          "You will lose an argument and still not agree that you lost.",
-          "“I'm not mad” has never once been true.",
-          "Once you've decided something, gravity has to ask permission."
+          "You don't like being wrong.",
+          "You don't like being right either. That's what makes you stubborn.",
+          "You won't even let me go after 4 years.",
+          "You like cats. A lot. No further explanation needed.",
+          "Your favorite word is “no, I won't.” Four years in, I don't even fight it anymore."
         ),
       ],
     },
@@ -788,10 +794,22 @@ window.Day5Scene = (function () {
   }
 
   function renderUnclassified(container) {
+    const facts = [
+      "Filed here because it didn't fit anywhere else.",
+      "She makes eba with food coloring in it.",
+      "Her room is never clean. Never.",
+      "She bites her fingernails.",
+      "She hates dogs.",
+      "She takes offense at almost everything.",
+      "She eats orange peels.",
+      "“Don Julio.” No further context necessary.",
+      "She likes flowers just because.",
+      "She randomly blurts out Arabic. She doesn't speak Arabic.",
+      "She still hasn't returned my heart.",
+    ];
     container.innerHTML = `
       <p class="d5-seq-title is-in">UNCLASSIFIED</p>
-      <p class="d5-seq-line is-in">Filed here because it didn't fit anywhere else.</p>
-      <p class="d5-seq-line is-in">She still calls it "sha sha." The archive has given up trying to translate it.</p>
+      ${facts.map((f) => `<p class="d5-seq-line is-in">${f}</p>`).join("")}
       <div class="d5-unclass-cat" id="d5-unclass-cat">🐈</div>
       <p class="d5-notice-annotation is-in" id="d5-unclass-line">the archivist refuses to vacate this drawer.</p>
     `;

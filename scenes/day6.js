@@ -230,10 +230,11 @@ window.Day6Scene = (function () {
       <p class="d6-item-line">Keep stealing my lingo.</p>
       <p class="d6-item-line d6-item-line-delay">You already say half of it like you invented it.</p>
       <p class="d6-item-note">thief.</p>
+      <p class="d6-item-note">my pretty ole. (Yoruba: my pretty thief.)</p>
       <p class="d6-item-note">the cat does nothing about this, as usual.</p>
       <div class="d6-stamp d6-stamp-in">KEEP.</div>
     `;
-    const words = ["actually,", "listen —", "say less", "no cap"];
+    const words = ["rando", "DW", "nbl", "i love you"];
     const from = container.querySelector("#d6-lingo-from");
     const to = container.querySelector("#d6-lingo-to");
     words.forEach((w, i) => {
@@ -564,6 +565,8 @@ window.Day6Scene = (function () {
       "try again.",
       "be embarrassed by old versions of yourself.",
       "surprise yourself.",
+      "grow in love with me.",
+      "stop falling.",
       "start over where you need to.",
     ];
     // These replace each other one at a time, not accumulate — a custom
