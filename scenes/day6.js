@@ -47,6 +47,14 @@ window.Day6Scene = (function () {
     setTimeout(() => el.classList.add("is-in"), 80);
   }
 
+  // Reading time scaled to how much there actually is to read, not a flat
+  // number — a one-word line and a full sentence were getting the same
+  // window before, which made longer lines fly by too fast to read.
+  function readTime(text) {
+    const words = (text || "").trim().split(/\s+/).filter(Boolean).length || 1;
+    return Math.max(1900, Math.min(5200, 700 + words * 340));
+  }
+
   /* ------------------------------------------------------------
      Same small sequencer pattern as Day 5 — plays steps one at a
      time at a readable pace, but a tap anywhere in the active
@@ -81,7 +89,7 @@ window.Day6Scene = (function () {
         };
         setTimeout(() => {
           if (advanceSequence) advanceSequence();
-        }, step.ms || 800);
+        }, step.ms || 1100);
         return;
       }
       if (step.type === "custom") {
@@ -96,7 +104,7 @@ window.Day6Scene = (function () {
         container.appendChild(e);
         requestAnimationFrame(() => e.classList.add("is-in"));
       }
-      const delay = step.ms || (step.type === "big" ? 2000 : step.type === "stamp" ? 1400 : 1600);
+      const delay = step.ms || readTime(step.text);
       advanceSequence = () => {
         advanceSequence = null;
         runNext();
@@ -565,11 +573,12 @@ window.Day6Scene = (function () {
     function nextGrowWord(next) {
       if (gi >= growWords.length) return next();
       growHost.innerHTML = "";
-      const p = make("p", "d6-seq-line", growWords[gi]);
+      const word = growWords[gi];
+      const p = make("p", "d6-seq-line", word);
       growHost.appendChild(p);
       requestAnimationFrame(() => p.classList.add("is-in"));
       gi++;
-      const t = setTimeout(() => nextGrowWord(next), 900);
+      const t = setTimeout(() => nextGrowWord(next), readTime(word));
       advanceSequence = () => {
         clearTimeout(t);
         advanceSequence = null;

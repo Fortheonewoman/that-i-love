@@ -39,6 +39,14 @@ window.Day5Scene = (function () {
     if (sceneEl) sceneEl.dataset.stage = String(n);
   }
 
+  // Reading time scaled to how much there actually is to read — a flat
+  // delay regardless of sentence length meant a one-word line and a full
+  // sentence got the same window, so longer lines flew by too fast.
+  function readTime(text) {
+    const words = (text || "").trim().split(/\s+/).filter(Boolean).length || 1;
+    return Math.max(1900, Math.min(5200, 700 + words * 340));
+  }
+
   /* ------------------------------------------------------------
      A tiny "sequencer": plays an array of steps into a container,
      one at a time, each staying up for a readable beat before the
@@ -77,7 +85,7 @@ window.Day5Scene = (function () {
         };
         setTimeout(() => {
           if (advanceSequence) advanceSequence();
-        }, step.ms || 900);
+        }, step.ms || 1100);
         return;
       }
 
@@ -96,7 +104,7 @@ window.Day5Scene = (function () {
           // some sequences replace rather than accumulate
         }
       }
-      const delay = step.ms || (step.type === "big" ? 2200 : step.type === "stamp" ? 1500 : 1700);
+      const delay = step.ms || (step.type === "stamp" ? 1600 : readTime(step.text));
       advanceSequence = () => {
         advanceSequence = null;
         runNext();
