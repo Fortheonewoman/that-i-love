@@ -116,15 +116,54 @@ window.Movements.m5 = (function () {
   }
 
   /* ---- the embrace ---- */
+  // The hug, drawn as two editorial-silhouette figures — elongated,
+  // graceful proportions, not circle-heads or stick limbs. Faces and
+  // hair are deliberately left as clean, featureless silhouette (no
+  // guessed features) until real reference photos are supplied; the
+  // pose, proportion and embrace itself are the part built now.
+  function hugSvg() {
+    return `
+      <svg class="fin-hug-svg" viewBox="0 0 300 460" aria-hidden="true">
+        <ellipse class="fin-hug-shadow" cx="150" cy="440" rx="70" ry="9"/>
+
+        <!-- HIM: legs + far arm (behind), drawn first so the wrapping arms layer on top -->
+        <path class="fin-hug-him-legs" d="M92,238 C90,272 87,306 85,344 C84,370 84,398 87,424 L100,424 C99,400 100,376 102,350 C105,308 108,270 111,238 C111,258 113,282 116,308 C119,340 122,378 124,424 L137,424 C136,392 133,354 129,318 C126,288 123,258 121,238 Z"/>
+        <path class="fin-hug-him-arm-far" d="M84,132 C68,140 56,158 51,184 C48,200 49,214 54,224 L66,220 C63,208 63,196 66,184 C70,168 78,154 90,146 Z"/>
+
+        <!-- HER: gown + far arm -->
+        <path class="fin-hug-her-gown" d="M182,236 C170,262 161,290 157,322 C152,362 150,400 152,432 L246,432 C245,398 240,360 232,322 C225,288 213,258 200,236 Z"/>
+        <path class="fin-hug-her-arm-far" d="M214,128 C230,136 241,152 245,174 C248,190 246,204 240,214 L228,209 C232,197 233,185 230,173 C226,157 217,144 204,137 Z"/>
+
+        <!-- HIM: torso (structured suit jacket, elongated, shoulders wide, waist tapered) -->
+        <path class="fin-hug-him-torso" d="M68,124 C66,148 71,170 82,186 C88,195 89,206 88,220 L124,220 C124,206 126,195 132,186 C142,168 145,144 140,120 C136,102 124,88 108,84 C92,86 72,100 68,124 Z"/>
+        <path class="fin-hug-him-lapel" d="M92,90 L104,150 L116,89"/>
+        <ellipse class="fin-hug-him-head" cx="104" cy="52" rx="17" ry="21"/>
+        <path class="fin-hug-him-neck" d="M96,70 L98,88 L112,88 L110,70 Z"/>
+
+        <!-- HER: torso (bodice), narrower, graceful taper into the gown -->
+        <path class="fin-hug-her-torso" d="M170,120 C167,144 172,166 182,182 C188,192 190,204 189,218 L214,218 C213,204 215,193 220,183 C229,166 231,142 226,118 C221,100 208,87 194,85 C182,86 173,100 170,120 Z"/>
+
+        <!-- Her head, tilted in and resting toward his shoulder -->
+        <g transform="rotate(-13 178 96)">
+          <ellipse class="fin-hug-her-head" cx="182" cy="52" rx="16" ry="20"/>
+          <path class="fin-hug-her-neck" d="M175,70 L174,86 L189,86 L188,68 Z"/>
+        </g>
+
+        <!-- The embrace: his arm drapes over her near shoulder (short, compact, stays high); her arm wraps around his waist (long, diagonal, stays low and close to his torso's contour) — two clearly different bands at two different heights, so it reads as a real wrap, not a tangled knot -->
+        <path class="fin-hug-him-arm-near" d="M128,106 C148,98 170,98 186,108 C196,115 202,126 202,138 L188,140 C187,130 182,121 174,115 C162,107 146,106 132,113 Z"/>
+        <path class="fin-hug-her-arm-near" d="M172,122 C148,128 124,142 108,165 C97,181 91,198 91,215 C91,222 93,229 97,234 L108,229 C105,222 104,214 105,206 C107,190 115,174 128,160 C141,148 156,138 172,132 Z"/>
+      </svg>`;
+  }
+
   function runEmbrace(container, done) {
     el("fin-approach").hidden = true;
     const host = el("fin-embrace");
     host.hidden = false;
     host.style.setProperty("--her-color", chosenColor());
-    host.innerHTML = `<div class="fin-embrace-glow" id="fin-embrace-glow"></div>`;
+    host.innerHTML = hugSvg();
     requestAnimationFrame(() => host.classList.add("is-in"));
     Cat.stand();
-    Cat.moveTo(50, 82, 900);
+    Cat.moveTo(50, 88, 900);
     after(900, () => Cat.sit());
     after(1400, () => host.classList.add("is-embracing"));
     after(2600, () => host.classList.add("is-warm"));
