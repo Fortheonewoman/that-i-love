@@ -131,7 +131,10 @@ window.FinaleCore = (function () {
       img.alt = "";
       img.loading = "lazy";
       img.decoding = "async";
-      if (photo.w && photo.h) frame.style.aspectRatio = `${photo.w} / ${photo.h}`;
+      // "circle" treatment has its own fixed 1:1 aspect-ratio in CSS —
+      // overriding it with the source's native ratio would stretch the
+      // circle into an oval, so only apply the real ratio otherwise.
+      if (photo.w && photo.h && treatment !== "circle") frame.style.aspectRatio = `${photo.w} / ${photo.h}`;
       // A photo that fails to load degrades to the same soft
       // stand-in as "no photo yet" — never a broken-image icon.
       img.addEventListener("error", () => {
@@ -139,6 +142,46 @@ window.FinaleCore = (function () {
         frame.classList.add("fin-photo-empty");
       });
       frame.appendChild(img);
+    } else {
+      frame.style.aspectRatio = opts.emptyRatio || "4 / 5";
+    }
+    return frame;
+  }
+
+  /* ------------------------------------------------------------
+     Same idea as photoFrame, for the handful of real video clips —
+     silent, autoplaying, looping, no controls (these are ambient
+     visual beats, not something she has to press play on). Degrades
+     the same way: no clip for that role yet → the same soft empty
+     stand-in, never a broken player.
+     ------------------------------------------------------------ */
+  function pickVideo(role, index) {
+    const videos = (window.FinaleMedia && window.FinaleMedia.videos) || [];
+    if (!videos.length) return null;
+    const byRole = role ? videos.filter((v) => v.role === role) : videos;
+    const pool = byRole.length ? byRole : videos;
+    return pool[(index || 0) % pool.length];
+  }
+
+  function videoFrame(opts) {
+    opts = opts || {};
+    const treatment = opts.treatment || "print";
+    const video = pickVideo(opts.role, opts.index);
+    const frame = make("div", `fin-photo fin-photo-${treatment}` + (video ? "" : " fin-photo-empty"));
+    if (video) {
+      const vid = document.createElement("video");
+      vid.className = "fin-photo-img";
+      vid.src = video.src;
+      vid.autoplay = true;
+      vid.loop = true;
+      vid.muted = true;
+      vid.playsInline = true;
+      if (video.w && video.h && treatment !== "circle") frame.style.aspectRatio = `${video.w} / ${video.h}`;
+      vid.addEventListener("error", () => {
+        vid.remove();
+        frame.classList.add("fin-photo-empty");
+      });
+      frame.appendChild(vid);
     } else {
       frame.style.aspectRatio = opts.emptyRatio || "4 / 5";
     }
@@ -245,5 +288,5 @@ window.FinaleCore = (function () {
     };
   }
 
-  return { el, make, Cat, photoFrame, pickPhoto, drawThread, readTime, playSequence };
+  return { el, make, Cat, photoFrame, pickPhoto, videoFrame, pickVideo, drawThread, readTime, playSequence };
 })();

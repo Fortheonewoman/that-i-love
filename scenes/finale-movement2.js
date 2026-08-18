@@ -48,22 +48,31 @@ window.Movements.m2 = (function () {
     }
   }
 
-  const MOTIF_BEATS = ["portrait", "trio", "candid", "hero", "flower", "candid"];
+  // One real beat of motion in the middle of the still photos — the
+  // crown clip, held noticeably longer than a photo beat so it actually
+  // reads as moving instead of flickering past like a seventh photo.
+  const MOTIF_BEATS = ["portrait", "trio", "candid", "hero", "flower", "video", "candid"];
 
   function runMontage(container, done) {
     const stage = el("fin-m2-montage");
     let i = 0;
-    const total = 6;
+    const total = MOTIF_BEATS.length;
     function beat() {
       if (i >= total) return done();
       stage.innerHTML = "";
       const kind = MOTIF_BEATS[i % MOTIF_BEATS.length];
+      let holdMs = 520;
       if (kind === "trio") {
         const wrap = make("div", "fin-m2-trio");
         for (let k = 0; k < 3; k++) wrap.appendChild(photoFrame({ role: "candid", index: i + k, treatment: "print" }));
         stage.appendChild(wrap);
       } else if (kind === "flower") {
         stage.appendChild(make("div", "fin-m2-flower-beat"));
+      } else if (kind === "video" && window.FinaleCore.pickVideo("hero")) {
+        const frame = window.FinaleCore.videoFrame({ role: "hero", index: i, treatment: "full" });
+        frame.classList.add("fin-m2-solo");
+        stage.appendChild(frame);
+        holdMs = 1500;
       } else {
         const frame = photoFrame({ role: kind === "hero" ? "hero" : "candid", index: i, treatment: kind === "hero" ? "full" : "print" });
         frame.classList.add("fin-m2-solo");
@@ -75,7 +84,7 @@ window.Movements.m2 = (function () {
       const t = setTimeout(() => {
         stage.classList.remove("is-in");
         setTimeout(beat, 180);
-      }, 520);
+      }, holdMs);
       timers.push(t);
     }
     beat();

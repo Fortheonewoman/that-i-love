@@ -755,9 +755,12 @@ h1, h2, h3 {
 .fin-m3-personality { max-width: 26rem; padding: 0 1.5rem; opacity: 0; transition: opacity 0.7s var(--fin-ease); }
 .fin-m3-personality.is-in { opacity: 1; }
 .fin-m3-personality.is-fading { opacity: 0; transition: opacity 0.5s var(--fin-ease); }
+.fin-m3-personality .fin-photo { margin: 0 auto 0.8rem; opacity: 0; }
 .fin-personality-label { margin: 0 0 0.3rem; font-family: var(--font-display); font-style: italic; font-size: 1.4rem; color: var(--fin-cherry); opacity: 0; }
 .fin-personality-line { margin: 0; font-size: 1rem; color: var(--fin-indigo); opacity: 0; }
-.is-word-in .fin-personality-label, .is-word-in .fin-personality-line { animation: fin-recap-pop 0.5s var(--fin-ease) forwards; }
+.is-word-in .fin-photo,
+.is-word-in .fin-personality-label,
+.is-word-in .fin-personality-line { animation: fin-recap-pop 0.5s var(--fin-ease) forwards; }
 .is-word-in .fin-personality-line { animation-delay: 0.15s; }
 @keyframes fin-recap-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 

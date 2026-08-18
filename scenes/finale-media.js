@@ -3,11 +3,12 @@
    videos, voice, and character art exist for the birthday finale.
    Every movement reads from here; none of them hardcode a filename.
 
-   Empty right now on purpose. Until real files are supplied, every
-   movement falls back to its own tasteful, media-free treatment —
-   never a broken image icon, never an ugly placeholder box, never
-   invented content. The moment entries appear below, the story
-   starts using them with no other code changes.
+   Real photos start appearing below as Obinna sends them over — sorted
+   by hand (not dumped in and not randomized), each one placed under
+   the role it actually reads as. Anything not yet used still falls
+   back to its own tasteful, media-free treatment if this list is ever
+   short on a given role — never a broken image icon, never an ugly
+   placeholder box, never invented content.
 
    Where files go (create the folder, drop files in, then list them
    here — nothing else to touch):
@@ -37,8 +38,43 @@
    final "I LOVE YOU" image), and for video specifically "laugh".
    ============================================================ */
 window.FinaleMedia = {
-  photos: [],
-  videos: [],
+  photos: [
+    { src: "img/birthday/photos/hero-restaurant.jpg", w: 918, h: 1400, role: "hero" },
+    { src: "img/birthday/photos/hero-red-gown.jpg", w: 1073, h: 1400, role: "hero" },
+    { src: "img/birthday/photos/hero-close-smile.jpg", w: 861, h: 1400, role: "hero" },
+    { src: "img/birthday/photos/hero-silhouette.jpg", w: 787, h: 1400, role: "hero" },
+
+    { src: "img/birthday/photos/candid-mirror.jpg", w: 1056, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-boat-1.jpg", w: 1056, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-boat-2.jpg", w: 1400, h: 1050, role: "candid" },
+    { src: "img/birthday/photos/candid-outdoor.jpg", w: 647, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-museum.jpg", w: 647, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-laugh.jpg", w: 647, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-plane.jpg", w: 750, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-yellow-shirt.jpg", w: 822, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-friend.jpg", w: 1041, h: 1400, role: "candid" },
+
+    { src: "img/birthday/photos/silly-thumbsup.jpg", w: 787, h: 1400, role: "silly" },
+    { src: "img/birthday/photos/silly-lobster.jpg", w: 787, h: 1400, role: "silly" },
+    { src: "img/birthday/photos/silly-pajama.jpg", w: 787, h: 1400, role: "silly" },
+    { src: "img/birthday/photos/silly-wig.jpg", w: 787, h: 1400, role: "silly" },
+    { src: "img/birthday/photos/silly-deadpan.jpg", w: 953, h: 1400, role: "silly" },
+  ],
+
+  // Only two clips wired to an active moment so far, each picked for
+  // a real, specific match rather than dropped in at random — more
+  // of what got sent over is still just sitting as raw footage
+  // (nothing invented, nothing guessed at), waiting for a beat that
+  // actually fits it instead of being force-included here.
+  videos: [
+    // Her in a hard hat and safety vest on an actual job site — this
+    // is the real thing the site's "the engineering brain" line was
+    // already talking about. Movement III pairs them directly.
+    { src: "video/birthday/candid-engineering.mp4", w: 720, h: 1280, role: "candid" },
+    // A literal crown, mid-party lighting — used as a quick beat in
+    // Movement II's montage rotation.
+    { src: "video/birthday/hero-crown.mp4", w: 480, h: 854, role: "hero" },
+  ],
 
   // Obinna's real voice note, played during the embrace in Movement
   // V. { src: "audio/birthday/voice.mp3" }. Left null until supplied

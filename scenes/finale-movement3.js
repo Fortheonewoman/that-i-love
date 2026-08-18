@@ -111,7 +111,10 @@ window.Movements.m3 = (function () {
     const beats = [
       { label: "“sha sha.”", line: "still contaminated. still saying it." },
       { label: "the weird cats", line: "apparently that's permanent now too." },
-      { label: "the engineering brain", line: "still needs to know why before it accepts that it does." },
+      // The real thing this line is talking about — hers, from a real
+      // job site, not a stand-in. Held a little longer than the other
+      // beats so the clip actually has a moment to move.
+      { label: "the engineering brain", line: "still needs to know why before it accepts that it does.", video: true, hold: 2800 },
       { label: "the stubbornness", line: "still undefeated." },
     ];
     let i = 0;
@@ -127,6 +130,9 @@ window.Movements.m3 = (function () {
         return;
       }
       host.innerHTML = "";
+      if (beats[i].video && window.FinaleCore.pickVideo("candid")) {
+        host.appendChild(window.FinaleCore.videoFrame({ role: "candid", treatment: "circle" }));
+      }
       const label = make("p", "fin-personality-label", beats[i].label);
       const line = make("p", "fin-personality-line", beats[i].line);
       host.append(label, line);
@@ -135,7 +141,7 @@ window.Movements.m3 = (function () {
       void host.offsetWidth;
       host.classList.add("is-word-in");
       i++;
-      after(1600, next);
+      after(beats[i - 1].hold || 1600, next);
     }
     next();
   }
