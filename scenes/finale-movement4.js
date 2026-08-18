@@ -1,14 +1,15 @@
 /* ============================================================
-   Movement IV — The Party. The one place the whole finale is
-   allowed to lose its composure — but on a budget: a fixed, finite
-   burst of petals/ribbon/paper pieces that clean themselves up,
-   never an infinite spawner. The cat panics and runs. Then it cuts,
-   hard, into Movement V's silence.
+   Movement IV — Twenty-One. 21 small lights scattered through the
+   composition (golden-angle spiral, same trick as Day 4's sky, on
+   purpose — this is the same 21, a few scenes older). Most light
+   themselves; she can tap a few; the 21st is reserved for the cat
+   alone. If she picked a favorite color last movement, the lights
+   glow in it instead of the default butter gold.
    ============================================================ */
 window.Movements = window.Movements || {};
 window.Movements.m4 = (function () {
   "use strict";
-  const { el, make, Cat, photoFrame } = window.FinaleCore;
+  const { el, make, Cat } = window.FinaleCore;
 
   let timers = [];
   function after(ms, fn) {
@@ -19,84 +20,93 @@ window.Movements.m4 = (function () {
     timers = [];
   }
 
-  const SHAPES = ["petal", "ribbon", "paper", "star"];
-  const PIECE_COUNT = 46; // finite — see the brief: no infinite spawner
+  const CENTER = { x: 50, y: 48 };
+  const LIGHTS = Array.from({ length: 21 }, (_, i) => {
+    const angle = i * 137.5 * (Math.PI / 180);
+    const radius = 1.4 + i * 0.58;
+    return {
+      id: "l" + i,
+      x: CENTER.x + Math.cos(angle) * radius * 2.0,
+      y: CENTER.y + Math.sin(angle) * radius * 1.05,
+    };
+  });
+  const LAST_ID = LIGHTS[LIGHTS.length - 1].id;
 
   function buildHTML() {
     return `
-      <div class="fin-m4" id="fin-m4">
-        <div class="fin-m4-burst" id="fin-m4-burst"></div>
-        <div class="fin-m4-photos" id="fin-m4-photos"></div>
-        <h1 class="fin-m4-word fin-m4-word-a" id="fin-m4-word-a">TWENTY-ONE</h1>
-        <h1 class="fin-m4-word fin-m4-word-b" id="fin-m4-word-b">Amirachi.</h1>
+      <div class="fin-m4t" id="fin-m4t">
+        <div class="fin-grain" aria-hidden="true"></div>
+        <div class="fin-m4t-lights" id="fin-m4t-lights">
+          ${LIGHTS.map((l) => `<button type="button" class="fin-m4t-light" id="fin-m4t-${l.id}" style="left:${l.x}%; top:${l.y}%" aria-label="light"></button>`).join("")}
+        </div>
+        <p class="fin-m4t-count" id="fin-m4t-count" hidden></p>
+        <p class="fin-m4t-headline" id="fin-m4t-headline" hidden>HAPPY 21ST, AMIRAH.</p>
       </div>`;
   }
 
-  function burstPieces() {
-    const host = el("fin-m4-burst");
-    for (let i = 0; i < PIECE_COUNT; i++) {
-      const shape = SHAPES[i % SHAPES.length];
-      const piece = make("span", `fin-piece fin-piece-${shape}`);
-      piece.style.left = Math.random() * 100 + "%";
-      piece.style.setProperty("--delay", Math.random() * 900 + "ms");
-      piece.style.setProperty("--drift", (Math.random() * 60 - 30) + "px");
-      piece.style.setProperty("--dur", 2600 + Math.random() * 1800 + "ms");
-      piece.style.setProperty("--rot", Math.random() * 540 - 270 + "deg");
-      host.appendChild(piece);
-      // Each piece removes itself once its own fall animation ends —
-      // the layer never accumulates or keeps spawning after this.
-      setTimeout(() => piece.remove(), 5200);
-    }
-  }
-
-  function scatterPhotos() {
-    const host = el("fin-m4-photos");
-    const positions = [
-      { x: 10, y: 18, r: -8 },
-      { x: 78, y: 14, r: 6 },
-      { x: 16, y: 68, r: 5 },
-      { x: 82, y: 66, r: -6 },
-    ];
-    positions.forEach((p, i) => {
-      after(200 + i * 220, () => {
-        const frame = photoFrame({ role: "silly", index: i, treatment: "torn" });
-        frame.classList.add("fin-m4-swing");
-        frame.style.left = p.x + "%";
-        frame.style.top = p.y + "%";
-        frame.style.setProperty("--r", p.r + "deg");
-        host.appendChild(frame);
-        requestAnimationFrame(() => frame.classList.add("is-in"));
-      });
-    });
-  }
-
   return {
-    async enter({ container, go }) {
+    async enter({ container, go, ctx }) {
       container.innerHTML = buildHTML();
-      const stage = container.querySelector(".fin-m4");
-      requestAnimationFrame(() => stage.classList.add("is-in"));
+      const chosen = (ctx && ctx.favoriteColor) || getComputedStyle(document.documentElement).getPropertyValue("--fin-chosen").trim();
+      if (chosen) {
+        document.getElementById("fin-m4t").style.setProperty("--m4t-light", chosen);
+      }
+      Cat.show();
+      Cat.moveTo(50, 75, 800);
 
-      burstPieces();
-      scatterPhotos();
+      let lit = 0;
+      const countEl = el("fin-m4t-count");
+      countEl.hidden = false;
+      requestAnimationFrame(() => countEl.classList.add("is-in"));
+      function updateCount() {
+        countEl.textContent = `${lit} / 21`;
+      }
+      updateCount();
 
-      after(200, () => Cat.panic());
-      after(300, () => Cat.moveTo(85, 85, 1600));
+      function light(id) {
+        const btn = el("fin-m4t-" + id);
+        if (!btn || btn.classList.contains("is-lit")) return;
+        btn.classList.add("is-lit");
+        lit++;
+        updateCount();
+        if (lit === 20) countEl.classList.add("is-holding");
+        if (lit >= 21) finish();
+      }
 
-      after(600, () => el("fin-m4-word-a").classList.add("is-in"));
-      after(2200, () => {
-        el("fin-m4-word-a").classList.add("is-leaving");
-        el("fin-m4-word-b").classList.add("is-in");
+      LIGHTS.forEach((l) => {
+        if (l.id === LAST_ID) return;
+        el("fin-m4t-" + l.id).addEventListener("click", () => light(l.id));
       });
 
-      // The party is loud on purpose, then it's cut — hard, not a
-      // fade — straight into Movement V's stillness.
-      after(4600, () => go(5));
+      const autoOrder = LIGHTS.slice(0, 20).sort(() => Math.random() - 0.5);
+      autoOrder.forEach((l, i) => after(1200 + i * 460, () => light(l.id)));
+
+      let finished = false;
+      function finish() {
+        if (finished) return;
+        finished = true;
+        after(1200, () => {
+          const headline = el("fin-m4t-headline");
+          headline.hidden = false;
+          requestAnimationFrame(() => headline.classList.add("is-in"));
+          container.querySelector(".fin-m4t").classList.add("is-celebrating");
+        });
+        after(4200, () => go(5));
+      }
+
+      after(1200 + 20 * 460 + 900, () => {
+        if (lit >= 21) return;
+        const lastLight = LIGHTS[LIGHTS.length - 1];
+        Cat.moveTo(lastLight.x, lastLight.y - 6, 900);
+        after(1000, () => {
+          Cat.paw();
+          light(LAST_ID);
+        });
+      });
     },
     exit() {
       clearTimers();
       Cat.reset();
-      const burst = el("fin-m4-burst");
-      if (burst) burst.innerHTML = "";
     },
     skip() {
       clearTimers();

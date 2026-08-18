@@ -27,8 +27,9 @@ const Birthday = (function () {
   let onRequestDay7 = null;
 
   const ctx = {
-    litLights: 0, // Movement III's 21-light count, read by later movements for the Day-4 callback
+    litLights: 0, // Movement IV's 21-light count, read by later movements for the Day-4 callback
     caughtCat: false,
+    favoriteColor: null, // set by Movement III once she picks; --fin-chosen carries it as a CSS var too
   };
 
   function stageEl() {

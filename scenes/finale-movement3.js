@@ -1,14 +1,16 @@
 /* ============================================================
-   Movement III — Twenty-One. 21 small lights scattered through the
-   composition (golden-angle spiral, same trick as Day 4's sky, on
-   purpose — this is the same 21, older by three days). Most light
-   themselves; she can tap a few to help; the 21st is reserved for
-   the cat alone, same as it always was.
+   Movement III — The Story. The party gets pulled away and the
+   real thing starts: the week's own visual vocabulary quietly
+   returns, a few real, already-established pieces of who she is
+   show up in new staging (not a Day 5 rerun), the site finally asks
+   the one question it's never asked her, and — without announcing
+   it — starts assembling I LOVE YOU out of everything it's already
+   shown her.
    ============================================================ */
 window.Movements = window.Movements || {};
 window.Movements.m3 = (function () {
   "use strict";
-  const { el, make, Cat } = window.FinaleCore;
+  const { el, make, Cat, photoFrame, drawThread, playSequence } = window.FinaleCore;
 
   let timers = [];
   function after(ms, fn) {
@@ -19,95 +21,260 @@ window.Movements.m3 = (function () {
     timers = [];
   }
 
-  const CENTER = { x: 50, y: 48 };
-  const LIGHTS = Array.from({ length: 21 }, (_, i) => {
-    const angle = i * 137.5 * (Math.PI / 180);
-    const radius = 1.4 + i * 0.58;
-    return {
-      id: "l" + i,
-      x: CENTER.x + Math.cos(angle) * radius * 2.0,
-      y: CENTER.y + Math.sin(angle) * radius * 1.05,
-    };
-  });
-  const LAST_ID = LIGHTS[LIGHTS.length - 1].id;
+  const SWATCHES = [
+    ["cherry", "#C0142B"],
+    ["coral", "#FF6F59"],
+    ["hot pink", "#E63E8C"],
+    ["blush", "#F0B8C6"],
+    ["cobalt", "#3B5BFF"],
+    ["butter", "#F3C15F"],
+    ["green", "#2F9E5C"],
+    ["violet", "#6C63FF"],
+  ];
 
   function buildHTML() {
     return `
       <div class="fin-m3" id="fin-m3">
         <div class="fin-grain" aria-hidden="true"></div>
-        <div class="fin-m3-lights" id="fin-m3-lights">
-          ${LIGHTS.map((l) => `<button type="button" class="fin-m3-light" id="fin-m3-${l.id}" style="left:${l.x}%; top:${l.y}%" aria-label="light"></button>`).join("")}
+
+        <div class="fin-m3-callbacks" id="fin-m3-callbacks"></div>
+        <div class="fin-m3-personality" id="fin-m3-personality"></div>
+
+        <div class="fin-m3-color" id="fin-m3-color" hidden>
+          <div class="fin-m3-color-talk" id="fin-m3-color-talk"></div>
+          <div class="fin-m3-swatches" id="fin-m3-swatches" hidden></div>
+          <p class="fin-m3-color-after" id="fin-m3-color-after" hidden></p>
         </div>
-        <p class="fin-m3-count" id="fin-m3-count" hidden></p>
-        <p class="fin-m3-headline" id="fin-m3-headline" hidden>HAPPY 21ST, AMIRAH.</p>
+
+        <div class="fin-love-stage" id="fin-love-stage" hidden></div>
       </div>`;
   }
 
-  return {
-    async enter({ container, go, ctx }) {
-      container.innerHTML = buildHTML();
-      Cat.show();
-      Cat.moveTo(50, 75, 800);
-
-      let lit = 0;
-      const countEl = el("fin-m3-count");
-      countEl.hidden = false;
-      requestAnimationFrame(() => countEl.classList.add("is-in"));
-
-      function updateCount() {
-        countEl.textContent = `${lit} / 21`;
-      }
-      updateCount();
-
-      function light(id) {
-        const btn = el("fin-m3-" + id);
-        if (!btn || btn.classList.contains("is-lit")) return;
-        btn.classList.add("is-lit");
-        lit++;
-        updateCount();
-        if (lit === 20) {
-          countEl.classList.add("is-holding");
-        }
-        if (lit >= 21) finish();
-      }
-
-      // She can tap any light herself — capped so 21 always waits
-      // for the cat specifically, never a stray tap.
-      LIGHTS.forEach((l) => {
-        if (l.id === LAST_ID) return;
-        const btn = el("fin-m3-" + l.id);
-        btn.addEventListener("click", () => light(l.id));
+  /* ---- the week's own vocabulary, quietly returning ---- */
+  function worldRemembers(container, done) {
+    const host = el("fin-m3-callbacks");
+    host.hidden = false;
+    Cat.show();
+    Cat.moveTo(30, 58, 900);
+    after(400, () => {
+      Cat.paw();
+      drawThread(host, 15, 60, 85, 55, { duration: 1500, bow: 4 }).classList.add("fin-callback-thread");
+    });
+    after(1700, () => {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("class", "fin-thread fin-callback-blueprint");
+      svg.setAttribute("viewBox", "0 0 100 100");
+      svg.setAttribute("preserveAspectRatio", "none");
+      host.appendChild(svg);
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M 20 30 L 55 30 L 55 45 L 78 45");
+      path.setAttribute("class", "fin-blueprint-path");
+      svg.appendChild(path);
+      const len = path.getTotalLength();
+      path.style.strokeDasharray = len + " " + len;
+      path.style.strokeDashoffset = len;
+      requestAnimationFrame(() => {
+        path.style.transition = "stroke-dashoffset 1.1s var(--fin-ease)";
+        path.style.strokeDashoffset = "0";
       });
-
-      // Most of them light themselves, staggered — she never has to
-      // click all 21 to see this finish.
-      const autoOrder = LIGHTS.slice(0, 20).sort(() => Math.random() - 0.5);
-      autoOrder.forEach((l, i) => {
-        after(1200 + i * 480, () => light(l.id));
+    });
+    after(2700, () => {
+      const star = make("span", "fin-callback-star", "✦");
+      star.style.left = "68%";
+      star.style.top = "24%";
+      host.appendChild(star);
+      requestAnimationFrame(() => star.classList.add("is-in"));
+      after(1500, () => star.classList.add("is-fading"));
+    });
+    after(3600, () => {
+      const stamp = make("p", "fin-callback-stamp", "SUBJECT: AMIRAH");
+      host.appendChild(stamp);
+      requestAnimationFrame(() => stamp.classList.add("is-in"));
+      after(1100, () => stamp.classList.add("is-fading"));
+    });
+    after(4400, () => container.querySelector(".fin-m3").classList.add("is-colored"));
+    after(5600, () => {
+      host.classList.add("is-fading");
+      after(600, () => {
+        host.hidden = true;
+        done();
       });
+    });
+  }
 
-      let finished = false;
-      function finish() {
-        if (finished) return;
-        finished = true;
-        after(1200, () => {
-          const headline = el("fin-m3-headline");
-          headline.hidden = false;
-          requestAnimationFrame(() => headline.classList.add("is-in"));
-          container.querySelector(".fin-m3").classList.add("is-celebrating");
+  /* ---- a few real, already-established pieces of her — new staging ---- */
+  function runPersonality(container, done) {
+    const host = el("fin-m3-personality");
+    host.hidden = false;
+    requestAnimationFrame(() => host.classList.add("is-in"));
+
+    const beats = [
+      { label: "“sha sha.”", line: "still contaminated. still saying it." },
+      { label: "the weird cats", line: "apparently that's permanent now too." },
+      { label: "the engineering brain", line: "still needs to know why before it accepts that it does." },
+      { label: "the stubbornness", line: "still undefeated." },
+    ];
+    let i = 0;
+    function next() {
+      if (i >= beats.length) {
+        after(600, () => {
+          host.classList.add("is-fading");
+          after(700, () => {
+            host.hidden = true;
+            done();
+          });
         });
-        after(4200, () => go(4));
+        return;
+      }
+      host.innerHTML = "";
+      const label = make("p", "fin-personality-label", beats[i].label);
+      const line = make("p", "fin-personality-line", beats[i].line);
+      host.append(label, line);
+      requestAnimationFrame(() => host.classList.add("is-word-in"));
+      host.classList.remove("is-word-in");
+      void host.offsetWidth;
+      host.classList.add("is-word-in");
+      i++;
+      after(1600, next);
+    }
+    next();
+  }
+
+  /* ---- four years, and the site finally asks ---- */
+  function runFavoriteColor(container, done) {
+    const wrap = el("fin-m3-color");
+    wrap.hidden = false;
+    requestAnimationFrame(() => wrap.classList.add("is-in"));
+    const talk = el("fin-m3-color-talk");
+
+    playSequence(
+      talk,
+      [
+        { type: "line", text: "Four years." },
+        { type: "pause", ms: 900 },
+        { type: "line", text: "And somehow I still don't know your favorite color." },
+        { type: "pause", ms: 900 },
+        { type: "big", text: "We're fixing that right now." },
+        { type: "pause", ms: 900 },
+      ],
+      {
+        onDone: () => {
+          talk.classList.add("is-fading");
+          after(600, showSwatches);
+        },
+      }
+    );
+
+    function showSwatches() {
+      talk.hidden = true;
+      const grid = el("fin-m3-swatches");
+      grid.hidden = false;
+      grid.innerHTML =
+        SWATCHES.map(([name, hex]) => `<button type="button" class="fin-swatch" data-hex="${hex}" style="--sw:${hex}"><span class="fin-swatch-name">${name}</span></button>`).join("") +
+        `<button type="button" class="fin-swatch fin-swatch-other" id="fin-swatch-other"><span class="fin-swatch-name">something else</span></button>` +
+        `<input type="color" id="fin-color-input" class="fin-color-input" aria-label="pick a color" />`;
+      requestAnimationFrame(() => grid.classList.add("is-in"));
+
+      function choose(hex) {
+        document.documentElement.style.setProperty("--fin-chosen", hex);
+        try {
+          localStorage.setItem("amirachi:favoriteColor", hex);
+        } catch {}
+        Birthday.ctx.favoriteColor = hex;
+        grid.classList.add("is-fading");
+        after(600, () => {
+          grid.hidden = true;
+          const after1 = el("fin-m3-color-after");
+          after1.hidden = false;
+          after1.style.color = hex;
+          playSequence(
+            after1,
+            [
+              { type: "line", text: "finally." },
+              { type: "custom", run: (c, next) => {
+                  const stamp = make("div", "fin-stamp-recorded", "RECORDED AFTER 4 YEARS");
+                  c.appendChild(stamp);
+                  requestAnimationFrame(() => stamp.classList.add("is-in"));
+                  after(1300, next);
+                } },
+              { type: "pause", ms: 700 },
+            ],
+            {
+              onDone: () => {
+                after1.classList.add("is-fading");
+                wrap.classList.add("is-fading");
+                after(700, () => {
+                  wrap.hidden = true;
+                  done();
+                });
+              },
+            }
+          );
+        });
       }
 
-      // Once every auto light has landed, give the cat a beat, then
-      // let it find the last one on its own.
-      after(1200 + 20 * 480 + 900, () => {
-        if (lit >= 21) return;
-        const lastLight = LIGHTS[LIGHTS.length - 1];
-        Cat.moveTo(lastLight.x, lastLight.y - 6, 900);
-        after(1000, () => {
-          Cat.paw();
-          light(LAST_ID);
+      grid.querySelectorAll(".fin-swatch:not(.fin-swatch-other)").forEach((btn) => {
+        btn.addEventListener("click", () => choose(btn.dataset.hex), { once: true });
+      });
+      el("fin-swatch-other").addEventListener("click", () => {
+        el("fin-color-input").click();
+      });
+      el("fin-color-input").addEventListener(
+        "input",
+        (e) => choose(e.target.value),
+        { once: true }
+      );
+    }
+  }
+
+  /* ---- I LOVE YOU, quietly assembled from everything already shown ---- */
+  function runLoveAssembly(container, done) {
+    const stage = el("fin-love-stage");
+    stage.hidden = false;
+    requestAnimationFrame(() => stage.classList.add("is-in"));
+
+    const word1 = make("p", "fin-love-word", "I");
+    stage.appendChild(word1);
+    requestAnimationFrame(() => word1.classList.add("is-in"));
+    after(1400, () => {
+      const word2 = make("p", "fin-love-word", "LOVE");
+      word2.id = "fin-love-word2";
+      stage.appendChild(word2);
+      requestAnimationFrame(() => word2.classList.add("is-in"));
+    });
+    after(2900, () => {
+      const word3 = make("p", "fin-love-word", "YOU");
+      stage.appendChild(word3);
+      requestAnimationFrame(() => word3.classList.add("is-in"));
+    });
+    after(4400, () => {
+      Cat.show();
+      Cat.moveTo(50, 46, 1000);
+      const w2 = document.getElementById("fin-love-word2");
+      if (w2) w2.classList.add("is-knocked");
+    });
+    after(5500, () => {
+      const sorry = make("p", "fin-love-sorry", "sorry.");
+      stage.appendChild(sorry);
+      requestAnimationFrame(() => sorry.classList.add("is-in"));
+      const w2 = document.getElementById("fin-love-word2");
+      if (w2) w2.classList.remove("is-knocked");
+    });
+    // Still doesn't end here — the story keeps going.
+    after(7200, () => {
+      stage.classList.add("is-fading");
+      after(700, done);
+    });
+  }
+
+  return {
+    async enter({ container, go }) {
+      container.innerHTML = buildHTML();
+      worldRemembers(container, () => {
+        runPersonality(container, () => {
+          runFavoriteColor(container, () => {
+            runLoveAssembly(container, () => go(4));
+          });
         });
       });
     },

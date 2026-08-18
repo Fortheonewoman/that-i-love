@@ -1,199 +1,118 @@
 /* ============================================================
-   Movement I — Midnight. The world is almost empty. A timestamp.
-   Two tiny lines. The cat wakes the room up, and as it does, the
-   whole week's visual vocabulary quietly returns — a thread, a
-   drawn line, a star, a stamp, a wash of colour — before the first
-   real photograph of her earns its own held moment.
+   Movement I — The Sky. Individual hand-painted-style cartoon
+   clouds drift, pass behind each other, and clear off in their own
+   time (never a symmetric two-panel gate). The cat balances on one,
+   nearly loses it, recovers. When the sky is clear: the fuse is lit
+   for Movement II's explosion.
    ============================================================ */
 window.Movements = window.Movements || {};
 window.Movements.m1 = (function () {
   "use strict";
-  const { el, make, Cat, photoFrame, drawThread, playSequence } = window.FinaleCore;
+  const { el, make, Cat } = window.FinaleCore;
 
   let timers = [];
   function after(ms, fn) {
-    const t = setTimeout(fn, ms);
-    timers.push(t);
-    return t;
+    timers.push(setTimeout(fn, ms));
   }
   function clearTimers() {
     timers.forEach(clearTimeout);
     timers = [];
   }
-  let seq = null;
+
+  // Each cloud: a cluster of overlapping circles (the classic
+  // "chunky cumulus" silhouette), a size, a depth (near/mid/far —
+  // controls scale, blur, speed and z-order), a start position, and
+  // which way + how far it exits.
+  const CLOUDS = [
+    { id: "c0", depth: "near", x: 8, y: 18, scale: 1.5, exitX: -60, exitY: -10, delay: 0 },
+    { id: "c1", depth: "mid", x: 78, y: 10, scale: 1.1, exitX: 40, exitY: -30, delay: 300 },
+    { id: "c2", depth: "far", x: 40, y: 8, scale: 0.7, exitX: 10, exitY: -50, delay: 600 },
+    { id: "c3", depth: "mid", x: 90, y: 55, scale: 1.2, exitX: 55, exitY: 20, delay: 200 },
+    { id: "c4", depth: "near", x: -5, y: 62, scale: 1.6, exitX: -50, exitY: 25, delay: 900 },
+    { id: "c5", depth: "far", x: 60, y: 30, scale: 0.6, exitX: 25, exitY: -35, delay: 1200 },
+    { id: "c6", depth: "mid", x: 20, y: 75, scale: 1.0, exitX: -35, exitY: 35, delay: 700 },
+    { id: "c7", depth: "near", x: 55, y: 85, scale: 1.4, exitX: 20, exitY: 45, delay: 1500 },
+    { id: "c8", depth: "far", x: 5, y: 40, scale: 0.65, exitX: -25, exitY: -20, delay: 1000 },
+  ];
+
+  function cloudSvg(cloud) {
+    // A chunky irregular cumulus silhouette built from overlapping
+    // circles — soft hand-painted feel, blue-grey underside, not a
+    // realistic/gradient/foggy cloud.
+    return `
+      <svg class="fin-cloud" viewBox="0 0 220 120" style="--scale:${cloud.scale}" aria-hidden="true">
+        <ellipse cx="110" cy="90" rx="90" ry="18" fill="#B9CFE0" opacity="0.55"/>
+        <g fill="#FFFFFF">
+          <circle cx="55" cy="70" r="38"/>
+          <circle cx="95" cy="48" r="46"/>
+          <circle cx="140" cy="55" r="42"/>
+          <circle cx="175" cy="72" r="32"/>
+          <circle cx="115" cy="80" r="40"/>
+          <circle cx="70" cy="85" r="30"/>
+        </g>
+        <g fill="#E7EFF6">
+          <circle cx="60" cy="90" r="20"/>
+          <circle cx="120" cy="92" r="26"/>
+          <circle cx="165" cy="88" r="18"/>
+        </g>
+      </svg>`;
+  }
 
   function buildHTML() {
     return `
       <div class="fin-m1" id="fin-m1">
-        <div class="fin-grain" aria-hidden="true"></div>
-        <div class="fin-haze" aria-hidden="true"></div>
-
-        <div class="fin-m1-mast" id="fin-m1-mast">
-          <p class="fin-m1-date" id="fin-m1-date">AUGUST 20</p>
-          <p class="fin-m1-time" id="fin-m1-time">00:00</p>
-          <p class="fin-m1-place" id="fin-m1-place">ARLINGTON, TEXAS</p>
+        <div class="fin-sky" id="fin-sky">
+          ${CLOUDS.map(
+            (c) => `
+            <div class="fin-cloud-wrap fin-cloud-${c.depth}" id="fin-${c.id}" style="left:${c.x}%; top:${c.y}%;">
+              ${cloudSvg(c)}
+            </div>`
+          ).join("")}
         </div>
-
-        <div class="fin-m1-lines" id="fin-m1-lines"></div>
-
-        <div class="fin-m1-lights" id="fin-m1-lights">
-          <span class="fin-m1-light" id="fin-m1-light-1"></span>
-          <span class="fin-m1-light" id="fin-m1-light-2"></span>
-        </div>
-
-        <h1 class="fin-m1-amirah" id="fin-m1-amirah" hidden>AMIRAH</h1>
-        <p class="fin-m1-21" id="fin-m1-21" hidden>21</p>
-
-        <div class="fin-m1-callbacks" id="fin-m1-callbacks"></div>
-
-        <div class="fin-m1-photo-slot" id="fin-m1-photo-slot" hidden></div>
-        <p class="fin-m1-there" id="fin-m1-there" hidden>there you are.</p>
       </div>`;
-  }
-
-  /* ---- the room wakes up: a thread, a line, a star, a stamp, colour ---- */
-  function worldRemembers(container, done) {
-    const host = el("fin-m1-callbacks");
-    host.hidden = false;
-    const stage = el("fin-m1");
-
-    // Day 2 — a loose red thread the cat pulls, travelling across.
-    Cat.moveTo(30, 58, 900);
-    after(500, () => {
-      Cat.paw();
-      const thread = drawThread(host, 15, 60, 85, 55, { duration: 1500, bow: 4 });
-      thread.classList.add("fin-callback-thread");
-    });
-
-    // Day 3 — an engineering line sketches itself.
-    after(1900, () => {
-      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg.setAttribute("class", "fin-thread fin-callback-blueprint");
-      svg.setAttribute("viewBox", "0 0 100 100");
-      svg.setAttribute("preserveAspectRatio", "none");
-      host.appendChild(svg);
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", "M 20 30 L 55 30 L 55 45 L 78 45");
-      path.setAttribute("class", "fin-blueprint-path");
-      svg.appendChild(path);
-      const len = path.getTotalLength();
-      path.style.strokeDasharray = len + " " + len;
-      path.style.strokeDashoffset = len;
-      requestAnimationFrame(() => {
-        path.style.transition = "stroke-dashoffset 1.1s var(--fin-ease)";
-        path.style.strokeDashoffset = "0";
-      });
-    });
-
-    // Day 4 — a star glints, once.
-    after(3000, () => {
-      const star = make("span", "fin-callback-star", "✦");
-      star.style.left = "68%";
-      star.style.top = "24%";
-      host.appendChild(star);
-      requestAnimationFrame(() => star.classList.add("is-in"));
-      after(1600, () => star.classList.add("is-fading"));
-    });
-
-    // Day 5 — an archival stamp, half a second.
-    after(4000, () => {
-      const stamp = make("p", "fin-callback-stamp", "SUBJECT: AMIRAH");
-      host.appendChild(stamp);
-      requestAnimationFrame(() => stamp.classList.add("is-in"));
-      after(1200, () => stamp.classList.add("is-fading"));
-    });
-
-    // Day 6 — colour leaks into the room.
-    after(4900, () => {
-      stage.classList.add("is-colored");
-    });
-
-    after(6600, done);
-  }
-
-  function showFirstPhoto(container, done) {
-    const slot = el("fin-m1-photo-slot");
-    slot.hidden = false;
-    const frame = photoFrame({ role: "portrait", treatment: "print" });
-    slot.appendChild(frame);
-    requestAnimationFrame(() => slot.classList.add("is-in"));
-    after(1400, () => {
-      const line = el("fin-m1-there");
-      line.hidden = false;
-      requestAnimationFrame(() => line.classList.add("is-in"));
-    });
-    after(4200, done);
   }
 
   return {
     async enter({ container, go }) {
       container.innerHTML = buildHTML();
+      const sky = el("fin-sky");
 
-      after(1400, () => el("fin-m1-mast").classList.add("is-in"));
-
-      const lineHost = el("fin-m1-lines");
-      after(3600, () => {
-        seq = playSequence(lineHost, [
-          { type: "line", text: "oh." },
-          { type: "pause", ms: 500 },
-          { type: "line", text: "you're here." },
-          { type: "pause", ms: 900 },
-        ]);
-      });
-
-      after(7200, () => {
+      // A settled beat of just sky and drifting clouds first — this
+      // is the fuse, not instant chaos.
+      after(600, () => {
         Cat.show();
-        Cat.moveTo(50, 62, 1100);
+        Cat.moveTo(8, 20, 0);
+        Cat.sit();
       });
-      after(8400, () => {
-        Cat.lookOffscreen();
-        el("fin-m1-light-1").classList.add("is-in");
-      });
-      after(9200, () => {
-        Cat.paw();
-        Cat.stopLooking();
-      });
-      after(9800, () => el("fin-m1-light-2").classList.add("is-in"));
-      after(10600, () => Cat.sit());
+      after(1800, () => Cat.paw()); // wobble as its cloud drifts under it
+      after(2600, () => Cat.moveTo(40, 10, 900)); // recovers, hops to another cloud
+      after(3600, () => Cat.sit());
 
-      after(11800, () => {
-        const a = el("fin-m1-amirah");
-        a.hidden = false;
-        requestAnimationFrame(() => a.classList.add("is-in"));
-      });
-      after(13600, () => {
-        const n = el("fin-m1-21");
-        n.hidden = false;
-        requestAnimationFrame(() => n.classList.add("is-in"));
+      // Each cloud independently exits on its own schedule — never
+      // symmetric, never "two halves."
+      CLOUDS.forEach((c) => {
+        after(2200 + c.delay, () => {
+          const node = el("fin-" + c.id);
+          if (!node) return;
+          node.style.setProperty("--exit-x", c.exitX + "vw");
+          node.style.setProperty("--exit-y", c.exitY + "vh");
+          node.classList.add("is-leaving");
+        });
       });
 
-      after(15600, () => {
-        el("fin-m1-mast").classList.add("is-fading");
-        lineHost.classList.add("is-fading");
-        el("fin-m1-amirah").classList.add("is-settled");
-        el("fin-m1-21").classList.add("is-settled");
-        el("fin-m1-lights").classList.add("is-fading");
+      after(4600, () => {
+        Cat.moveTo(85, 15, 1400); // last cloud out — cat rides it off too
         Cat.stand();
-        // mast/lines are normal flex-column items (unlike the rest of
-        // this scene, which is absolutely positioned) — hard-hide once
-        // faded so they stop occupying vertical flex space.
-        after(800, () => {
-          el("fin-m1-mast").hidden = true;
-          lineHost.hidden = true;
-        });
-        worldRemembers(container, () => {
-          showFirstPhoto(container, () => go(2));
-        });
       });
+
+      after(5600, () => go(2));
     },
     exit() {
       clearTimers();
-      if (seq) seq.cancel();
       Cat.reset();
     },
     skip() {
       clearTimers();
-      if (seq) seq.cancel();
       Cat.reset();
       Birthday.goToMovement(2);
     },

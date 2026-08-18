@@ -283,7 +283,7 @@ function wireMute() {
   });
 }
 
-const MOVEMENT_NAMES = ["before the party", "the world remembers her", "twenty-one", "the party", "after"];
+const MOVEMENT_NAMES = ["the sky", "the explosion", "the story", "twenty-one", "them"];
 
 function wireReplayControls() {
   const startBtn = document.getElementById("replay-start");
