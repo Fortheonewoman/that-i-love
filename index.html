@@ -11,7 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,460;0,9..144,560;0,9..144,650;1,9..144,460;1,9..144,560&family=Inter:wght@400;500;600&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="style.css?v=46" />
+  <link rel="stylesheet" href="style.css?v=47" />
 </head>
 <body>
   <div class="grain-overlay" aria-hidden="true"></div>
@@ -54,10 +54,24 @@
       </svg>
       <p class="hero-eyebrow">a week of small things, then everything</p>
       <h1 class="hero-title">My Amirah</h1>
-      <p class="birthday-countdown" id="birthday-countdown"></p>
+
+      <!-- Holds Obinna's own pre-birthday writeup once it's supplied —
+           stays hidden and the page looks exactly as it does today
+           until real text is dropped into content/writeup.json. Never
+           filled with placeholder or invented writing. -->
+      <div class="pre-birthday-writeup" id="pre-birthday-writeup" hidden></div>
     </main>
 
     <div class="day-grid" id="day-grid"></div>
+  </div>
+
+  <!-- The trusted countdown to her birthday, small and fixed in the
+       corner rather than dominating the page — a secret ticking
+       clock, not a giant digital display. Same window.TimeLock this
+       whole site already trusts; no separate/weaker time source. -->
+  <div class="corner-countdown" id="corner-countdown" hidden>
+    <p class="corner-countdown-label">until Amirah is 21</p>
+    <p class="corner-countdown-digits" id="corner-countdown-digits">— : — : — : —</p>
   </div>
 
   <div class="day-overlay" id="day-overlay" hidden>
@@ -93,19 +107,19 @@
        GitHub Pages itself) cache JS/CSS aggressively, so without this
        a pushed fix can silently not show up until a hard refresh.
        Bump this number whenever any of these files change. -->
-  <script src="scenes/day2.js?v=46"></script>
-  <script src="scenes/day3.js?v=46"></script>
-  <script src="scenes/day4.js?v=46"></script>
-  <script src="scenes/day5.js?v=46"></script>
-  <script src="scenes/day6.js?v=46"></script>
-  <script src="scenes/finale-media.js?v=46"></script>
-  <script src="scenes/finale-core.js?v=46"></script>
-  <script src="scenes/finale-movement1.js?v=46"></script>
-  <script src="scenes/finale-movement2.js?v=46"></script>
-  <script src="scenes/finale-movement3.js?v=46"></script>
-  <script src="scenes/finale-movement4.js?v=46"></script>
-  <script src="scenes/finale-movement5.js?v=46"></script>
-  <script src="birthday.js?v=46"></script>
-  <script src="app.js?v=46"></script>
+  <script src="scenes/day2.js?v=47"></script>
+  <script src="scenes/day3.js?v=47"></script>
+  <script src="scenes/day4.js?v=47"></script>
+  <script src="scenes/day5.js?v=47"></script>
+  <script src="scenes/day6.js?v=47"></script>
+  <script src="scenes/finale-media.js?v=47"></script>
+  <script src="scenes/finale-core.js?v=47"></script>
+  <script src="scenes/finale-movement1.js?v=47"></script>
+  <script src="scenes/finale-movement2.js?v=47"></script>
+  <script src="scenes/finale-movement3.js?v=47"></script>
+  <script src="scenes/finale-movement4.js?v=47"></script>
+  <script src="scenes/finale-movement5.js?v=47"></script>
+  <script src="birthday.js?v=47"></script>
+  <script src="app.js?v=47"></script>
 </body>
 </html>

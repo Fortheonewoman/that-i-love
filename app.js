@@ -332,7 +332,8 @@ function wireReplayControls() {
 
   const stampsEl = document.getElementById("stamps");
   const gridEl = document.getElementById("day-grid");
-  const countdownEl = document.getElementById("birthday-countdown");
+  const cornerCountdownEl = document.getElementById("corner-countdown");
+  const cornerDigitsEl = document.getElementById("corner-countdown-digits");
   const overlayEl = document.getElementById("day-overlay");
   const overlayContentEl = document.getElementById("day-overlay-content");
   const overlayCloseEl = document.getElementById("day-overlay-close");
@@ -605,14 +606,31 @@ function wireReplayControls() {
     });
   }
 
+  // DD : HH : MM : SS — the small corner widget's format, distinct
+  // from formatDuration()'s "5d 12h 34m 56s" used everywhere else.
+  function formatCountdownDigits(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return [days, hours, minutes, seconds].map((n) => String(n).padStart(2, "0")).join(" : ");
+  }
+
   function renderCountdown() {
     const unlocks = window.TimeLock.unlocks();
     const birthday = unlocks.find((u) => u.id === "birthday");
     const remaining = birthday.unlocked ? "it's her birthday" : window.TimeLock.formatDuration(birthday.msRemaining);
-    countdownEl.textContent = birthday.unlocked ? remaining : remaining + " until Amirachi's birthday";
     // Same countdown, shown inside the day overlay too, so it's visible
     // no matter which screen she's looking at.
     overlayCountdownEl.textContent = birthday.unlocked ? remaining : remaining + " until her birthday";
+
+    if (birthday.unlocked) {
+      cornerCountdownEl.hidden = true;
+      return;
+    }
+    cornerCountdownEl.hidden = false;
+    cornerDigitsEl.textContent = formatCountdownDigits(birthday.msRemaining);
   }
 
   let birthdayLaunched = false;
@@ -626,12 +644,23 @@ function wireReplayControls() {
     const birthday = window.TimeLock.unlocks().find((u) => u.id === "birthday");
     if (birthday.unlocked && !birthdayLaunched) {
       birthdayLaunched = true;
+      launchBirthdayFromDayGrid();
+    }
+  }
+
+  // The countdown hitting zero isn't a hard cut to a new document —
+  // the page itself folds away first (a beat of held stillness, then
+  // the light/paper transform in CSS) before Day 8 actually begins.
+  function launchBirthdayFromDayGrid() {
+    overlayEl.hidden = true;
+    cornerCountdownEl.classList.add("is-holding");
+    document.querySelector(".hero").classList.add("is-transforming");
+    setTimeout(() => {
       appEl.hidden = true;
-      overlayEl.hidden = true;
       wireMute();
       wireReplayControls();
       Birthday.start({ onRequestDay7: () => goToDay7() });
-    }
+    }, 1600);
   }
 
   // Dev shortcut (?act=N) or already-past-unlock-on-load: launch
@@ -644,6 +673,22 @@ function wireReplayControls() {
     await Birthday.start({ onRequestDay7: () => goToDay7() });
     return;
   }
+
+  // Obinna's pre-birthday writeup — real content only, never invented.
+  // Silently does nothing if content/writeup.json doesn't exist yet.
+  (async () => {
+    try {
+      const res = await fetch("content/writeup.json", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      const slot = document.getElementById("pre-birthday-writeup");
+      if (!data || !data.lines || !data.lines.length || !slot) return;
+      slot.innerHTML = data.lines.map((line) => `<p class="pre-birthday-writeup-line">${line}</p>`).join("");
+      slot.hidden = false;
+    } catch (err) {
+      console.warn("no pre-birthday writeup yet:", err);
+    }
+  })();
 
   tick();
   setInterval(tick, 1000);
