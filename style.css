@@ -3383,3 +3383,140 @@ h1, h2, h3 {
   .d6-panel { padding: 1.8rem 1.1rem 1.5rem; }
   .d6-final-motifs { display: none; }
 }
+
+/* ============================================================
+   Day 7 — the letter. A dark starfield stage, not the warm-paper
+   template every other day sits inside — this one is a real crawl,
+   not a scrapbook page.
+   ============================================================ */
+.d7-scene {
+  position: relative;
+  width: 100%;
+  height: min(74vh, 640px);
+  min-height: 26rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: radial-gradient(ellipse 120% 60% at 50% 8%, #1c1433 0%, #0a0a18 55%, #05050d 100%);
+  color: #F3EEFF;
+  font-family: var(--font-body);
+}
+
+.d7-stars-far,
+.d7-stars-near {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  border-radius: 50%;
+  animation: d7-twinkle 5s ease-in-out infinite;
+}
+.d7-stars-near { animation-duration: 3.6s; animation-delay: 0.6s; }
+@keyframes d7-twinkle {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+
+.d7-vanish-glow {
+  position: absolute;
+  top: -2rem;
+  left: 50%;
+  width: 60%;
+  height: 8rem;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(255, 61, 122, 0.16), transparent 70%);
+  pointer-events: none;
+}
+
+.d7-crawl-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  perspective: 340px;
+  perspective-origin: 50% 100%;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+/* The 3D tilt lives on this stage-sized wrapper — NOT on the long
+   scrolling content — so the rotation pivots around a point close to
+   the viewer (this box's own bottom edge) instead of the bottom of a
+   ~14,000px-tall text block. Anchoring it to the content itself makes
+   the lever arm grow with the letter's length, which crushes anything
+   more than a screen or two in to an unreadable speck near the
+   vanishing point well before it's actually supposed to recede. */
+.d7-crawl-tilt {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transform: rotateX(40deg);
+  transform-origin: 50% 100%;
+}
+
+.d7-crawl {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(30rem, 84%);
+  will-change: transform;
+  text-align: center;
+  transition: opacity 2s var(--ease);
+}
+.d7-crawl.is-gone { opacity: 0; }
+
+.d7-line {
+  margin: 0.85em 0;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2.6vw, 1.3rem);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: #F3EEFF;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.08);
+}
+.d7-line:first-child {
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(1.3rem, 4vw, 1.9rem);
+  letter-spacing: 0.05em;
+  margin-bottom: 1.6em;
+  color: #FF3D7A;
+}
+
+.d7-countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  opacity: 0;
+  transition: opacity 1.6s var(--ease);
+  pointer-events: none;
+}
+.d7-countdown.is-in { opacity: 1; }
+.d7-countdown-label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 560;
+  font-size: clamp(1.1rem, 3.4vw, 1.5rem);
+  color: #F3EEFF;
+  opacity: 0.85;
+}
+.d7-countdown-digits {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: clamp(1.5rem, 5.6vw, 2.4rem);
+  letter-spacing: 0.03em;
+  color: #FF3D7A;
+  text-shadow: 0 0 26px rgba(255, 61, 122, 0.45);
+}
+
+@media (max-width: 700px) {
+  .d7-scene { height: min(76vh, 560px); }
+  .d7-crawl { width: 90%; }
+}
