@@ -11,18 +11,13 @@
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,460;0,9..144,560;0,9..144,650;1,9..144,460;1,9..144,560&family=Inter:wght@400;500;600&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="style.css?v=38" />
+  <link rel="stylesheet" href="style.css?v=42" />
 </head>
 <body>
   <div class="grain-overlay" aria-hidden="true"></div>
 
   <div id="locked-out" class="locked-out floral-decor" hidden>
     <p>Connect to the internet to open this.</p>
-  </div>
-
-  <div id="phone-block" class="phone-block floral-decor" hidden>
-    <p class="birthday-countdown" id="phone-countdown"></p>
-    <p class="phone-message">this one needs your laptop, Amirachi</p>
   </div>
 
   <div id="app" class="app" hidden>
@@ -72,48 +67,45 @@
   </div>
 
   <div id="birthday" class="birthday" hidden>
-    <div class="act-progress" id="act-progress"></div>
-    <button type="button" class="act-skip" id="act-skip">skip →</button>
+    <button type="button" class="movement-skip" id="movement-skip">skip →</button>
     <button type="button" class="mute-btn" id="mute-btn" aria-label="mute">🔊</button>
+    <div class="movement-progress" id="movement-progress"></div>
 
-    <div class="act-stage" id="act-stage"></div>
+    <div class="movement-stage" id="movement-stage"></div>
 
-    <!-- Persistent across every act — never wiped by a scene change. -->
-    <div class="cast-layer" id="birthday-cast-layer"></div>
-    <div class="confetti-layer" id="confetti-layer" hidden aria-hidden="true"></div>
+    <!-- Persistent across every movement — the cat, never wiped by a
+         movement change so it can walk continuously between them. -->
+    <div class="finale-cat-layer" id="finale-cat-layer"></div>
 
     <div class="replay-controls" id="replay-controls" hidden>
-      <button type="button" id="replay-start">start again</button>
-      <button type="button" id="replay-skip">skip to…</button>
+      <button type="button" id="replay-start">replay</button>
+      <button type="button" id="replay-skip">chapters</button>
       <div class="replay-jump" id="replay-jump" hidden></div>
     </div>
   </div>
 
-  <!-- cast/scenes/director load first so app.js can rely on them
-       existing the instant its own async code resumes — script tags
-       block in order, but a later `await` inside app.js is not
-       guaranteed to lose the race against these otherwise.
+  <!-- scenes/director load first so app.js can rely on them existing
+       the instant its own async code resumes — script tags block in
+       order, but a later `await` inside app.js is not guaranteed to
+       lose the race against these otherwise.
 
        The ?v=N on every file below is a cache-buster — browsers (and
        GitHub Pages itself) cache JS/CSS aggressively, so without this
        a pushed fix can silently not show up until a hard refresh.
        Bump this number whenever any of these files change. -->
-  <script src="cast.js?v=38"></script>
-  <script src="scenes/act1.js?v=38"></script>
-  <script src="scenes/act2.js?v=38"></script>
-  <script src="scenes/act3.js?v=38"></script>
-  <script src="scenes/act4.js?v=38"></script>
-  <script src="scenes/act5.js?v=38"></script>
-  <script src="scenes/act6.js?v=38"></script>
-  <script src="scenes/act7.js?v=38"></script>
-  <script src="scenes/act8.js?v=38"></script>
-  <script src="scenes/act9.js?v=38"></script>
-  <script src="scenes/day2.js?v=38"></script>
-  <script src="scenes/day3.js?v=38"></script>
-  <script src="scenes/day4.js?v=38"></script>
-  <script src="scenes/day5.js?v=38"></script>
-  <script src="scenes/day6.js?v=38"></script>
-  <script src="birthday.js?v=38"></script>
-  <script src="app.js?v=38"></script>
+  <script src="scenes/day2.js?v=42"></script>
+  <script src="scenes/day3.js?v=42"></script>
+  <script src="scenes/day4.js?v=42"></script>
+  <script src="scenes/day5.js?v=42"></script>
+  <script src="scenes/day6.js?v=42"></script>
+  <script src="scenes/finale-media.js?v=42"></script>
+  <script src="scenes/finale-core.js?v=42"></script>
+  <script src="scenes/finale-movement1.js?v=42"></script>
+  <script src="scenes/finale-movement2.js?v=42"></script>
+  <script src="scenes/finale-movement3.js?v=42"></script>
+  <script src="scenes/finale-movement4.js?v=42"></script>
+  <script src="scenes/finale-movement5.js?v=42"></script>
+  <script src="birthday.js?v=42"></script>
+  <script src="app.js?v=42"></script>
 </body>
 </html>

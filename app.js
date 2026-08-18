@@ -254,17 +254,12 @@ const FLORAL_FLOURISH = `
    The seven-day palette. Each day "wears" its own colour the
    moment it's opened — set as the --accent CSS variable on the
    root element, and reverted to the default when she closes it.
-
-   Day 4 is a placeholder for now: act 7 of the birthday sequence
-   has her pick her favourite colour and the site tells her "that's
-   why day four was that colour" — so day4's real value here has to
-   become her actual favourite once we know it, not before.
    ============================================================ */
 const DAY_PALETTE = {
   day1: "#C81E3A", // rich red — roses are red
   day2: "#FF6F5E", // coral
   day3: "#F2B705", // butter yellow
-  day4: "#9B6FD4", // lilac — placeholder, replace with her favourite colour later
+  day4: "#9B6FD4", // lilac
   day5: "#2E9E6B", // fresh green
   day6: "#3B5BFF", // electric blue
   day7: "#FF3D7A", // hot pink
@@ -277,13 +272,6 @@ const DEFAULT_ACCENT = "#FF6F5E";
    time exclusively through window.TimeLock — never the device
    clock, same rule as everything else in this file.
    ============================================================ */
-// Laptop only: the chase, the coach, and the peeper all need a real
-// cursor. Touch-primary devices get a small, honest screen instead of
-// a broken experience — same time lock, just no dead end.
-function isTouchPrimaryDevice() {
-  return window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-}
-
 function wireMute() {
   const btn = document.getElementById("mute-btn");
   if (!btn) return;
@@ -295,20 +283,19 @@ function wireMute() {
   });
 }
 
+const MOVEMENT_NAMES = ["before the party", "the world remembers her", "twenty-one", "the party", "after"];
+
 function wireReplayControls() {
   const startBtn = document.getElementById("replay-start");
   const skipBtn = document.getElementById("replay-skip");
   const jumpEl = document.getElementById("replay-jump");
   if (!startBtn) return;
-  startBtn.addEventListener("click", () => Birthday.goToAct(1));
+  startBtn.addEventListener("click", () => Birthday.goToMovement(1));
   skipBtn.addEventListener("click", () => {
     if (jumpEl.hidden) {
-      jumpEl.innerHTML = Array.from({ length: 9 }, (_, i) => {
-        const n = i + 1;
-        return `<button type="button" data-jump="${n}">act ${n}</button>`;
-      }).join("");
+      jumpEl.innerHTML = MOVEMENT_NAMES.map((name, i) => `<button type="button" data-jump="${i + 1}">${i + 1}. ${name}</button>`).join("");
       jumpEl.querySelectorAll("[data-jump]").forEach((b) => {
-        b.addEventListener("click", () => Birthday.goToAct(parseInt(b.dataset.jump, 10)));
+        b.addEventListener("click", () => Birthday.goToMovement(parseInt(b.dataset.jump, 10)));
       });
     }
     jumpEl.hidden = !jumpEl.hidden;
@@ -318,7 +305,6 @@ function wireReplayControls() {
 (async function runSite() {
   const appEl = document.getElementById("app");
   const lockedOutEl = document.getElementById("locked-out");
-  const phoneBlockEl = document.getElementById("phone-block");
   if (!appEl) return; // not this page
 
   const ok = await window.TimeLock.init();
@@ -327,40 +313,22 @@ function wireReplayControls() {
     return;
   }
 
-  // Laptop-only applies to the birthday ACT SEQUENCE specifically —
-  // that's the part that needs a real cursor (the chase, the peeper).
-  // The seven-day countdown itself is just tapping cards, which
-  // works fine on a phone, so it isn't gated at all.
+  // The birthday finale is fully responsive — no device gate. She may
+  // well open this at midnight on her phone.
   const params = new URLSearchParams(location.search);
   const devAct = parseInt(params.get("act"), 10);
   const birthdayUnlocked = window.TimeLock.unlocks().find((u) => u.id === "birthday").unlocked;
   const wantsBirthdaySequence = devAct >= 1 || birthdayUnlocked;
 
-  if (wantsBirthdaySequence && isTouchPrimaryDevice()) {
-    phoneBlockEl.hidden = false;
-    const phoneCountdownEl = document.getElementById("phone-countdown");
-    function tickPhone() {
-      const unlocks = window.TimeLock.unlocks();
-      const birthday = unlocks.find((u) => u.id === "birthday");
-      phoneCountdownEl.textContent = birthday.unlocked
-        ? "it's her birthday"
-        : window.TimeLock.formatDuration(birthday.msRemaining) + " until Amirachi's birthday";
-    }
-    tickPhone();
-    setInterval(tickPhone, 1000);
-    return;
-  }
-
-  if (wantsBirthdaySequence) {
-    appEl.hidden = true;
-    wireMute();
-    Cast.startPeeper(document.getElementById("birthday-cast-layer"));
-    wireReplayControls();
-    await Birthday.start();
-    return;
-  }
-
-  appEl.hidden = false;
+  // NOTE: launching the birthday sequence happens further down, after
+  // openDay/overlayContentEl/etc. are declared — goToDay7() (the
+  // finale's handoff to Day 7) calls openDay(), so those consts must
+  // already be initialized before the finale can start. A `const`
+  // that's still in its temporal dead zone throws if a callback
+  // reaches it before its own declaration line has run; returning
+  // early from this function (as this branch used to, right here)
+  // meant that line never ran at all for this call.
+  appEl.hidden = wantsBirthdaySequence;
 
   const stampsEl = document.getElementById("stamps");
   const gridEl = document.getElementById("day-grid");
@@ -467,6 +435,15 @@ function wireReplayControls() {
     overlayEl.hidden = true;
     document.documentElement.style.setProperty("--accent", DEFAULT_ACCENT);
   });
+
+  // The finale's last act: hand her straight to Day 7. Leaves the
+  // birthday sequence behind entirely and opens the letter directly,
+  // through the same door every other day uses — no separate path.
+  function goToDay7() {
+    document.getElementById("birthday").hidden = true;
+    appEl.hidden = false;
+    openDay("day7");
+  }
 
   function shake(el) {
     el.classList.remove("is-shaking");
@@ -640,38 +617,32 @@ function wireReplayControls() {
 
   let birthdayLaunched = false;
   function tick() {
-    const phoneBlockEl = document.getElementById("phone-block");
-    if (!phoneBlockEl.hidden) {
-      const birthday = window.TimeLock.unlocks().find((u) => u.id === "birthday");
-      document.getElementById("phone-countdown").textContent = birthday.unlocked
-        ? "it's her birthday"
-        : window.TimeLock.formatDuration(birthday.msRemaining) + " until Amirachi's birthday";
-      return; // nothing else to update once she's parked on this screen
-    }
     renderGrid();
     renderCountdown();
 
     // The instant server time hits the birthday, the sky opens —
     // even if she's just sitting on the day-grid when it happens.
+    // Fully responsive, so no device check here either.
     const birthday = window.TimeLock.unlocks().find((u) => u.id === "birthday");
     if (birthday.unlocked && !birthdayLaunched) {
       birthdayLaunched = true;
-      if (isTouchPrimaryDevice()) {
-        // She's on her phone right as it unlocks — keep her on the
-        // (already gorgeous) countdown view instead of launching a
-        // cursor-dependent sequence she can't drive from touch.
-        document.getElementById("phone-block").hidden = false;
-        appEl.hidden = true;
-        overlayEl.hidden = true;
-        return;
-      }
       appEl.hidden = true;
       overlayEl.hidden = true;
       wireMute();
-      Cast.startPeeper(document.getElementById("birthday-cast-layer"));
       wireReplayControls();
-      Birthday.start();
+      Birthday.start({ onRequestDay7: () => goToDay7() });
     }
+  }
+
+  // Dev shortcut (?act=N) or already-past-unlock-on-load: launch
+  // straight into the finale instead of the day-grid. The natural
+  // mid-session unlock (sitting on the day-grid when the clock hits
+  // it) is handled inside tick() below, the same way.
+  if (wantsBirthdaySequence) {
+    wireMute();
+    wireReplayControls();
+    await Birthday.start({ onRequestDay7: () => goToDay7() });
+    return;
   }
 
   tick();
