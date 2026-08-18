@@ -809,12 +809,17 @@ h1, h2, h3 {
 .fin-approach { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s var(--fin-ease); }
 .fin-approach.is-in { opacity: 1; }
 .fin-figure { position: absolute; top: 55%; width: 3.4rem; height: 7rem; border-radius: 50% 50% 40% 40% / 45% 45% 30% 30%; transition: left 2.6s var(--fin-ease), transform 0.6s var(--fin-ease); }
-.fin-figure-him { left: 8%; background: linear-gradient(180deg, var(--fin-indigo), #14213B); box-shadow: 0 10px 24px -10px rgba(20,33,59,0.6); }
+.fin-figure-him { left: 8%; background: linear-gradient(180deg, #1a1a1a, #050505); box-shadow: 0 10px 24px -10px rgba(0,0,0,0.6); transition: left 2.6s var(--fin-ease), transform 0.6s var(--fin-ease), background 1.4s var(--fin-ease), box-shadow 1.4s var(--fin-ease); }
+.fin-figure-him::after { content: ""; position: absolute; left: 50%; top: 8%; width: 0.35rem; height: 2.2rem; background: var(--fin-cherry); border-radius: 0.1rem; transform: translateX(-50%); opacity: 0.9; }
+.fin-figure-him.is-matching { background: linear-gradient(180deg, #1a1a1a, color-mix(in srgb, var(--her-color, var(--fin-coral)) 55%, #1a1a1a)); box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--her-color, var(--fin-coral)) 45%, transparent); }
 .fin-figure-her { left: 92%; background: linear-gradient(180deg, color-mix(in srgb, var(--her-color, var(--fin-coral)) 70%, white), var(--her-color, var(--fin-coral))); box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--her-color, var(--fin-coral)) 50%, transparent); }
 .fin-figure.is-approaching.fin-figure-him { left: 38%; }
 .fin-figure.is-approaching.fin-figure-her { left: 62%; }
 .fin-approach.is-close .fin-figure-him { left: 44%; }
 .fin-approach.is-close .fin-figure-her { left: 56%; }
+.fin-approach-joke { position: absolute; left: 50%; bottom: 12%; transform: translateX(-50%); margin: 0; max-width: 24rem; padding: 0 1rem; font-family: var(--font-display); font-style: italic; font-size: 0.9rem; color: var(--ink-soft); text-align: center; opacity: 0; transition: opacity 0.6s var(--fin-ease); }
+.fin-approach-joke.is-in { opacity: 1; }
+.fin-approach-joke.is-fading { opacity: 0; }
 .fin-approach-thread { opacity: 0.7; }
 .fin-approach.is-still .fin-approach-thread { opacity: 0.3; transition: opacity 1s ease; }
 

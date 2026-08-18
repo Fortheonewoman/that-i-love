@@ -94,11 +94,25 @@ window.Movements.m5 = (function () {
       Cat.sit();
     });
 
+    // His suit was black. Right as they close the distance, it quietly
+    // picks up her chosen color instead — the one thing in the whole
+    // night that's visibly, deliberately about her.
+    after(5600, () => {
+      el("fin-figure-him").style.setProperty("--her-color", chosenColor());
+      el("fin-figure-him").classList.add("is-matching");
+    });
+    after(6200, () => {
+      const joke = make("p", "fin-approach-joke", "i totally didn't change my suit color because of you.");
+      wrap.appendChild(joke);
+      requestAnimationFrame(() => joke.classList.add("is-in"));
+      after(2000, () => joke.classList.add("is-fading"));
+    });
+
     // Five full silent seconds. No text. No cat gag. Nothing.
-    after(6400, () => {
+    after(9000, () => {
       wrap.classList.add("is-still");
     });
-    after(11400, done);
+    after(14000, done);
   }
 
   /* ---- the embrace ---- */
