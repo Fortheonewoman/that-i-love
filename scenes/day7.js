@@ -313,13 +313,27 @@ window.Day7Scene = (function () {
     });
 
     requestAnimationFrame(() => {
-      const contentH = crawlEl.getBoundingClientRect().height;
-      const viewportH = stageEl.getBoundingClientRect().height;
+      // Layout measurements (offsetHeight/offsetTop), NOT
+      // getBoundingClientRect() — .d7-crawl sits inside a
+      // perspective+rotateX ancestor, and this content is roughly
+      // 15,000–20,000px tall. A block that far from the rotation's
+      // origin can land far enough outside the camera's practical
+      // projection range that its RENDERED rect comes back wrong —
+      // which was the real bug: completion firing almost immediately
+      // because the projected "last block" position was nonsense, not
+      // because it had actually scrolled anywhere. offsetTop/Height
+      // are plain layout numbers, untouched by the 3D transform used
+      // to render the tilt, so this check can't be fooled by it.
+      const contentH = crawlEl.offsetHeight;
+      const viewportH = stageEl.offsetHeight;
       const totalDistance = contentH + viewportH * 1.25;
       const pxPerMs = totalDistance / (crawlSeconds() * 1000);
 
       const blockEls = crawlEl.querySelectorAll(".d7-block");
       const lastBlockEl = blockEls[blockEls.length - 1] || crawlEl;
+      // Local offset of the last block's bottom edge, relative to
+      // .d7-crawl's own top — fixed for the whole crawl, measured once.
+      const lastBlockBottom = lastBlockEl.offsetTop + lastBlockEl.offsetHeight;
 
       // Starts already most of the way into view (not sitting fully
       // below the fold) — the title should be visibly moving the
@@ -344,17 +358,15 @@ window.Day7Scene = (function () {
           y -= pxPerMs * dt;
           applyY();
         }
-        // Completion is observed from the real last block's own
-        // position, not a computed/guessed duration — it must have
-        // fully passed above the readable stage before we're done.
-        if (!finished) {
-          const rect = lastBlockEl.getBoundingClientRect();
-          const stageTop = stageEl.getBoundingClientRect().top;
-          if (rect.bottom < stageTop) {
-            finished = true;
-            onCrawlComplete({ onBirthdayReady });
-            return;
-          }
+        // Done only once the last block's own bottom edge has
+        // actually scrolled above the stage — real position, not a
+        // timer, and never early: whether this takes 9 minutes or,
+        // as Obinna put it, 5 months, the countdown does not appear
+        // a moment before this is true.
+        if (!finished && y + lastBlockBottom < 0) {
+          finished = true;
+          onCrawlComplete({ onBirthdayReady });
+          return;
         }
         if (!finished) rafId = requestAnimationFrame(frame);
       }
