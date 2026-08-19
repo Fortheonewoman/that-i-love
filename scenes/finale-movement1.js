@@ -1,9 +1,15 @@
 /* ============================================================
-   Movement I — The Sky. Individual hand-painted-style cartoon
-   clouds drift, pass behind each other, and clear off in their own
-   time (never a symmetric two-panel gate). The cat balances on one,
-   nearly loses it, recovers. When the sky is clear: the fuse is lit
-   for Movement II's explosion.
+   Movement I — The Balloon. No music, anywhere. The rhythm here is
+   built entirely from stillness, motion, and one huge beat:
+
+     midnight lands → silence → one balloon rises → she taps it →
+     it pops (her interaction, never automatic) → a split-second of
+     black → BOOM → the whole thing detonates into Movement II.
+
+   Same darkness Day 7's countdown ended on — this isn't a hard cut
+   to a new document, it's the next thing that happens in that same
+   sky. The balloon itself is hand-drawn SVG (glossy body, highlight,
+   knot, string) — never an emoji, never clip-art.
    ============================================================ */
 window.Movements = window.Movements || {};
 window.Movements.m1 = (function () {
@@ -19,93 +25,128 @@ window.Movements.m1 = (function () {
     timers = [];
   }
 
-  // Each cloud: a cluster of overlapping circles (the classic
-  // "chunky cumulus" silhouette), a size, a depth (near/mid/far —
-  // controls scale, blur, speed and z-order), a start position, and
-  // which way + how far it exits.
-  const CLOUDS = [
-    { id: "c0", depth: "near", x: 8, y: 18, scale: 1.5, exitX: -60, exitY: -10, delay: 0 },
-    { id: "c1", depth: "mid", x: 78, y: 10, scale: 1.1, exitX: 40, exitY: -30, delay: 300 },
-    { id: "c2", depth: "far", x: 40, y: 8, scale: 0.7, exitX: 10, exitY: -50, delay: 600 },
-    { id: "c3", depth: "mid", x: 90, y: 55, scale: 1.2, exitX: 55, exitY: 20, delay: 200 },
-    { id: "c4", depth: "near", x: -5, y: 62, scale: 1.6, exitX: -50, exitY: 25, delay: 900 },
-    { id: "c5", depth: "far", x: 60, y: 30, scale: 0.6, exitX: 25, exitY: -35, delay: 1200 },
-    { id: "c6", depth: "mid", x: 20, y: 75, scale: 1.0, exitX: -35, exitY: 35, delay: 700 },
-    { id: "c7", depth: "near", x: 55, y: 85, scale: 1.4, exitX: 20, exitY: 45, delay: 1500 },
-    { id: "c8", depth: "far", x: 5, y: 40, scale: 0.65, exitX: -25, exitY: -20, delay: 1000 },
-  ];
+  // Neutral celebratory red — she hasn't told us her favorite color
+  // yet (that's Movement III), so this is a composition choice, not
+  // a guess at personal meaning. Later balloons/confetti/light in
+  // this same session can inherit her real answer once she gives it.
+  const BALLOON_COLOR = "#C81E3A";
+  const BALLOON_HILITE = "#F3E3E6";
 
-  function cloudSvg(cloud) {
-    // A chunky irregular cumulus silhouette built from overlapping
-    // circles — soft hand-painted feel, blue-grey underside, not a
-    // realistic/gradient/foggy cloud.
+  function balloonSvg() {
     return `
-      <svg class="fin-cloud" viewBox="0 0 220 120" style="--scale:${cloud.scale}" aria-hidden="true">
-        <ellipse cx="110" cy="90" rx="90" ry="18" fill="#B9CFE0" opacity="0.55"/>
-        <g fill="#FFFFFF">
-          <circle cx="55" cy="70" r="38"/>
-          <circle cx="95" cy="48" r="46"/>
-          <circle cx="140" cy="55" r="42"/>
-          <circle cx="175" cy="72" r="32"/>
-          <circle cx="115" cy="80" r="40"/>
-          <circle cx="70" cy="85" r="30"/>
-        </g>
-        <g fill="#E7EFF6">
-          <circle cx="60" cy="90" r="20"/>
-          <circle cx="120" cy="92" r="26"/>
-          <circle cx="165" cy="88" r="18"/>
-        </g>
+      <svg class="fin-balloon-svg" viewBox="0 0 160 220" aria-hidden="true">
+        <path class="fin-balloon-string" d="M80,196 C70,206 90,214 80,220"/>
+        <path d="M80,168 L70,182 L90,182 Z" fill="${BALLOON_COLOR}"/>
+        <ellipse cx="80" cy="92" rx="66" ry="82" fill="${BALLOON_COLOR}"/>
+        <ellipse cx="56" cy="58" rx="20" ry="28" fill="${BALLOON_HILITE}" opacity="0.55"/>
+        <ellipse cx="48" cy="48" rx="8" ry="12" fill="#fff" opacity="0.7"/>
       </svg>`;
   }
 
   function buildHTML() {
     return `
       <div class="fin-m1" id="fin-m1">
-        <div class="fin-sky" id="fin-sky">
-          ${CLOUDS.map(
-            (c) => `
-            <div class="fin-cloud-wrap fin-cloud-${c.depth}" id="fin-${c.id}" style="left:${c.x}%; top:${c.y}%;">
-              ${cloudSvg(c)}
-            </div>`
-          ).join("")}
+        <div class="fin-m1-stars" aria-hidden="true"></div>
+        <div class="fin-balloon-wrap" id="fin-balloon-wrap">
+          ${balloonSvg()}
+          <p class="fin-balloon-pop-label" id="fin-balloon-pop-label">pop</p>
         </div>
+        <div class="fin-blackout" id="fin-blackout"></div>
+        <p class="fin-boom-giant" id="fin-boom-giant">BOOM</p>
       </div>`;
+  }
+
+  function buildStars(target, count) {
+    const shadows = [];
+    for (let i = 0; i < count; i++) {
+      const x = (Math.random() * 100).toFixed(2);
+      const y = (Math.random() * 100).toFixed(2);
+      shadows.push(`${x}vw ${y}vh 0 1px rgba(255,255,255,${(0.35 + Math.random() * 0.5).toFixed(2)})`);
+    }
+    target.style.boxShadow = shadows.join(",");
+  }
+
+  function fragmentBurst(host) {
+    const colors = [BALLOON_COLOR, BALLOON_HILITE, "#fff"];
+    for (let i = 0; i < 16; i++) {
+      const frag = make("span", "fin-balloon-frag");
+      const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.3;
+      const dist = 60 + Math.random() * 90;
+      frag.style.setProperty("--fx", Math.cos(angle) * dist + "px");
+      frag.style.setProperty("--fy", Math.sin(angle) * dist + "px");
+      frag.style.setProperty("--frot", Math.random() * 360 + "deg");
+      frag.style.setProperty("--dur", 500 + Math.random() * 300 + "ms");
+      frag.style.width = frag.style.height = 3 + Math.random() * 5 + "px";
+      frag.style.left = "50%";
+      frag.style.top = "45%";
+      frag.style.background = colors[i % colors.length];
+      host.appendChild(frag);
+      setTimeout(() => frag.remove(), 900);
+    }
   }
 
   return {
     async enter({ container, go }) {
       container.innerHTML = buildHTML();
-      const sky = el("fin-sky");
+      buildStars(container.querySelector(".fin-m1-stars"), 90);
 
-      // A settled beat of just sky and drifting clouds first — this
-      // is the fuse, not instant chaos.
-      after(600, () => {
+      const wrap = el("fin-balloon-wrap");
+      const popLabel = el("fin-balloon-pop-label");
+      const blackout = el("fin-blackout");
+      const boomEl = el("fin-boom-giant");
+
+      let popped = false;
+      let catPeeked = false;
+
+      // Silence first — nothing moves for a beat. Then the balloon
+      // rises on its own, gently, and starts bobbing once it settles.
+      after(650, () => {
+        wrap.classList.add("is-risen");
+      });
+      after(3900, () => {
+        wrap.classList.add("is-bobbing");
+        popLabel.classList.add("is-in");
+      });
+
+      // If she doesn't tap right away, the cat wanders over and
+      // peeks — pure company, it never touches the balloon.
+      after(9000, () => {
+        if (popped || catPeeked) return;
+        catPeeked = true;
         Cat.show();
-        Cat.moveTo(8, 20, 0);
-        Cat.sit();
+        Cat.moveTo(68, 66, 1400);
+        after(1500, () => Cat.sit());
+        after(2600, () => Cat.paw());
       });
-      after(1800, () => Cat.paw()); // wobble as its cloud drifts under it
-      after(2600, () => Cat.moveTo(40, 10, 900)); // recovers, hops to another cloud
-      after(3600, () => Cat.sit());
 
-      // Each cloud independently exits on its own schedule — never
-      // symmetric, never "two halves."
-      CLOUDS.forEach((c) => {
-        after(2200 + c.delay, () => {
-          const node = el("fin-" + c.id);
-          if (!node) return;
-          node.style.setProperty("--exit-x", c.exitX + "vw");
-          node.style.setProperty("--exit-y", c.exitY + "vh");
-          node.classList.add("is-leaving");
+      function onPop() {
+        if (popped) return;
+        popped = true;
+        wrap.removeEventListener("click", onPop);
+        wrap.removeEventListener("touchend", onPop);
+        Cat.hide();
+
+        wrap.classList.add("is-popping");
+        popLabel.classList.remove("is-in");
+        after(140, () => {
+          wrap.classList.add("is-gone");
+          fragmentBurst(container.querySelector(".fin-m1"));
         });
+        // Split-second of black.
+        after(260, () => blackout.classList.add("is-in"));
+        // Then the giant BOOM, fast.
+        after(420, () => {
+          blackout.classList.remove("is-in");
+          boomEl.classList.add("is-in");
+        });
+        after(780, () => boomEl.classList.add("is-breaking"));
+        after(1050, () => go(2));
+      }
+      wrap.addEventListener("click", onPop);
+      wrap.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        onPop();
       });
-
-      after(4600, () => {
-        Cat.moveTo(85, 15, 1400); // last cloud out — cat rides it off too
-        Cat.stand();
-      });
-
-      after(5600, () => go(2));
     },
     exit() {
       clearTimers();

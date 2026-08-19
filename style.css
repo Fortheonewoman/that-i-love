@@ -693,18 +693,137 @@ h1, h2, h3 {
   .birthday * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
+/* ---- BOOM — the recurring Day 8 signature, small version ----
+   A maker's mark, not a logo: low-opacity, corner-anchored, gone in
+   about a second and a half. The huge opening detonation is its own
+   hand-built moment in Movement I, not this. */
+.fin-boom-stamp {
+  position: absolute;
+  z-index: 6;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--fin-champagne, #E8C87A);
+  opacity: 0;
+  text-shadow: 0 0 10px currentColor;
+  transition: opacity 0.7s var(--fin-ease);
+  pointer-events: none;
+}
+.fin-boom-stamp.is-in { opacity: 0.55; }
+.fin-boom-br { right: 0.9rem; bottom: 0.9rem; }
+.fin-boom-bl { left: 0.9rem; bottom: 0.9rem; }
+.fin-boom-tr { right: 0.9rem; top: 0.9rem; }
+.fin-boom-tl { left: 0.9rem; top: 0.9rem; }
+
 /* ============================================================
-   Movement I — The Sky
+   Movement I — The Balloon. Midnight lands in the same darkness
+   Day 7's countdown ended on (visual continuity, not a hard cut):
+   silence, one balloon rises, she pops it herself, and THAT is what
+   detonates into Day 8. No music anywhere in this — the rhythm is
+   built entirely from stillness, motion, and the one huge beat.
    ============================================================ */
-.fin-m1 { position: absolute; inset: 0; background: linear-gradient(180deg, #7EC1EA 0%, #A9D8F5 55%, #D9ECFA 100%); }
-.fin-sky { position: absolute; inset: 0; }
-.fin-cloud-wrap { position: absolute; width: 12rem; transform: translate(-50%, -50%); transition: transform 1.6s cubic-bezier(0.6, 0, 0.4, 1), opacity 1.4s ease; }
-.fin-cloud-near { width: 16rem; z-index: 3; }
-.fin-cloud-mid { width: 12rem; z-index: 2; filter: saturate(0.96); }
-.fin-cloud-far { width: 8rem; z-index: 1; opacity: 0.85; filter: blur(0.5px) saturate(0.9); }
-.fin-cloud { display: block; width: 100%; height: auto; transform: scale(var(--scale, 1)); animation: fin-cloud-drift 9s ease-in-out infinite alternate; }
-@keyframes fin-cloud-drift { from { transform: scale(var(--scale, 1)) translateX(0); } to { transform: scale(var(--scale, 1)) translateX(1.5%); } }
-.fin-cloud-wrap.is-leaving { transform: translate(calc(-50% + var(--exit-x, 40vw)), calc(-50% + var(--exit-y, -20vh))); opacity: 0; }
+.fin-m1 {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 130% 70% at 50% 6%, #1c1433 0%, #0a0a18 55%, #05050d 100%);
+  overflow: hidden;
+}
+.fin-m1-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  border-radius: 50%;
+  animation: fin-m1-twinkle 5s ease-in-out infinite;
+}
+@keyframes fin-m1-twinkle {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.fin-balloon-wrap {
+  position: absolute;
+  left: 50%;
+  bottom: -30vh;
+  transform: translateX(-50%);
+  width: min(11rem, 34vw);
+  cursor: pointer;
+  transition: bottom 3.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.fin-balloon-wrap.is-risen { bottom: 38vh; }
+.fin-balloon-wrap.is-bobbing .fin-balloon-svg { animation: fin-balloon-bob 3.6s ease-in-out infinite, fin-balloon-sway 4.4s ease-in-out infinite; }
+.fin-balloon-wrap.is-popping { pointer-events: none; }
+.fin-balloon-wrap.is-popping .fin-balloon-svg { animation: none; transform: scaleY(0.82) scaleX(1.06); transition: transform 0.14s ease-out; }
+.fin-balloon-wrap.is-gone { opacity: 0; transition: opacity 0.1s linear; }
+@keyframes fin-balloon-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+@keyframes fin-balloon-sway { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+
+.fin-balloon-svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.35)); }
+.fin-balloon-string { stroke: rgba(255, 255, 255, 0.35); stroke-width: 1.5; fill: none; }
+
+.fin-balloon-pop-label {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(1rem, 4vw, 1.3rem);
+  letter-spacing: 0.06em;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.8s var(--fin-ease);
+  pointer-events: none;
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+}
+.fin-balloon-pop-label.is-in { opacity: 1; animation: fin-pop-label-pulse 1.6s ease-in-out infinite; }
+@keyframes fin-pop-label-pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.08); } }
+
+.fin-balloon-frag { position: absolute; border-radius: 2px; opacity: 0; animation: fin-frag-burst var(--dur, 700ms) ease-out forwards; }
+@keyframes fin-frag-burst {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translate(var(--fx, 0), var(--fy, 0)) rotate(var(--frot, 180deg)) scale(0.4); opacity: 0; }
+}
+
+.fin-blackout {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.08s linear;
+  z-index: 8;
+}
+.fin-blackout.is-in { opacity: 1; }
+
+.fin-boom-giant {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(4rem, 22vw, 11rem);
+  letter-spacing: 0.02em;
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.14s ease-out, transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-shadow: 0 0 60px rgba(255, 61, 122, 0.6);
+  pointer-events: none;
+}
+.fin-boom-giant.is-in { opacity: 1; transform: scale(1); }
+.fin-boom-giant.is-breaking { opacity: 0; transform: scale(1.7); transition: opacity 0.3s ease-in, transform 0.3s ease-in; }
 
 /* ============================================================
    Movement II — The Explosion
@@ -719,15 +838,16 @@ h1, h2, h3 {
   font-size: clamp(2.4rem, 11vw, 5rem); opacity: 0; transition: opacity 0.6s var(--fin-ease), transform 0.6s cubic-bezier(0.34,1.56,0.64,1), top 0.8s var(--fin-ease), font-size 0.8s var(--fin-ease);
 }
 .fin-m2-headline.is-in { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-.fin-m2-headline.is-settled { top: 8%; font-size: clamp(1.1rem, 3.4vw, 1.5rem); }
+.fin-m2-headline.is-settled { top: 7%; font-size: clamp(1.1rem, 3.4vw, 1.5rem); }
 .fin-m2-headline.is-gone { opacity: 0; transition: opacity 0.4s ease; }
+.fin-m2-headline-2.is-settled { top: 11.5%; }
 .fin-m2-21 {
   position: absolute; left: 50%; top: 60%; transform: translate(-50%, -50%) scale(0.6); margin: 0;
   font-family: var(--font-display); font-weight: 700; color: var(--fin-coral);
   font-size: clamp(2.4rem, 10vw, 4rem); opacity: 0; transition: opacity 0.6s var(--fin-ease), transform 0.6s cubic-bezier(0.34,1.56,0.64,1), top 0.8s var(--fin-ease), font-size 0.8s var(--fin-ease);
 }
 .fin-m2-21.is-in { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-.fin-m2-21.is-settled { top: 14%; font-size: 1.4rem; }
+.fin-m2-21.is-settled { top: 16.5%; font-size: 1.4rem; }
 .fin-m2-21.is-gone { opacity: 0; transition: opacity 0.4s ease; }
 .fin-m2-montage { position: absolute; left: 50%; top: 55%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
 .fin-m2-montage.is-in { opacity: 1; }

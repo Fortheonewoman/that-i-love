@@ -288,5 +288,29 @@ window.FinaleCore = (function () {
     };
   }
 
-  return { el, make, Cat, photoFrame, pickPhoto, videoFrame, pickVideo, drawThread, readTime, playSequence };
+  /* ------------------------------------------------------------
+     BOOM — Day 8's recurring signature. The huge version (the
+     detonation itself) is hand-built where it's used; this is only
+     the SMALL, subtle recurring mark — a corner stamp, a transition
+     flicker — that gets sprinkled through the rest of the day so it
+     reads as a maker's mark, never a logo plastered over every frame.
+     opts: { corner: "br"|"bl"|"tr"|"tl" (default "br"), holdMs, color }
+     Appends itself, fades in, fades out and removes itself. Caller
+     doesn't need to clean up.
+     ------------------------------------------------------------ */
+  function boomStamp(parent, opts) {
+    opts = opts || {};
+    const corner = opts.corner || "br";
+    const stamp = make("span", `fin-boom-stamp fin-boom-${corner}`, "BOOM.");
+    if (opts.color) stamp.style.color = opts.color;
+    parent.appendChild(stamp);
+    requestAnimationFrame(() => stamp.classList.add("is-in"));
+    setTimeout(() => {
+      stamp.classList.remove("is-in");
+      setTimeout(() => stamp.remove(), 700);
+    }, opts.holdMs || 1600);
+    return stamp;
+  }
+
+  return { el, make, Cat, photoFrame, pickPhoto, videoFrame, pickVideo, drawThread, readTime, playSequence, boomStamp };
 })();

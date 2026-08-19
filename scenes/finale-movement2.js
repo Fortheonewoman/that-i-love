@@ -26,7 +26,8 @@ window.Movements.m2 = (function () {
     return `
       <div class="fin-m2" id="fin-m2">
         <div class="fin-m2-burst" id="fin-m2-burst"></div>
-        <h1 class="fin-m2-headline" id="fin-m2-headline">HAPPY BIRTHDAY<br/>AMIRAH!!!</h1>
+        <h1 class="fin-m2-headline" id="fin-m2-headline">HAPPY BIRTHDAY</h1>
+        <h1 class="fin-m2-headline fin-m2-headline-2" id="fin-m2-headline-2">AMIRAH</h1>
         <div class="fin-m2-montage" id="fin-m2-montage"></div>
         <p class="fin-m2-21" id="fin-m2-21">21</p>
         <div class="fin-m2-after" id="fin-m2-after" hidden></div>
@@ -101,12 +102,22 @@ window.Movements.m2 = (function () {
       Cat.panic();
       Cat.moveTo(50, 15, 300);
 
+      // HAPPY BIRTHDAY / AMIRAH / 21 — three separate giant beats,
+      // one at a time (this is what the balloon's BOOM breaks apart
+      // into), each settling to a small mark before the next lands.
       after(150, () => el("fin-m2-headline").classList.add("is-in"));
-      after(900, () => el("fin-m2-21").classList.add("is-in"));
-
-      after(1700, () => {
+      after(900, () => {
         el("fin-m2-headline").classList.add("is-settled");
+        el("fin-m2-headline-2").classList.add("is-in");
+      });
+      after(1650, () => {
+        el("fin-m2-headline-2").classList.add("is-settled");
+        el("fin-m2-21").classList.add("is-in");
+      });
+
+      after(2500, () => {
         el("fin-m2-21").classList.add("is-settled");
+        window.FinaleCore.boomStamp(stage, { corner: "br" });
         runMontage(container, () => {
           // A second, smaller confetti wave right as the montage ends —
           // keeps the energy from just trailing off.
@@ -119,6 +130,7 @@ window.Movements.m2 = (function () {
       after(8600, () => {
         el("fin-m2-burst").innerHTML = "";
         el("fin-m2-headline").classList.add("is-gone");
+        el("fin-m2-headline-2").classList.add("is-gone");
         el("fin-m2-21").classList.add("is-gone");
         el("fin-m2-montage").classList.add("is-gone");
         stage.classList.add("is-quiet");
