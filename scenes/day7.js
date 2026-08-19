@@ -302,7 +302,6 @@ window.Day7Scene = (function () {
     const crawlEl = el("d7-crawl");
     const skipBtn = el("d7-skip");
 
-    let manualUntil = 0;
     skipBtn.addEventListener("click", () => {
       if (skipBtn.dataset.busy) return;
       skipBtn.dataset.busy = "1";
@@ -322,7 +321,14 @@ window.Day7Scene = (function () {
       const blockEls = crawlEl.querySelectorAll(".d7-block");
       const lastBlockEl = blockEls[blockEls.length - 1] || crawlEl;
 
-      let y = viewportH;
+      // Starts already most of the way into view (not sitting fully
+      // below the fold) — the title should be visibly moving the
+      // instant the galaxy appears, not after a long empty runway
+      // she has no way to know is coming. Purely automatic: no wheel,
+      // no touch-scroll, nothing to interpret or accidentally fast-
+      // forward through — this is the one thing on Day 7 that plays
+      // itself, start to finish, with zero input.
+      let y = viewportH * 0.32;
       let lastT = performance.now();
       let finished = false;
 
@@ -331,36 +337,10 @@ window.Day7Scene = (function () {
       }
       applyY();
 
-      function onManualDelta(deltaPx) {
-        y -= deltaPx;
-        manualUntil = performance.now() + 2600;
-        applyY();
-      }
-      stageEl.addEventListener(
-        "wheel",
-        (e) => {
-          onManualDelta(e.deltaY * 0.6);
-          e.preventDefault();
-        },
-        { passive: false }
-      );
-      let touchY = null;
-      stageEl.addEventListener("touchstart", (e) => { touchY = e.touches[0].clientY; }, { passive: true });
-      stageEl.addEventListener(
-        "touchmove",
-        (e) => {
-          if (touchY == null) return;
-          const ny = e.touches[0].clientY;
-          onManualDelta(-(ny - touchY) * 1.4);
-          touchY = ny;
-        },
-        { passive: true }
-      );
-
       function frame(t) {
         const dt = t - lastT;
         lastT = t;
-        if (!finished && t > manualUntil) {
+        if (!finished) {
           y -= pxPerMs * dt;
           applyY();
         }
