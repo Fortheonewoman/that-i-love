@@ -338,6 +338,10 @@ function wireReplayControls() {
   const overlayContentEl = document.getElementById("day-overlay-content");
   const overlayCloseEl = document.getElementById("day-overlay-close");
   const overlayCountdownEl = document.getElementById("overlay-countdown");
+  // Day 7 does NOT live inside the cream day-overlay card system —
+  // it's a real fullscreen takeover mounted at its own root, sibling
+  // to #app/#day-overlay/#birthday. See openDay()'s day7 special case.
+  const day7RootEl = document.getElementById("day7-root");
 
   const DAY_IDS = ["day1", "day2", "day3", "day4", "day5", "day6", "day7"];
 
@@ -355,13 +359,39 @@ function wireReplayControls() {
   }
 
   async function openDay(id) {
+    // Day 7 is a true fullscreen takeover, not the cream day-overlay
+    // card every other day uses — handled entirely separately, before
+    // any of the day-overlay chrome (including its own countdown, the
+    // one thing Day 7 explicitly must never show during the letter)
+    // gets touched.
+    if (id === "day7") {
+      document.documentElement.style.setProperty("--accent", DAY_PALETTE.day7 || DEFAULT_ACCENT);
+      appEl.hidden = true;
+      day7RootEl.hidden = false;
+      window.Day7Scene.render(day7RootEl, {
+        onDone: () => {
+          markOpened(id);
+          renderGrid();
+        },
+        onExit: () => {
+          day7RootEl.hidden = true;
+          appEl.hidden = false;
+          document.documentElement.style.setProperty("--accent", DEFAULT_ACCENT);
+        },
+        onBirthdayReady: () => launchBirthdayFromDay7(),
+      });
+      markOpened(id);
+      renderGrid();
+      return;
+    }
+
     overlayContentEl.innerHTML = `<p class="dev-note">opening…</p>`;
     overlayEl.hidden = false;
     document.documentElement.style.setProperty("--accent", DAY_PALETTE[id] || DEFAULT_ACCENT);
 
-    // Days 2 and 3 are bespoke interactive scenes, not the generic
+    // Days 2–6 are bespoke interactive scenes, not the generic
     // title/photo/poem template the other days use.
-    const bespokeScene = { day2: window.Day2Scene, day3: window.Day3Scene, day4: window.Day4Scene, day5: window.Day5Scene, day6: window.Day6Scene, day7: window.Day7Scene }[id];
+    const bespokeScene = { day2: window.Day2Scene, day3: window.Day3Scene, day4: window.Day4Scene, day5: window.Day5Scene, day6: window.Day6Scene }[id];
     if (bespokeScene) {
       overlayContentEl.className = "day-overlay-content"; // drop floral-decor — these draw their own world
       bespokeScene.render(overlayContentEl, {
@@ -625,7 +655,10 @@ function wireReplayControls() {
     // no matter which screen she's looking at.
     overlayCountdownEl.textContent = birthday.unlocked ? remaining : remaining + " until her birthday";
 
-    if (birthday.unlocked) {
+    // Day 7 is explicit about this: NO countdown widget anywhere on
+    // screen while the letter is up — not this corner one either.
+    // day7RootEl owns showing its own, only after the crawl finishes.
+    if (birthday.unlocked || !day7RootEl.hidden) {
       cornerCountdownEl.hidden = true;
       return;
     }
@@ -641,8 +674,15 @@ function wireReplayControls() {
     // The instant server time hits the birthday, the sky opens —
     // even if she's just sitting on the day-grid when it happens.
     // Fully responsive, so no device check here either.
+    //
+    // BUT NOT while she's inside Day 7: the letter has its own,
+    // separate midnight handling (Day7Scene's onBirthdayReady) that
+    // only fires once the actual last line has finished — never mid-
+    // read. If this generic tick() also auto-launched here, it would
+    // interrupt her the instant midnight hit, which is exactly what
+    // Day 7 was built to never do.
     const birthday = window.TimeLock.unlocks().find((u) => u.id === "birthday");
-    if (birthday.unlocked && !birthdayLaunched) {
+    if (birthday.unlocked && !birthdayLaunched && day7RootEl.hidden) {
       birthdayLaunched = true;
       launchBirthdayFromDayGrid();
     }
@@ -661,6 +701,20 @@ function wireReplayControls() {
       wireReplayControls();
       Birthday.start({ onRequestDay7: () => goToDay7() });
     }, 1600);
+  }
+
+  // Day 7's own midnight handoff — she finished the letter (or was
+  // already unlocked when she opened it) and trusted time says the
+  // birthday has actually started. No countdown screen for a moment
+  // that already happened; straight into Day 8 instead. Reuses the
+  // same Birthday.start() every other entry point uses.
+  function launchBirthdayFromDay7() {
+    birthdayLaunched = true;
+    day7RootEl.hidden = true;
+    appEl.hidden = true;
+    wireMute();
+    wireReplayControls();
+    Birthday.start({ onRequestDay7: () => goToDay7() });
   }
 
   // Dev shortcut (?act=N) or already-past-unlock-on-load: launch

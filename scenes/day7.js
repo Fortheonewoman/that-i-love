@@ -1,337 +1,190 @@
 /* ============================================================
-   Day 7 — the letter. Not the generic title/photo/poem template
-   every other non-illustrated day uses: this is the one real, long,
-   handwritten thing the whole week has been walking toward, so it
-   gets its own bespoke treatment.
+   Day 7 — the letter. Full rebuild (v2).
 
-   His exact words, verbatim, one line per line — no line invented,
-   none reordered, none softened, no explanation tacked onto a line
-   that already lands on its own. It ends on the line it's supposed
-   to end on and nothing follows it.
+   THE LETTER IS THE POINT. Everything below exists to get out of
+   its way: a real fullscreen takeover (mounted at #day7-root, a
+   sibling of #app/#day-overlay/#birthday — NOT the cream day-overlay
+   card system), a love-gate she actually has to answer before it
+   starts, a crawl paced from the real word count instead of a guess,
+   and a completion check that watches the actual last block's
+   position instead of a timer.
 
-   A slow star-wars-style crawl: the text drifts up and away into a
-   starfield at a deliberately unhurried pace (this is the one thing
-   on the whole site that should NOT feel rushed), but she can always
-   scroll or drag it herself if she wants to move faster or re-read a
-   line — the auto-drift just yields to her for a few seconds and
-   picks back up from wherever she left it.
+   Text itself lives in content/day7-letter.js (window.Day7Letter) —
+   the one canonical source, loaded before this file. This file never
+   contains letter text of its own.
 
-   When the last line has scrolled fully away, the sky holds empty
-   for a moment, then the site's own trusted countdown — same
-   window.TimeLock everything else on this site reads, never a
-   separate weaker clock — fades in to walk her the rest of the way
-   to her actual birthday.
-
-   This is birthday eve (Day 7 unlocks midnight Arlington, Aug 19).
-   The birthday itself belongs to Day 8 — nothing here says it.
+   Two phases:
+     PHASE ONE  — .d7-intro:  warm ivory. AND GOD RESTED. → the
+                  love-gate (real text input, normalized comparison,
+                  no bypass).
+     PHASE TWO  — .d7-galaxy: full-bleed deep space. The crawl, then
+                  (only once the real last line has actually passed
+                  through) the trusted countdown — or, if trusted
+                  time already says the birthday started while she
+                  was reading, a direct handoff into Day 8 instead.
    ============================================================ */
 window.Day7Scene = (function () {
   "use strict";
 
-  // Exact text. Preserved line-for-line — the line breaks are the
-  // rhythm, not just wrapping, so each entry is its own line, never
-  // reflowed into a paragraph.
-  const LINES = [
-    "ALL I WRITE IS YOU",
-    "How can I go a birthday without writing for you?",
-    "How can I go silent when all I write is you?",
-    "And it is by design that we gon always have issues,",
-    "cos two people becoming one",
-    "will always have some things to undo.",
-    "But who was there beside me",
-    "in all the things I've been through?",
-    "Who saw the good,",
-    "who saw the ugly,",
-    "who saw me confused,",
-    "and somehow still saw me?",
-    "You.",
-    "And I know love isn't perfect.",
-    "I know sometimes it's heavy.",
-    "Sometimes it's distance.",
-    "Sometimes it's patience.",
-    "Sometimes it's two people saying the right thing",
-    "at the wrong time.",
-    "But genuine is genuine.",
-    "And I'll always know the difference.",
-    "Oshe Oluwa.",
-    "Because when I really think about us,",
-    "God was doing too much behind the scenes.",
-    "Different places.",
-    "Different people.",
-    "Different situations.",
-    "He kept arranging scenario after scenario,",
-    "like He had already made the meeting foolproof.",
-    "Like,",
-    "“No matter what these two idiots do,",
-    "they will still somehow meet.”",
-    "And then we did.",
-    "And somehow,",
-    "you became somebody I can't imagine",
-    "not having met.",
-    "Oshe Amirah.",
-    "I look at you in awe.",
-    "Amirah mi.",
-    "Abike mi.",
-    "Eniobanke.",
-    "Iwuri mi.",
-    "My Yorubaddie.",
-    "Ofu ayam.",
-    "Nnem oma.",
-    "Iyamomo.",
-    "See what you've done to me.",
-    "I'm mixing languages just to find enough ways",
-    "to call you mine.",
-    "I'll preach your word to all my sisters",
-    "after we close the distance.",
-    "A lot of things to be with you.",
-    "We could pick,",
-    "we could choose.",
-    "A lot of places to go.",
-    "A lot of things we haven't done.",
-    "A lot of memories still waiting",
-    "for somebody to make them.",
-    "Cos one thing I know is true—",
-    "I can never go wrong with you.",
-    "And that's not me saying",
-    "we'll never get it wrong.",
-    "It's me saying",
-    "even when we do,",
-    "I still want to get it right with you.",
-    "That's different.",
-    "Where my white can color you,",
-    "and your light can color me.",
-    "A life that feels like ours.",
-    "Not perfect.",
-    "Just real.",
-    "I'll have my eyes on you,",
-    "yours on me as it should.",
-    "A forum gi naya.",
-    "And it's unconditional.",
-    "Real proof that God is good.",
-    "The destiny we choose.",
-    "Cos we started from the bottom",
-    "and the top still in view.",
-    "The plans I have for you—",
-    "and these are just a few.",
-    "I want to see you win.",
-    "Not just in money.",
-    "I want to see you win in peace.",
-    "In purpose.",
-    "In faith.",
-    "In the things nobody claps for.",
-    "I want to see you become",
-    "more you,",
-    "not more what everybody expects.",
-    "Because the only thing permanent is change.",
-    "And if you're going to change anyway,",
-    "change into somebody",
-    "your younger self would be proud to name.",
-    "I pray you do.",
-    "I pray you get manna,",
-    "no more dollar déjà vu.",
-    "I pray your money comes clean",
-    "and stays plenty.",
-    "I pray your mind gets quieter,",
-    "your heart gets lighter,",
-    "and the things that used to shake you",
-    "don't shake you like they used to.",
-    "I pray you become calmer.",
-    "No more carrying every problem",
-    "like you were born to fight the whole world.",
-    "I pray you love God",
-    "the way God loves you.",
-    "And if you see God in me,",
-    "love me and trust me to the core.",
-    "Not because I'm perfect.",
-    "You know I'm not.",
-    "But because I'm trying.",
-    "And I'll keep trying.",
-    "I pray your life stays aligned with God.",
-    "You'll never be lined in chalk.",
-    "And if your mind becomes a storm,",
-    "I pray it always finds its way back to shore.",
-    "I pray for your family.",
-    "I pray for your dreams.",
-    "I pray for the things you don't tell me about.",
-    "The silent ones.",
-    "The ones you smile through.",
-    "The ones that make you say",
-    "“I'm fine”",
-    "when you're really not.",
-    "Because someone was crying.",
-    "And maybe nobody knew.",
-    "But God did.",
-    "And I pray He remembers every tear",
-    "you never let anybody see.",
-    "I pray your joy becomes louder",
-    "than the things that hurt you.",
-    "I pray your laughter comes easy.",
-    "I pray you never lose your softness",
-    "just because the world wasn't always soft with you.",
-    "And I pray that when life gets confusing,",
-    "you never forget who you are.",
-    "Because I know who you are.",
-    "At least,",
-    "I'm lucky enough to know some of her.",
-    "And I'm still learning the rest.",
-    "That's the beautiful part.",
-    "So change.",
-    "Grow.",
-    "Live.",
-    "Surprise yourself.",
-    "Just don't ever think",
-    "you have to stop being you",
-    "to become better.",
-    "And I'll be here,",
-    "watching you do it.",
-    "Oshe idagba.",
-    "I'll surely write.",
-    "I'll surely write when you're older.",
-    "I'll surely write when your life looks nothing",
-    "like it does today.",
-    "I'll surely write when the things we prayed for",
-    "are sitting right in front of us.",
-    "I'll surely write till your hair outgrows mine.",
-    "And if I run out of paper,",
-    "I'll find another page.",
-    "If I run out of pages,",
-    "I'll find another way.",
-    "Because my heart's job is to pump,",
-    "but you make it smile.",
-    "And that's a serious thing.",
-    "So serious",
-    "that I still don't know",
-    "how to write it properly.",
-    "Maybe that's why I keep writing.",
-    "Not because I have nothing else to say,",
-    "but because every time I think",
-    "I've said enough,",
-    "I remember you,",
-    "and suddenly enough",
-    "doesn't feel like enough.",
-    "I could write about your smile.",
-    "Your stubbornness.",
-    "Your little attitude.",
-    "The way you can make me laugh",
-    "without even trying.",
-    "The way you can annoy me",
-    "and still somehow be my favorite person",
-    "to talk to five minutes later.",
-    "I could write about the little things",
-    "you probably don't even know I notice.",
-    "But I'd rather keep some of those",
-    "between me and God.",
-    "Some things don't need an audience.",
-    "Some things are just mine",
-    "to be grateful for.",
-    "And I'm grateful.",
-    "Privileged, actually.",
-    "Privileged that I get to know you.",
-    "Privileged that I get to love you.",
-    "Privileged that somehow,",
-    "out of all the scenarios God could've arranged,",
-    "He arranged one",
-    "where I met you.",
-    "Oshe Oluwa.",
-    "Oshe Amirah.",
-    "Oshe idagba.",
-    "Thank you God for grace.",
-    "For the girl.",
-    "For the woman.",
-    "For the heart.",
-    "For the madness.",
-    "For the prayers.",
-    "For every version of you",
-    "I've had the privilege to meet.",
-    "And for every version",
-    "I haven't met yet.",
-    "May God keep you.",
-    "May He guide you.",
-    "May He bless you beyond what you ask for.",
-    "May He give you peace that money can't buy,",
-    "wisdom that age can't teach,",
-    "and joy that nobody can destroy.",
-    "And when the story gets long,",
-    "when the years start adding up,",
-    "when we're looking back at everything",
-    "we once thought was impossible,",
-    "I hope we remember this version of us.",
-    "The one still figuring it out.",
-    "The one still praying.",
-    "The one still dreaming.",
-    "The one still writing.",
-    "And if you ever ask me",
-    "why I wrote so much for your birthday,",
-    "I'll tell you the truth.",
-    "Because how could I go a birthday",
-    "without writing for you?",
-    "How could I go silent",
-    "when all I write is you?",
-    "And if one thing remains true",
-    "through every change,",
-    "every season,",
-    "every view—",
-    "I can never go wrong with you.",
-    "Not because everything with you",
-    "will always go right.",
-    "But because loving you",
-    "has never required me",
-    "to pretend we're perfect.",
-    "I know the person I'm choosing.",
-    "The soft parts.",
-    "The stubborn parts.",
-    "The changing parts.",
-    "The parts still figuring themselves out.",
-    "And somehow,",
-    "after all the words,",
-    "all the prayers,",
-    "all the distance,",
-    "all the things we've had to understand,",
-    "I still end up here.",
-    "Writing you.",
-    "Thinking you.",
-    "Praying for you.",
-    "Thanking God for you.",
-    "And loving you.",
-    "From now",
-    "till burial.",
-    "Not as the ending.",
-    "Life is too long for me to act like",
-    "I've already written ours.",
-    "There's still too much left.",
-    "Too much you haven't become.",
-    "Too much I haven't learned.",
-    "Too many versions of Amirah",
-    "I haven't had the privilege to meet yet.",
-    "So I'll surely write.",
-    "Again.",
-    "And again.",
-    "And when another birthday comes,",
-    "I'll probably still be here,",
-    "trying to explain something",
-    "that refuses to fit properly inside words.",
-    "Because how can I go a birthday",
-    "without writing for you?",
-    "When all I write",
-    "is you.",
-    "Now go and wait for your birthday, guy.",
-  ];
-
-  // ~7 minutes for the full unassisted drift — deliberately slower
-  // than normal reading speed for 1,382 words of scrolling, tilted
-  // text (harder to read than flat text, and this one deserves the
-  // extra time) but not so long it's impractical; she can always
-  // scroll it herself if she wants to move at her own pace.
-  const CRAWL_SECONDS = 420;
-
   function el(id) {
     return document.getElementById(id);
   }
+  function make(tag, cls, html) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html !== undefined) e.innerHTML = html;
+    return e;
+  }
+  function normalizeAnswer(s) {
+    return (s || "")
+      .toLowerCase()
+      .replace(/[.,!?'"’‘“”]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 
-  let tickInterval = null;
+  const LETTER = window.Day7Letter || [];
+
+  // Paced from the letter's real word count, not a guessed constant —
+  // ~160 words/minute, deliberately slower than normal silent reading
+  // because this is scrolling, tilted, emotional text she shouldn't
+  // have to speed-read. Short/isolated lines and the four lines
+  // Obinna bolded himself get EXTRA margin in the layout (see
+  // buildCrawlHTML) so they linger longer at this same constant
+  // scroll speed — pacing comes from the composition, not from
+  // varying the speed itself.
+  const TARGET_WPM = 160;
+  const totalWords = LETTER.reduce((sum, b) => sum + b.lines.join(" ").split(/\s+/).filter(Boolean).length, 0);
+  const PRODUCTION_CRAWL_SECONDS = Math.max(60, Math.round((totalWords / TARGET_WPM) * 60));
+  // Dev-only override for testing state transitions without sitting
+  // through the real ~9min crawl — window.__DAY7_DEV_FAST__ must be
+  // set before the crawl phase starts; never true in production.
+  function crawlSeconds() {
+    return window.__DAY7_DEV_FAST__ ? 4 : PRODUCTION_CRAWL_SECONDS;
+  }
+
+  // Dev-time integrity check, not a UI feature: the rendered block
+  // count must equal the source block count, and the required marker
+  // lines must all be present, in order. Runs once, logs only —
+  // never blocks rendering, but a mismatch here means the canonical
+  // letter file was hand-edited wrong.
+  (function verifyLetterIntegrity() {
+    const markers = [
+      "How can I go a birthday without writing for you?",
+      "I can not go wrong with you.",
+      "OSHE AMIRAH.",
+      "Olorun, o ṣe.",
+      "Happy birthday, Amirah.",
+      "Now go and wait for your birthday, guy.",
+    ];
+    const flat = LETTER.map((b) => b.lines.join(" ")).join(" \n ");
+    const missing = markers.filter((m) => !flat.includes(m));
+    const lastBlock = LETTER[LETTER.length - 1];
+    const endsCorrectly = lastBlock && lastBlock.lines[lastBlock.lines.length - 1] === "Now go and wait for your birthday, guy.";
+    if (missing.length || !endsCorrectly) {
+      console.error("[Day7Scene] letter integrity check FAILED — missing markers:", missing, "endsCorrectly:", endsCorrectly);
+    } else {
+      console.info(`[Day7Scene] letter OK — ${LETTER.length} blocks, ${totalWords} words, ~${Math.round(PRODUCTION_CRAWL_SECONDS / 60)}min crawl.`);
+    }
+  })();
+
+  let timers = [];
   let rafId = null;
+  function after(ms, fn) {
+    const t = setTimeout(fn, ms);
+    timers.push(t);
+    return t;
+  }
+  function clearTimers() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  function buildCrawlHTML() {
+    let html = `<p class="d7-crawl-title">ALL I WRITE IS YOU</p>`;
+    LETTER.forEach((block) => {
+      const isShort = block.lines.length === 1 && block.lines[0].length <= 24;
+      const cls = ["d7-block"];
+      if (block.emphasis) cls.push("d7-block-emphasis");
+      else if (isShort) cls.push("d7-block-short");
+      const lines = block.lines.map((l) => `<p class="d7-line">${l}</p>`).join("");
+      html += `<div class="${cls.join(" ")}">${lines}</div>`;
+    });
+    return html;
+  }
+
+  function formatDigits(ms) {
+    if (ms <= 0) return { d: "00", h: "00", m: "00", s: "00" };
+    const totalSec = Math.floor(ms / 1000);
+    const p = (n) => String(n).padStart(2, "0");
+    return {
+      d: p(Math.floor(totalSec / 86400)),
+      h: p(Math.floor((totalSec % 86400) / 3600)),
+      m: p(Math.floor((totalSec % 3600) / 60)),
+      s: p(totalSec % 60),
+    };
+  }
+
+  function render(container, opts) {
+    clearTimers();
+    const onDoneCb = (opts && opts.onDone) || null;
+    const onExitCb = (opts && opts.onExit) || null;
+    const onBirthdayReadyCb = (opts && opts.onBirthdayReady) || null;
+
+    container.innerHTML = `
+      <div class="d7-intro" id="d7-intro">
+        <button type="button" class="d7-exit" id="d7-intro-exit" aria-label="close">×</button>
+        <div class="d7-intro-cat" aria-hidden="true">🐈</div>
+        <p class="d7-intro-eyebrow" id="d7-intro-eyebrow">the birthday eve</p>
+        <p class="d7-intro-daylabel" id="d7-intro-daylabel">day 7</p>
+        <p class="d7-intro-rest" id="d7-intro-rest">AND GOD RESTED.</p>
+        <p class="d7-intro-loveline" id="d7-intro-loveline" hidden>i love you Amirah</p>
+        <p class="d7-intro-ask" id="d7-intro-ask" hidden>what do you say?</p>
+        <form class="d7-intro-form" id="d7-intro-form" hidden autocomplete="off">
+          <input type="text" class="d7-intro-input" id="d7-intro-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="what do you say?" />
+        </form>
+        <p class="d7-intro-response" id="d7-intro-response" aria-live="polite"></p>
+      </div>
+      <div class="d7-galaxy" id="d7-galaxy" hidden>
+        <button type="button" class="d7-exit" id="d7-galaxy-exit" aria-label="close">×</button>
+        <div class="d7-stars-far" aria-hidden="true"></div>
+        <div class="d7-stars-near" aria-hidden="true"></div>
+        <button type="button" class="d7-skip" id="d7-skip">skip</button>
+        <div class="d7-crawl-stage" id="d7-crawl-stage">
+          <div class="d7-crawl-tilt">
+            <div class="d7-crawl" id="d7-crawl">${buildCrawlHTML()}</div>
+          </div>
+        </div>
+        <div class="d7-countdown" id="d7-countdown" hidden>
+          <p class="d7-countdown-label">Birthday in:</p>
+          <p class="d7-countdown-digits" id="d7-countdown-digits">00 : 00 : 00 : 00</p>
+          <div class="d7-countdown-units">
+            <span class="d7-countdown-unit">days</span>
+            <span class="d7-countdown-unit">hrs</span>
+            <span class="d7-countdown-unit">min</span>
+            <span class="d7-countdown-unit">sec</span>
+          </div>
+          <p class="d7-countdown-sub">see you at midnight.</p>
+        </div>
+      </div>`;
+
+    buildStars(container.querySelector(".d7-stars-far"), 100, 1);
+    buildStars(container.querySelector(".d7-stars-near"), 50, 2);
+
+    function handleExit() {
+      clearTimers();
+      if (onExitCb) onExitCb();
+    }
+    el("d7-intro-exit").addEventListener("click", handleExit);
+    el("d7-galaxy-exit").addEventListener("click", handleExit);
+
+    runIntro({ onDone: onDoneCb, onBirthdayReady: onBirthdayReadyCb });
+  }
 
   function buildStars(target, count, sizePx) {
+    if (!target) return;
     const shadows = [];
     for (let i = 0; i < count; i++) {
       const x = (Math.random() * 100).toFixed(2);
@@ -341,59 +194,136 @@ window.Day7Scene = (function () {
     target.style.boxShadow = shadows.join(",");
   }
 
-  function formatDigits(ms) {
-    if (ms <= 0) return "00 : 00 : 00 : 00";
-    const totalSec = Math.floor(ms / 1000);
-    const d = Math.floor(totalSec / 86400);
-    const h = Math.floor((totalSec % 86400) / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    const p = (n) => String(n).padStart(2, "0");
-    return `${p(d)} : ${p(h)} : ${p(m)} : ${p(s)}`;
+  /* ---------------- PHASE ONE: the love-gate ---------------- */
+  function runIntro({ onDone, onBirthdayReady }) {
+    const eyebrow = el("d7-intro-eyebrow");
+    const daylabel = el("d7-intro-daylabel");
+    const rest = el("d7-intro-rest");
+    const loveline = el("d7-intro-loveline");
+    const ask = el("d7-intro-ask");
+    const form = el("d7-intro-form");
+    const input = el("d7-intro-input");
+    const response = el("d7-intro-response");
+    const introEl = el("d7-intro");
+
+    after(500, () => eyebrow.classList.add("is-in"));
+    after(1300, () => daylabel.classList.add("is-in"));
+    after(2400, () => rest.classList.add("is-in"));
+    after(5200, () => {
+      rest.classList.add("is-fading");
+      after(900, () => {
+        rest.hidden = true;
+        loveline.hidden = false;
+        requestAnimationFrame(() => loveline.classList.add("is-in"));
+      });
+    });
+    after(7200, () => {
+      ask.hidden = false;
+      requestAnimationFrame(() => ask.classList.add("is-in"));
+    });
+    after(8400, () => {
+      form.hidden = false;
+      requestAnimationFrame(() => {
+        form.classList.add("is-in");
+        input.focus();
+      });
+    });
+
+    let wrongCount = 0;
+    function onSubmit(e) {
+      e.preventDefault();
+      const val = normalizeAnswer(input.value);
+      if (val === "i love you too") {
+        form.removeEventListener("submit", onSubmit);
+        succeed();
+        return;
+      }
+      wrongCount++;
+      input.value = "";
+      input.focus();
+      response.textContent = wrongCount === 1 ? "Amirah." : "you know the answer 😭";
+      response.classList.remove("is-in");
+      void response.offsetWidth;
+      response.classList.add("is-in");
+      after(2200, () => response.classList.remove("is-in"));
+    }
+    form.addEventListener("submit", onSubmit);
+    // Belt-and-suspenders: a single-text-field form submits on Enter
+    // natively in every real browser with no JS needed, but this
+    // guarantees it regardless — Enter always resolves to exactly one
+    // onSubmit call, never a page reload, never silently doing nothing.
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.keyCode === 13) {
+        e.preventDefault();
+        if (form.requestSubmit) form.requestSubmit();
+        else onSubmit(new Event("submit", { cancelable: true }));
+      }
+    });
+
+    function succeed() {
+      form.classList.add("is-gone");
+      loveline.classList.remove("is-in");
+      ask.classList.remove("is-in");
+      after(900, () => {
+        const yeah = make("p", "d7-intro-yeah", "yeah.");
+        introEl.appendChild(yeah);
+        requestAnimationFrame(() => yeah.classList.add("is-in"));
+        after(1900, () => {
+          yeah.classList.remove("is-in");
+          after(700, () => {
+            const come = make("p", "d7-intro-comehere", "come here.");
+            introEl.appendChild(come);
+            requestAnimationFrame(() => come.classList.add("is-in"));
+            after(2200, () => {
+              enterGalaxy({ onDone, onBirthdayReady });
+            });
+          });
+        });
+      });
+    }
   }
 
-  function render(container, opts) {
-    if (tickInterval) clearInterval(tickInterval);
-    if (rafId) cancelAnimationFrame(rafId);
-    const onDoneCb = (opts && opts.onDone) || null;
+  /* ---------------- PHASE TWO: the galaxy + crawl ---------------- */
+  function enterGalaxy({ onDone, onBirthdayReady }) {
+    const introEl = el("d7-intro");
+    const galaxyEl = el("d7-galaxy");
+    introEl.classList.add("is-leaving");
+    after(950, () => {
+      introEl.hidden = true;
+      galaxyEl.hidden = false;
+      requestAnimationFrame(() => galaxyEl.classList.add("is-in"));
+      if (onDone) onDone();
+      startCrawl({ onBirthdayReady });
+    });
+  }
 
-    container.innerHTML = `
-      <div class="d7-scene" id="d7-scene">
-        <div class="d7-stars-far" aria-hidden="true"></div>
-        <div class="d7-stars-near" aria-hidden="true"></div>
-        <div class="d7-vanish-glow" aria-hidden="true"></div>
-        <div class="d7-crawl-stage" id="d7-crawl-stage">
-          <div class="d7-crawl-tilt">
-            <div class="d7-crawl" id="d7-crawl">
-              ${LINES.map((l) => `<p class="d7-line">${l}</p>`).join("")}
-            </div>
-          </div>
-        </div>
-        <div class="d7-countdown" id="d7-countdown" hidden>
-          <p class="d7-countdown-label">Birthday in:</p>
-          <p class="d7-countdown-digits" id="d7-countdown-digits">— : — : — : —</p>
-        </div>
-      </div>`;
-
-    buildStars(container.querySelector(".d7-stars-far"), 90, 1);
-    buildStars(container.querySelector(".d7-stars-near"), 46, 2);
-
+  function startCrawl({ onBirthdayReady }) {
     const stageEl = el("d7-crawl-stage");
     const crawlEl = el("d7-crawl");
-    const countdownEl = el("d7-countdown");
-    const digitsEl = el("d7-countdown-digits");
+    const skipBtn = el("d7-skip");
 
-    // Let layout settle so crawlEl has its real rendered height (it
-    // holds all 1,382 words) before computing scroll distance.
+    let manualUntil = 0;
+    skipBtn.addEventListener("click", () => {
+      if (skipBtn.dataset.busy) return;
+      skipBtn.dataset.busy = "1";
+      skipBtn.textContent = "be patient.";
+      after(1700, () => {
+        skipBtn.textContent = "skip";
+        delete skipBtn.dataset.busy;
+      });
+    });
+
     requestAnimationFrame(() => {
       const contentH = crawlEl.getBoundingClientRect().height;
       const viewportH = stageEl.getBoundingClientRect().height;
-      const totalDistance = contentH + viewportH * 1.3;
-      const pxPerMs = totalDistance / (CRAWL_SECONDS * 1000);
+      const totalDistance = contentH + viewportH * 1.25;
+      const pxPerMs = totalDistance / (crawlSeconds() * 1000);
 
-      let y = viewportH; // starts just below the stage, fully hidden
+      const blockEls = crawlEl.querySelectorAll(".d7-block");
+      const lastBlockEl = blockEls[blockEls.length - 1] || crawlEl;
+
+      let y = viewportH;
       let lastT = performance.now();
-      let manualUntil = 0;
       let finished = false;
 
       function applyY() {
@@ -415,13 +345,7 @@ window.Day7Scene = (function () {
         { passive: false }
       );
       let touchY = null;
-      stageEl.addEventListener(
-        "touchstart",
-        (e) => {
-          touchY = e.touches[0].clientY;
-        },
-        { passive: true }
-      );
+      stageEl.addEventListener("touchstart", (e) => { touchY = e.touches[0].clientY; }, { passive: true });
       stageEl.addEventListener(
         "touchmove",
         (e) => {
@@ -440,36 +364,72 @@ window.Day7Scene = (function () {
           y -= pxPerMs * dt;
           applyY();
         }
-        if (!finished && y <= -(contentH + viewportH * 0.2)) {
-          finished = true;
-          crawlEl.classList.add("is-gone");
-          setTimeout(showCountdown, 2200);
-          return;
+        // Completion is observed from the real last block's own
+        // position, not a computed/guessed duration — it must have
+        // fully passed above the readable stage before we're done.
+        if (!finished) {
+          const rect = lastBlockEl.getBoundingClientRect();
+          const stageTop = stageEl.getBoundingClientRect().top;
+          if (rect.bottom < stageTop) {
+            finished = true;
+            onCrawlComplete({ onBirthdayReady });
+            return;
+          }
         }
         if (!finished) rafId = requestAnimationFrame(frame);
       }
       rafId = requestAnimationFrame(frame);
     });
-
-    function showCountdown() {
-      countdownEl.hidden = false;
-      requestAnimationFrame(() => countdownEl.classList.add("is-in"));
-      tick();
-      tickInterval = setInterval(tick, 1000);
-      if (onDoneCb) onDoneCb();
-    }
-
-    function tick() {
-      const overlayEl = document.getElementById("day-overlay");
-      if (!overlayEl || overlayEl.hidden) {
-        if (tickInterval) clearInterval(tickInterval);
-        tickInterval = null;
-        return;
-      }
-      const entry = window.TimeLock.unlocks().find((u) => u.id === "birthday");
-      digitsEl.textContent = entry.unlocked ? "she's here" : formatDigits(entry.msRemaining);
-    }
   }
 
-  return { render };
+  function onCrawlComplete({ onBirthdayReady }) {
+    // Silence — the sky holds empty. No countdown, no timer, nothing.
+    after(4200, () => {
+      const galaxyEl = el("d7-galaxy");
+      const star = make("div", "d7-falling-star");
+      galaxyEl.appendChild(star);
+      after(2500, () => {
+        star.remove();
+        // Midnight case: if trusted time already says the birthday
+        // started while she was reading, skip the countdown entirely
+        // and hand off straight into Day 8 instead of showing a
+        // countdown to a moment that already happened.
+        const entry = window.TimeLock.unlocks().find((u) => u.id === "birthday");
+        if (entry && entry.unlocked) {
+          clearTimers();
+          if (onBirthdayReady) onBirthdayReady();
+          return;
+        }
+        showCountdown({ onBirthdayReady });
+      });
+    });
+  }
+
+  function showCountdown({ onBirthdayReady }) {
+    const countdownEl = el("d7-countdown");
+    const digitsEl = el("d7-countdown-digits");
+    countdownEl.hidden = false;
+    requestAnimationFrame(() => countdownEl.classList.add("is-in"));
+
+    function tick() {
+      const galaxyEl = el("d7-galaxy");
+      if (!galaxyEl || galaxyEl.hidden) return; // scene was exited
+      const entry = window.TimeLock.unlocks().find((u) => u.id === "birthday");
+      if (entry && entry.unlocked) {
+        clearTimers();
+        if (onBirthdayReady) onBirthdayReady();
+        return;
+      }
+      const d = formatDigits(entry.msRemaining);
+      digitsEl.textContent = `${d.d} : ${d.h} : ${d.m} : ${d.s}`;
+      after(1000, tick);
+    }
+    tick();
+  }
+
+  function exit() {
+    clearTimers();
+  }
+
+  return { render, exit };
 })();
