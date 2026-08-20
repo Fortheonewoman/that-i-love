@@ -1112,6 +1112,49 @@ h1, h2, h3 {
 .fin-m5-world.is-loved { background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--d8-chosen) 45%, var(--d8-midnight)) 0%, var(--d8-midnight) 85%); }
 
 /* ============================================================
+   Movement VI — The Procession (majestic carousel → final smile →
+   Obinna's voice → quiet close). Slow, hero-led, unhurried — the
+   deliberate opposite of Movement III's fast montage.
+   ============================================================ */
+.fin-m6 { position: absolute; inset: 0; overflow: hidden; background: var(--d8-midnight); opacity: 0; transition: opacity 0.8s var(--fin-ease); }
+.fin-m6.is-in { opacity: 1; }
+
+.fin-m6-stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transition: filter 1.2s var(--fin-ease); }
+.fin-m6-stage.is-settled { filter: none; }
+.fin-m6-frame {
+  position: absolute; opacity: 0; transform: scale(1.04);
+  transition: opacity 1.6s var(--fin-ease), transform 2.4s var(--fin-ease);
+  filter: drop-shadow(0 30px 70px rgba(0,0,0,0.55));
+}
+.fin-m6-frame.is-in { opacity: 1; transform: scale(1); }
+.fin-m6-frame.is-leaving { opacity: 0; transition: opacity 0.5s ease; }
+.fin-m6-frame.is-final { filter: drop-shadow(0 30px 90px rgba(0,0,0,0.6)); }
+.fin-m6-media { display: block; max-width: min(26rem, 86vw); max-height: 78vh; width: auto; height: auto; border-radius: 0.5rem; object-fit: cover; }
+.fin-m6-frame.is-final .fin-m6-media { max-width: min(24rem, 84vw); border-radius: 0.8rem; }
+
+.fin-m6-lookatyou, .fin-m6-voice, .fin-m6-close {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  gap: 0.6rem;
+}
+.fin-m6-lookatyou-line {
+  margin: 0; font-family: var(--font-display); font-style: italic; font-weight: 560;
+  font-size: clamp(1.6rem, 5vw, 2.3rem); color: var(--d8-ink); opacity: 0; transition: opacity 1s var(--fin-ease);
+}
+.fin-m6-lookatyou-line.is-in { opacity: 1; }
+
+.fin-m6-voice { opacity: 0; transition: opacity 1s var(--fin-ease); gap: 1.2rem; }
+.fin-m6-voice.is-in { opacity: 1; }
+.fin-m6-voice-bar { width: min(18rem, 70vw); height: 2px; background: rgba(243,238,255,0.18); border-radius: 999px; overflow: hidden; }
+.fin-m6-voice-fill { height: 100%; width: 0%; background: var(--d8-chosen); transition: width 0.2s linear; }
+
+.fin-m6-close .fin-seq-title { color: var(--d8-gold); }
+.fin-m6-close .fin-seq-big { color: var(--d8-ink); }
+
+@media (max-width: 700px) {
+  .fin-m6-media { max-width: 88vw; max-height: 68vh; }
+}
+
+/* ============================================================
    Floral decoration — elegant botanical sprigs (stem, leaves,
    layered petals), not flower emoji or corner stickers. Peeks
    from edges, sits low in the stack, always low-opacity so it

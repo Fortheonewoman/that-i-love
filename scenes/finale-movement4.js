@@ -12,6 +12,11 @@
    color is already stored (a previous run, or a replay), this
    movement does not ask again — it reaffirms briefly and moves on,
    per the brief's own replay requirement.
+
+   Every async continuation checks a generation token before touching
+   the DOM — see finale-movement5.js's header for why (playSequence
+   manages its own internal timers, so clearTimers() alone can't stop
+   a stale chain from a movement she's already left).
    ============================================================ */
 window.Movements = window.Movements || {};
 window.Movements.m4 = (function () {
@@ -26,6 +31,8 @@ window.Movements.m4 = (function () {
     timers.forEach(clearTimeout);
     timers = [];
   }
+
+  let generation = 0;
 
   const PANES = [
     ["warm gold", "#f3c15f"],
@@ -55,46 +62,38 @@ window.Movements.m4 = (function () {
     Birthday.ctx.favoriteColor = hex;
   }
 
-  function buildHTML() {
-    return `
-      <div class="fin-m4" id="fin-m4">
-        <div class="fin-m4-cat-beat" id="fin-m4-cat-beat"></div>
-        <div class="fin-m4-talk" id="fin-m4-talk"></div>
-        <div class="fin-m4-room" id="fin-m4-room" hidden></div>
-        <div class="fin-m4-after" id="fin-m4-after" hidden></div>
-      </div>`;
-  }
-
-  function runAlreadyKnown(hex, done) {
+  function runAlreadyKnown(myGen, hex, done) {
     applyColor(hex);
     const after1 = el("fin-m4-after");
+    if (!after1) return;
     after1.hidden = false;
     after1.style.setProperty("--d8-chosen", hex);
     requestAnimationFrame(() => after1.classList.add("is-in"));
     const p = make("p", "fin-m4-finally", "still that color, right?");
     after1.appendChild(p);
     after(2200, () => {
+      if (myGen !== generation) return;
       after1.classList.add("is-fading");
-      after(700, done);
+      after(700, () => myGen === generation && done());
     });
   }
 
-  function runCatDiscovery(done) {
+  function runCatDiscovery(myGen, done) {
     Cat.show();
     Cat.moveTo(20, 70, 900);
-    after(1000, () => Cat.lookOffscreen());
+    after(1000, () => myGen === generation && Cat.lookOffscreen());
     after(1800, () => {
+      if (myGen !== generation) return;
       Cat.stopLooking();
       Cat.moveTo(62, 45, 1300);
     });
-    after(3200, () => {
-      Cat.paw();
-    });
-    after(3900, done);
+    after(3200, () => myGen === generation && Cat.paw());
+    after(3900, () => myGen === generation && done());
   }
 
-  function runAsk(done) {
+  function runAsk(myGen, done) {
     const talk = el("fin-m4-talk");
+    if (!talk) return;
     playSequence(
       talk,
       [
@@ -109,8 +108,10 @@ window.Movements.m4 = (function () {
       ],
       {
         onDone: () => {
+          if (myGen !== generation) return;
           talk.classList.add("is-fading");
           after(600, () => {
+            if (myGen !== generation) return;
             talk.hidden = true;
             done();
           });
@@ -119,8 +120,9 @@ window.Movements.m4 = (function () {
     );
   }
 
-  function runRoom(done) {
+  function runRoom(myGen, done) {
     const room = el("fin-m4-room");
+    if (!room) return;
     room.hidden = false;
     room.innerHTML =
       PANES.map(
@@ -132,11 +134,13 @@ window.Movements.m4 = (function () {
     requestAnimationFrame(() => room.classList.add("is-in"));
 
     function choose(hex) {
+      if (myGen !== generation) return;
       const chosen = room.querySelector(`[data-hex="${hex}"]`);
       if (chosen) chosen.classList.add("is-chosen");
       Cat.sit();
       room.classList.add("is-fading");
       after(650, () => {
+        if (myGen !== generation) return;
         room.hidden = true;
         applyColor(hex);
         done(hex);
@@ -150,45 +154,58 @@ window.Movements.m4 = (function () {
     el("fin-m4-color-input").addEventListener("input", (e) => choose(e.target.value), { once: true });
   }
 
-  function runFinally(hex, done) {
+  function runFinally(myGen, hex, done) {
     const after1 = el("fin-m4-after");
+    if (!after1) return;
     after1.hidden = false;
     after1.style.setProperty("--d8-chosen", hex);
     requestAnimationFrame(() => after1.classList.add("is-in"));
     const finally1 = make("p", "fin-m4-finally", "finally.");
     after1.appendChild(finally1);
     after(1300, () => {
+      if (myGen !== generation) return;
       const late = make("p", "fin-m4-late", "four years late.");
       after1.appendChild(late);
       requestAnimationFrame(() => late.classList.add("is-in"));
     });
     after(3000, () => {
+      if (myGen !== generation) return;
       after1.classList.add("is-fading");
-      after(700, done);
+      after(700, () => myGen === generation && done());
     });
   }
 
   return {
     async enter({ container, go }) {
-      container.innerHTML = buildHTML();
+      generation++;
+      const myGen = generation;
+      container.innerHTML = `
+        <div class="fin-m4" id="fin-m4">
+          <div class="fin-m4-cat-beat" id="fin-m4-cat-beat"></div>
+          <div class="fin-m4-talk" id="fin-m4-talk"></div>
+          <div class="fin-m4-room" id="fin-m4-room" hidden></div>
+          <div class="fin-m4-after" id="fin-m4-after" hidden></div>
+        </div>`;
       const existing = storedColor();
       if (existing) {
-        runAlreadyKnown(existing, () => go(5));
+        runAlreadyKnown(myGen, existing, () => go(5));
         return;
       }
-      runCatDiscovery(() => {
-        runAsk(() => {
-          runRoom((hex) => {
-            runFinally(hex, () => go(5));
+      runCatDiscovery(myGen, () => {
+        runAsk(myGen, () => {
+          runRoom(myGen, (hex) => {
+            runFinally(myGen, hex, () => go(5));
           });
         });
       });
     },
     exit() {
+      generation++;
       clearTimers();
       Cat.reset();
     },
     skip() {
+      generation++;
       clearTimers();
       // Skipping does NOT invent an answer — "she must actually
       // choose" is absolute. If nothing's stored yet, Birthday.ctx

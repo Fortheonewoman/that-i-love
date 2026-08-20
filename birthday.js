@@ -31,7 +31,7 @@
 const Birthday = (function () {
   "use strict";
 
-  const TOTAL_MOVEMENTS = 5;
+  const TOTAL_MOVEMENTS = 6;
   let currentMovement = null;
   let currentN = 0;
 

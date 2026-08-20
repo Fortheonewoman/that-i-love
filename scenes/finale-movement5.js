@@ -8,6 +8,15 @@
    microphone recognition.
 
    The seven lines are locked text — do not reword them.
+
+   Every async continuation checks a generation token before touching
+   the DOM — clearTimers() alone doesn't stop an in-flight
+   playSequence (it manages its own internal timers), so a stale
+   chain from a movement she's already navigated away from could
+   otherwise resume later and crash trying to touch elements a fresh
+   enter() has since replaced. Caught via a stress test that jumped
+   between movements repeatedly (the replay/chapters UI makes that a
+   real scenario, not just an adversarial one).
    ============================================================ */
 window.Movements = window.Movements || {};
 window.Movements.m5 = (function () {
@@ -22,6 +31,8 @@ window.Movements.m5 = (function () {
     timers.forEach(clearTimeout);
     timers = [];
   }
+
+  let generation = 0;
 
   const AFFIRMATIONS = [
     "I am beautiful.",
@@ -42,8 +53,9 @@ window.Movements.m5 = (function () {
       </div>`;
   }
 
-  function runIntro(done) {
+  function runIntro(myGen, done) {
     const host = el("fin-m5-intro");
+    if (!host) return;
     window.FinaleCore.playSequence(
       host,
       [
@@ -54,8 +66,9 @@ window.Movements.m5 = (function () {
       ],
       {
         onDone: () => {
+          if (myGen !== generation) return;
           host.classList.add("is-fading");
-          after(600, done);
+          after(600, () => myGen === generation && done());
         },
       }
     );
@@ -112,16 +125,18 @@ window.Movements.m5 = (function () {
     }
   }
 
-  function runAffirmations(done) {
+  function runAffirmations(myGen, done) {
     const stage = el("fin-m5-stage");
     const world = el("fin-m5-world");
+    if (!stage || !world) return;
     stage.hidden = false;
     let i = 0;
 
     function next() {
+      if (myGen !== generation) return;
       if (i >= AFFIRMATIONS.length) {
         stage.classList.add("is-fading");
-        after(700, done);
+        after(700, () => myGen === generation && done());
         return;
       }
       stage.innerHTML = "";
@@ -146,7 +161,7 @@ window.Movements.m5 = (function () {
       // is a moment to sit in, not a form to fill out, but it still
       // shouldn't be able to stall the experience forever.
       after(6500, () => {
-        if (!btn.disabled) advance();
+        if (myGen === generation && !btn.disabled) advance();
       });
     }
     next();
@@ -154,6 +169,8 @@ window.Movements.m5 = (function () {
 
   return {
     async enter({ container, go }) {
+      generation++;
+      const myGen = generation;
       container.innerHTML = buildHTML();
       const stage = container.querySelector(".fin-m5");
       requestAnimationFrame(() => stage.classList.add("is-in"));
@@ -161,21 +178,20 @@ window.Movements.m5 = (function () {
       Cat.moveTo(50, 82, 800);
       after(600, () => Cat.sit());
 
-      runIntro(() => {
-        runAffirmations(() => {
-          // Carousel/final smile/voice/final explosion come next —
-          // not built yet in this pass. Hold here, settled, rather
-          // than advancing into a movement that doesn't exist.
-        });
+      runIntro(myGen, () => {
+        runAffirmations(myGen, () => go(6));
       });
     },
     exit() {
+      generation++;
       clearTimers();
       Cat.reset();
     },
     skip() {
+      generation++;
       clearTimers();
       Cat.reset();
+      Birthday.goToMovement(6);
     },
   };
 })();
