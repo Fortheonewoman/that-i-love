@@ -283,7 +283,7 @@ function wireMute() {
   });
 }
 
-const MOVEMENT_NAMES = ["the balloon", "the explosion", "21 seconds", "favorite color", "affirmations", "the procession"];
+const MOVEMENT_NAMES = ["the balloon", "the explosion", "21 seconds", "favorite color", "affirmations", "the procession", "the celebration"];
 
 function wireReplayControls() {
   const startBtn = document.getElementById("replay-start");

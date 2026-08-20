@@ -228,7 +228,7 @@ window.Movements.m6 = (function () {
   }
 
   return {
-    async enter({ container }) {
+    async enter({ container, go }) {
       generation++;
       const myGen = generation;
       container.innerHTML = buildHTML();
@@ -243,8 +243,7 @@ window.Movements.m6 = (function () {
         runLookAtYou(myGen, () => {
           runVoice(myGen, () => {
             runClose(myGen, () => {
-              // Final celebration + love close come next — not built
-              // yet in this pass. Holds here, settled.
+              if (myGen === generation) go(7);
             });
           });
         });
@@ -261,6 +260,7 @@ window.Movements.m6 = (function () {
       clearTimers();
       stopAudio();
       Cat.reset();
+      Birthday.goToMovement(7);
     },
   };
 })();

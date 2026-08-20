@@ -1155,6 +1155,66 @@ h1, h2, h3 {
 }
 
 /* ============================================================
+   Movement VII — Final Celebration + Love. Day 8's last act.
+   ============================================================ */
+.fin-m7 {
+  position: absolute; inset: 0; overflow: hidden; opacity: 0; transition: opacity 0.5s var(--fin-ease), background 2s var(--fin-ease);
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--d8-chosen) 22%, var(--d8-indigo)) 0%, var(--d8-midnight) 70%);
+}
+.fin-m7.is-in { opacity: 1; }
+.fin-m7.is-settling { background: var(--d8-midnight); }
+.fin-m7-burst { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+
+.fin-m7-composition {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 1.2s var(--fin-ease); z-index: 3;
+}
+.fin-m7-composition.is-in { opacity: 1; }
+.fin-m7-big21 {
+  position: absolute; margin: 0; font-family: var(--font-display); font-weight: 800; font-style: italic;
+  font-size: clamp(8rem, 42vw, 22rem); color: var(--d8-chosen); opacity: 0.16; line-height: 1; user-select: none;
+  transition: opacity 1.4s var(--fin-ease);
+}
+.fin-m7-big21.is-gone { opacity: 0; }
+.fin-m7-media { position: relative; width: min(20rem, 78vw); display: flex; align-items: center; justify-content: center; }
+.fin-m7-hero-media {
+  width: 100%; box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6); position: relative; z-index: 2;
+  transition: opacity 1.4s var(--fin-ease), transform 1.4s var(--fin-ease);
+}
+/* Once the close text arrives, the hero image dims rather than
+   vanishing — "the final hero image remains," just quiet enough for
+   "I love you." to actually be readable layered over it. */
+.fin-m7.is-closing .fin-m7-hero-media { opacity: 0.32; transform: scale(0.97); }
+.fin-m7-support-media {
+  position: absolute; width: 6rem; opacity: 0.9; box-shadow: 0 16px 40px -14px rgba(0,0,0,0.55); z-index: 1;
+  transition: opacity 1.2s var(--fin-ease);
+}
+.fin-m7-support-media.is-gone { opacity: 0; }
+.fin-m7-support-0 { left: -3.5rem; top: 12%; transform: rotate(-8deg); }
+.fin-m7-support-1 { right: -3.5rem; bottom: 8%; transform: rotate(7deg); }
+.fin-m7-happybday {
+  position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); margin: 0; text-align: center; width: 90vw;
+  font-family: var(--font-display); font-weight: 700; font-style: italic; color: var(--d8-ink);
+  font-size: clamp(1.4rem, 5.5vw, 2.6rem); text-shadow: 0 0 30px color-mix(in srgb, var(--d8-chosen) 60%, transparent);
+  transition: opacity 1.2s var(--fin-ease);
+}
+.fin-m7-happybday.is-gone { opacity: 0; }
+
+.fin-m7-close {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center;
+  z-index: 4;
+}
+.fin-m7-close .fin-seq-big { color: var(--d8-ink); font-size: clamp(1.8rem, 6vw, 2.6rem); text-shadow: 0 2px 20px rgba(0,0,0,0.7); }
+.fin-m7-close .fin-seq-title { color: var(--d8-chosen); font-size: clamp(1.2rem, 4vw, 1.7rem); letter-spacing: 0.01em; text-transform: none; font-weight: 650; text-shadow: 0 2px 20px rgba(0,0,0,0.7); }
+.fin-m7-close .fin-seq-line { color: rgba(243,238,255,0.85); font-size: 1rem; text-shadow: 0 2px 16px rgba(0,0,0,0.7); }
+
+@media (max-width: 700px) {
+  .fin-m7-support-media { width: 4.4rem; }
+  .fin-m7-support-0 { left: -1.5rem; }
+  .fin-m7-support-1 { right: -1.5rem; }
+}
+
+/* ============================================================
    Floral decoration — elegant botanical sprigs (stem, leaves,
    layered petals), not flower emoji or corner stickers. Peeks
    from edges, sits low in the stack, always low-opacity so it
