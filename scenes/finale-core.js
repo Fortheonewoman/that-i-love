@@ -289,36 +289,13 @@ window.FinaleCore = (function () {
   }
 
   /* ------------------------------------------------------------
-     BOOM — Day 8's recurring signature. The huge version (the
-     detonation itself) is hand-built where it's used; this is only
-     the SMALL, subtle recurring mark — a corner stamp, a transition
-     flicker — that gets sprinkled through the rest of the day so it
-     reads as a maker's mark, never a logo plastered over every frame.
-     opts: { corner: "br"|"bl"|"tr"|"tl" (default "br"), holdMs, color }
-     Appends itself, fades in, fades out and removes itself. Caller
-     doesn't need to clean up.
-     ------------------------------------------------------------ */
-  function boomStamp(parent, opts) {
-    opts = opts || {};
-    const corner = opts.corner || "br";
-    const stamp = make("span", `fin-boom-stamp fin-boom-${corner}`, "BOOM.");
-    if (opts.color) stamp.style.color = opts.color;
-    parent.appendChild(stamp);
-    requestAnimationFrame(() => stamp.classList.add("is-in"));
-    setTimeout(() => {
-      stamp.classList.remove("is-in");
-      setTimeout(() => stamp.remove(), 700);
-    }, opts.holdMs || 1600);
-    return stamp;
-  }
-
-  /* ------------------------------------------------------------
      FIREWORKS — a real canvas particle system, not a CSS sprite
      sheet: rockets launch from low on screen, climb with a slight
      drift and gravity, then burst into 40–70 radiating particles
-     that fade and fall. Used sparingly (balloon→BOOM, the opening
-     explosion, the final celebration) — never a constant background
-     loop, per the brief.
+     that fade and fall. This is Day 8's actual recurring signature —
+     used liberally across the whole day (the opening explosion, the
+     montage, favorite color, the final celebration), never a
+     constant background loop.
 
      Fireworks.mount(container) creates one canvas sized to its
      parent and returns a handle:
@@ -491,8 +468,10 @@ window.FinaleCore = (function () {
     for (let i = 0; i < beamCount; i++) {
       const beam = make("div", "fin-disco-beam");
       beam.style.setProperty("--beam-color", opts.color || ["#f3c15f", "#ff2e88", "#3d7fff", "#6c3fd6"][i % 4]);
-      beam.style.setProperty("--beam-dur", 5 + Math.random() * 5 + "s");
-      beam.style.setProperty("--beam-delay", -(Math.random() * 6) + "s");
+      // Slow, ambient sweeps — this is background atmosphere, not
+      // something that should read as spinning or hectic.
+      beam.style.setProperty("--beam-dur", 13 + Math.random() * 9 + "s");
+      beam.style.setProperty("--beam-delay", -(Math.random() * 10) + "s");
       layer.appendChild(beam);
     }
     if (opts.ball !== false) layer.appendChild(make("div", "fin-disco-ball"));
@@ -501,8 +480,8 @@ window.FinaleCore = (function () {
       const glint = make("span", "fin-disco-glint");
       glint.style.left = Math.random() * 100 + "%";
       glint.style.top = Math.random() * 100 + "%";
-      glint.style.setProperty("--glint-dur", 1.6 + Math.random() * 2.4 + "s");
-      glint.style.setProperty("--glint-delay", -(Math.random() * 3) + "s");
+      glint.style.setProperty("--glint-dur", 3.2 + Math.random() * 3.2 + "s");
+      glint.style.setProperty("--glint-delay", -(Math.random() * 5) + "s");
       glint.style.setProperty("--glint-peak", 0.4 + Math.random() * 0.5);
       layer.appendChild(glint);
     }
@@ -510,5 +489,5 @@ window.FinaleCore = (function () {
     return layer;
   }
 
-  return { el, make, Cat, photoFrame, pickPhoto, videoFrame, pickVideo, drawThread, readTime, playSequence, boomStamp, Fireworks, discoLayer };
+  return { el, make, Cat, photoFrame, pickPhoto, videoFrame, pickVideo, drawThread, readTime, playSequence, Fireworks, discoLayer };
 })();

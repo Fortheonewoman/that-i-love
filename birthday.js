@@ -6,9 +6,9 @@
 
    Day 8 storyboard (per the Day 8 rebuild — no relation to the old
    5-act "sky/explosion/story/twenty-one/them" structure):
-     1. The Balloon      — silence, one balloon, she pops it, BOOM.
+     1. The Balloon      — silence, one balloon, she pops it, fireworks.
      2. The Explosion     — HAPPY BIRTHDAY / AMIRAH / 21, fireworks,
-                            confetti, disco, a short photo flourish.
+                            confetti, disco, a real photo/video montage.
      3. 21 Seconds         — the one fast, hard-cut montage.
      4. Favorite Color     — the real question, finally asked.
      5. Affirmations       — seven lines, said aloud, one at a time.
@@ -86,6 +86,26 @@ const Birthday = (function () {
     });
   }
 
+  // Lets her back out of Day 8 mid-sequence to the day grid, without
+  // leaving a stale movement's timers/async chains running behind
+  // her — same exit() contract every movement already honors for
+  // normal movement-to-movement transitions.
+  function stop() {
+    if (currentMovement && currentMovement.exit) {
+      try {
+        currentMovement.exit();
+      } catch (err) {
+        console.warn("movement exit error:", err);
+      }
+    }
+    currentMovement = null;
+    currentN = 0;
+    const stage = stageEl();
+    if (stage) stage.innerHTML = "";
+    const root = document.getElementById("birthday");
+    if (root) root.hidden = true;
+  }
+
   function skipCurrent() {
     if (currentMovement && currentMovement.skip) {
       currentMovement.skip();
@@ -114,6 +134,7 @@ const Birthday = (function () {
 
   return {
     start,
+    stop,
     goToMovement,
     ctx,
     get currentMovement() {

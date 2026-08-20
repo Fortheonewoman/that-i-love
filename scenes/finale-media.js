@@ -49,6 +49,13 @@ window.FinaleMedia = {
     { src: "img/birthday/photos/silly-pajama.jpg", w: 787, h: 1400, role: "silly" },
     { src: "img/birthday/photos/silly-wig.jpg", w: 787, h: 1400, role: "silly" },
     { src: "img/birthday/photos/silly-deadpan.jpg", w: 953, h: 1400, role: "silly" },
+    { src: "img/birthday/photos/silly-carselfie.jpg", w: 647, h: 1400, role: "silly" },
+
+    { src: "img/birthday/photos/candid-shorthair.jpg", w: 787, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-argyle.jpg", w: 745, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-peacesign.jpg", w: 750, h: 1400, role: "candid" },
+    { src: "img/birthday/photos/candid-artistic.jpg", w: 1400, h: 933, role: "hero" },
+    { src: "img/birthday/photos/ambient-frostheart.jpg", w: 647, h: 1400, role: "candid" },
   ],
 
   videos: [
@@ -64,6 +71,22 @@ window.FinaleMedia = {
     // just that: no app chrome, no crop-tool UI, just the zoom
     // settling on her smile. Nothing else may close the carousel.
     { src: "video/birthday/final-smile.mp4", w: 720, h: 1418, role: "final-smile", finalCarouselClip: true },
+
+    { src: "video/birthday/candid-braids-walk.mp4", w: 480, h: 848, role: "candid" },
+    { src: "video/birthday/silly-thumbsup-filter.mp4", w: 448, h: 848, role: "silly" },
+    { src: "video/birthday/candid-closeup.mp4", w: 720, h: 1564, role: "candid" },
+    { src: "video/birthday/candid-mirror-video.mp4", w: 720, h: 1280, role: "candid" },
+    { src: "video/birthday/candid-yorubaddie.mp4", w: 720, h: 1280, role: "candid" },
+    { src: "video/birthday/candid-puffbuns.mp4", w: 720, h: 500, role: "candid" },
+    { src: "video/birthday/candid-plane.mp4", w: 448, h: 848, role: "candid" },
+    { src: "video/birthday/candid-whitestrapless.mp4", w: 720, h: 1280, role: "hero" },
+    { src: "video/birthday/candid-curlinghair.mp4", w: 720, h: 1280, role: "candid" },
+    { src: "video/birthday/candid-pinkafro.mp4", w: 540, h: 960, role: "candid" },
+    { src: "video/birthday/silly-playfulgesture.mp4", w: 720, h: 500, role: "silly" },
+    { src: "video/birthday/candid-gele-jollof.mp4", w: 720, h: 1280, role: "hero" },
+    { src: "video/birthday/candid-handsonhips.mp4", w: 720, h: 500, role: "candid" },
+    { src: "video/birthday/silly-pikachu-dance.mp4", w: 480, h: 848, role: "silly" },
+    { src: "video/birthday/silly-wig-arrived.mp4", w: 656, h: 1232, role: "silly" },
   ],
 
   // Obinna's real voice note, played after the carousel's final smile

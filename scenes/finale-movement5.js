@@ -42,6 +42,11 @@ window.Movements.m5 = (function () {
     "I deserve peace.",
     "I trust myself.",
     "I am loved.",
+    "I let myself be loved.",
+    "I am more capable than what I give myself credit for.",
+    "My mistakes do not define me.",
+    "Your dreams are valid, even when they are too big.",
+    "Your softness is never a weakness.",
   ];
 
   function buildHTML() {
@@ -122,6 +127,29 @@ window.Movements.m5 = (function () {
       // I am loved — the whole space fills with her color. No
       // attribution beneath it — this one belongs to her alone.
       world.classList.add("is-loved");
+    } else if (index === 7) {
+      // I let myself be loved — same fill, the natural continuation
+      // of the line before it.
+      world.classList.add("is-loved");
+    } else if (index === 8) {
+      // I am more capable than what I give myself credit for — the
+      // single centered light, growing stronger.
+      const core = make("div", "fin-m5-core");
+      world.appendChild(core);
+      requestAnimationFrame(() => core.classList.add("is-strong"));
+    } else if (index === 9) {
+      // My mistakes do not define me — the noise clears away.
+      world.classList.add("is-empty");
+    } else if (index === 10) {
+      // Your dreams are valid, even when they are too big — the
+      // light-structure expands again, unhurried.
+      const bloom = make("div", "fin-m5-bloom");
+      world.appendChild(bloom);
+      requestAnimationFrame(() => bloom.classList.add("is-growing"));
+    } else if (index === 11) {
+      // Your softness is never a weakness — everything slows all the
+      // way down, gentle.
+      world.classList.add("is-calm");
     }
   }
 

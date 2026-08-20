@@ -646,6 +646,14 @@ h1, h2, h3 {
 }
 .movement-skip:hover { opacity: 1; background: rgba(255, 253, 248, 0.9); }
 
+.birthday-back-btn {
+  position: absolute; top: 1.5rem; left: 1.5rem; z-index: 30; appearance: none;
+  border: 1px solid rgba(255, 253, 248, 0.5); background: rgba(255, 253, 248, 0.6); backdrop-filter: blur(10px);
+  color: var(--ink); border-radius: 999px; padding: 0.4rem 0.9rem; font: inherit; font-size: 0.78rem; font-weight: 500;
+  cursor: pointer; opacity: 0.55; transition: opacity 0.3s var(--fin-ease), background 0.3s var(--fin-ease);
+}
+.birthday-back-btn:hover { opacity: 1; background: rgba(255, 253, 248, 0.9); }
+
 .mute-btn {
   position: absolute; bottom: calc(1.5rem + env(safe-area-inset-bottom)); right: 1.5rem; z-index: 30; appearance: none;
   border: 1px solid rgba(255, 253, 248, 0.5); background: rgba(255, 253, 248, 0.72); backdrop-filter: blur(10px);
@@ -710,30 +718,6 @@ h1, h2, h3 {
 @media (prefers-reduced-motion: reduce) {
   .birthday * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
-
-/* ---- BOOM — the recurring Day 8 signature, small version ----
-   A maker's mark, not a logo: low-opacity, corner-anchored, gone in
-   about a second and a half. The huge opening detonation is its own
-   hand-built moment in Movement I, not this. */
-.fin-boom-stamp {
-  position: absolute;
-  z-index: 6;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-style: italic;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  color: var(--fin-champagne, #E8C87A);
-  opacity: 0;
-  text-shadow: 0 0 10px currentColor;
-  transition: opacity 0.7s var(--fin-ease);
-  pointer-events: none;
-}
-.fin-boom-stamp.is-in { opacity: 0.55; }
-.fin-boom-br { right: 0.9rem; bottom: 0.9rem; }
-.fin-boom-bl { left: 0.9rem; bottom: 0.9rem; }
-.fin-boom-tr { right: 0.9rem; top: 0.9rem; }
-.fin-boom-tl { left: 0.9rem; top: 0.9rem; }
 
 /* ============================================================
    Movement I — The Balloon. Midnight lands in the same darkness
@@ -820,28 +804,6 @@ h1, h2, h3 {
 }
 .fin-blackout.is-in { opacity: 1; }
 
-.fin-boom-giant {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9;
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-style: italic;
-  font-size: clamp(4rem, 22vw, 11rem);
-  letter-spacing: 0.02em;
-  color: #fff;
-  opacity: 0;
-  transform: scale(0.6);
-  transition: opacity 0.14s ease-out, transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1);
-  text-shadow: 0 0 60px rgba(255, 61, 122, 0.6);
-  pointer-events: none;
-}
-.fin-boom-giant.is-in { opacity: 1; transform: scale(1); }
-.fin-boom-giant.is-breaking { opacity: 0; transform: scale(1.7); transition: opacity 0.3s ease-in, transform 0.3s ease-in; }
 
 /* ============================================================
    Movement II — The Explosion
@@ -891,7 +853,7 @@ h1, h2, h3 {
   background: linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--beam-color, var(--d8-gold)) 55%, transparent) 35%, transparent 75%);
   mix-blend-mode: screen;
   opacity: 0.5;
-  animation: fin-disco-sweep var(--beam-dur, 7s) linear infinite;
+  animation: fin-disco-sweep var(--beam-dur, 16s) linear infinite;
   animation-delay: var(--beam-delay, 0s);
 }
 @keyframes fin-disco-sweep {
@@ -905,20 +867,20 @@ h1, h2, h3 {
     radial-gradient(circle at 65% 60%, rgba(255,255,255,0.5), transparent 35%),
     conic-gradient(from 0deg, #cfd6e6, #fff, #cfd6e6, #9aa4bd, #fff, #cfd6e6);
   box-shadow: 0 0 22px 6px rgba(223, 228, 238, 0.35);
-  animation: fin-disco-spin 6s linear infinite;
+  animation: fin-disco-spin 15s linear infinite;
 }
 @keyframes fin-disco-spin { to { transform: translateX(-50%) rotate(360deg); } }
 .fin-disco-glint {
   position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fff;
   box-shadow: 0 0 6px 2px rgba(255,255,255,0.8);
-  opacity: 0; animation: fin-glint-twinkle var(--glint-dur, 2.4s) ease-in-out infinite;
+  opacity: 0; animation: fin-glint-twinkle var(--glint-dur, 4.5s) ease-in-out infinite;
   animation-delay: var(--glint-delay, 0s);
 }
 @keyframes fin-glint-twinkle { 0%, 100% { opacity: 0; } 50% { opacity: var(--glint-peak, 0.8); } }
 
 /* ============================================================
    Movement II — The Opening Explosion (recolored for Day 8's dark
-   birthday-night palette — the balloon's BOOM should never cut to a
+   birthday-night palette — the balloon's pop should never cut to a
    bright cream page).
    ============================================================ */
 .fin-m2 {

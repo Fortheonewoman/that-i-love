@@ -13,7 +13,7 @@
 window.Movements = window.Movements || {};
 window.Movements.m7 = (function () {
   "use strict";
-  const { el, make, Cat, photoFrame, playSequence, boomStamp } = window.FinaleCore;
+  const { el, make, Cat, photoFrame, playSequence } = window.FinaleCore;
 
   let timers = [];
   function after(ms, fn) {
@@ -84,11 +84,9 @@ window.Movements.m7 = (function () {
     fw.launch({ x: 0.75, y: 0.3, color });
     after(500, () => fw.launch({ x: 0.5, y: 0.22, color: "#f3c15f", count: 70 }));
     after(1000, () => burstPieces(el("fin-m7-burst"), 60));
-    after(1000, () => {
-      if (myGen !== generation) return;
-      boomStamp(stage, { corner: "tl", color });
-    });
-    after(2200, () => myGen === generation && done());
+    after(1500, () => fw.launch({ x: 0.35, y: 0.26, color }));
+    after(1900, () => fw.launch({ x: 0.65, y: 0.3, color: "#f3c15f" }));
+    after(3400, () => myGen === generation && done());
   }
 
   function runComposition(myGen, done) {
@@ -149,12 +147,7 @@ window.Movements.m7 = (function () {
       ],
       {
         onDone: () => {
-          if (myGen !== generation) return;
-          after(500, () => {
-            if (myGen !== generation) return;
-            boomStamp(host, { corner: "br", holdMs: 2200 });
-          });
-          done();
+          if (myGen === generation) done();
         },
       }
     );

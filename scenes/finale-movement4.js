@@ -33,6 +33,13 @@ window.Movements.m4 = (function () {
   }
 
   let generation = 0;
+  let fw = null;
+  function teardownEffects() {
+    if (fw) {
+      fw.destroy();
+      fw = null;
+    }
+  }
 
   const PANES = [
     ["warm gold", "#f3c15f"],
@@ -138,6 +145,11 @@ window.Movements.m4 = (function () {
       const chosen = room.querySelector(`[data-hex="${hex}"]`);
       if (chosen) chosen.classList.add("is-chosen");
       Cat.sit();
+      // A single quiet burst in the exact color she just picked — the
+      // moment earns one, but this room stays hers, not a fireworks
+      // show; no launch loop, no disco.
+      fw = window.FinaleCore.Fireworks.mount(room);
+      fw.launch({ x: 0.5, y: 0.36, color: hex, count: 46 });
       room.classList.add("is-fading");
       after(650, () => {
         if (myGen !== generation) return;
@@ -202,11 +214,13 @@ window.Movements.m4 = (function () {
     exit() {
       generation++;
       clearTimers();
+      teardownEffects();
       Cat.reset();
     },
     skip() {
       generation++;
       clearTimers();
+      teardownEffects();
       // Skipping does NOT invent an answer — "she must actually
       // choose" is absolute. If nothing's stored yet, Birthday.ctx
       // .favoriteColor simply stays null and every later movement's

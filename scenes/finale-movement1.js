@@ -4,7 +4,7 @@
 
      midnight lands → silence → one balloon rises → she taps it →
      it pops (her interaction, never automatic) → a split-second of
-     black → BOOM → the whole thing detonates into Movement II.
+     black → fireworks take over the whole sky → Movement II.
 
    Same darkness Day 7's countdown ended on — this isn't a hard cut
    to a new document, it's the next thing that happens in that same
@@ -23,6 +23,14 @@ window.Movements.m1 = (function () {
   function clearTimers() {
     timers.forEach(clearTimeout);
     timers = [];
+  }
+
+  let fw = null;
+  function teardownEffects() {
+    if (fw) {
+      fw.destroy();
+      fw = null;
+    }
   }
 
   // Neutral celebratory red — she hasn't told us her favorite color
@@ -52,7 +60,6 @@ window.Movements.m1 = (function () {
           <p class="fin-balloon-pop-label" id="fin-balloon-pop-label">pop</p>
         </div>
         <div class="fin-blackout" id="fin-blackout"></div>
-        <p class="fin-boom-giant" id="fin-boom-giant">BOOM</p>
       </div>`;
   }
 
@@ -93,7 +100,6 @@ window.Movements.m1 = (function () {
       const wrap = el("fin-balloon-wrap");
       const popLabel = el("fin-balloon-pop-label");
       const blackout = el("fin-blackout");
-      const boomEl = el("fin-boom-giant");
 
       let popped = false;
       let catPeeked = false;
@@ -133,14 +139,20 @@ window.Movements.m1 = (function () {
           fragmentBurst(container.querySelector(".fin-m1"));
         });
         // Split-second of black.
-        after(260, () => blackout.classList.add("is-in"));
-        // Then the giant BOOM, fast.
-        after(420, () => {
+        after(280, () => blackout.classList.add("is-in"));
+        // Then the sky itself takes over — real fireworks, not a
+        // logo. Held long enough to actually watch, not a flash cut.
+        after(520, () => {
           blackout.classList.remove("is-in");
-          boomEl.classList.add("is-in");
+          const stage = container.querySelector(".fin-m1");
+          fw = window.FinaleCore.Fireworks.mount(stage);
+          fw.launch({ x: 0.5, y: 0.25, count: 80 });
+          after(280, () => fw.launch({ x: 0.25, y: 0.32 }));
+          after(560, () => fw.launch({ x: 0.75, y: 0.3 }));
+          after(1100, () => fw.launch({ x: 0.4, y: 0.22 }));
+          after(1500, () => fw.launch({ x: 0.6, y: 0.28 }));
         });
-        after(780, () => boomEl.classList.add("is-breaking"));
-        after(1050, () => go(2));
+        after(3600, () => go(2));
       }
       wrap.addEventListener("click", onPop);
       wrap.addEventListener("touchend", (e) => {
@@ -150,10 +162,12 @@ window.Movements.m1 = (function () {
     },
     exit() {
       clearTimers();
+      teardownEffects();
       Cat.reset();
     },
     skip() {
       clearTimers();
+      teardownEffects();
       Cat.reset();
       Birthday.goToMovement(2);
     },

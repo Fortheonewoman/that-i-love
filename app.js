@@ -690,6 +690,7 @@ function wireReplayControls() {
       appEl.hidden = true;
       wireMute();
       wireReplayControls();
+      wireBirthdayBack();
       Birthday.start();
     }, 1600);
   }
@@ -706,7 +707,27 @@ function wireReplayControls() {
     appEl.hidden = true;
     wireMute();
     wireReplayControls();
+    wireBirthdayBack();
     Birthday.start();
+  }
+
+  // Lets her step back out of Day 8 to the day grid mid-sequence —
+  // she asked for this explicitly. Birthday.stop() tears down
+  // whatever movement is currently running; this handles the chrome
+  // on app.js's side of that handoff. Defined here (inside runSite())
+  // rather than top-level so it can close over appEl/day7RootEl/
+  // renderGrid the same way every other launch helper above does.
+  function wireBirthdayBack() {
+    const btn = document.getElementById("birthday-back-btn");
+    if (!btn || btn.dataset.wired) return;
+    btn.dataset.wired = "1";
+    btn.addEventListener("click", () => {
+      Birthday.stop();
+      day7RootEl.hidden = true;
+      appEl.hidden = false;
+      document.documentElement.style.setProperty("--accent", DEFAULT_ACCENT);
+      renderGrid();
+    });
   }
 
   // Dev shortcut (?act=N) or already-past-unlock-on-load: launch
@@ -716,6 +737,7 @@ function wireReplayControls() {
   if (wantsBirthdaySequence) {
     wireMute();
     wireReplayControls();
+    wireBirthdayBack();
     await Birthday.start();
     return;
   }

@@ -1,18 +1,22 @@
 /* ============================================================
    Movement II — The Explosion. The sky just cleared for her — so
-   the whole website detonates. Huge typography, a finite (never
-   infinite) burst of petals/ribbons/confetti/stars, a fast-cut
-   montage, the cat panicking. Then, hard: everything gets pulled
-   away, and a quiet line starts the real story.
+   the whole website detonates: fireworks, a finite (never infinite)
+   burst of petals/ribbons/confetti/stars, disco light, and a real
+   montage of her — properly preloaded, held long enough to actually
+   look at (including the videos, which get real time to play, not a
+   flicker), pulling from the full media pool. Then, hard: everything
+   gets pulled away into the 21-second montage.
    ============================================================ */
 window.Movements = window.Movements || {};
 window.Movements.m2 = (function () {
   "use strict";
-  const { el, make, Cat, photoFrame } = window.FinaleCore;
+  const { el, make, Cat, photoFrame, videoFrame, pickVideo } = window.FinaleCore;
 
   let timers = [];
   function after(ms, fn) {
-    timers.push(setTimeout(fn, ms));
+    const t = setTimeout(fn, ms);
+    timers.push(t);
+    return t;
   }
   function clearTimers() {
     timers.forEach(clearTimeout);
@@ -35,6 +39,8 @@ window.Movements.m2 = (function () {
     }
   }
 
+  let generation = 0;
+
   const SHAPES = ["petal", "ribbon", "paper", "star"];
   const PIECE_COUNT = 70;
 
@@ -52,6 +58,7 @@ window.Movements.m2 = (function () {
 
   function burstPieces(count) {
     const host = el("fin-m2-burst");
+    if (!host) return;
     for (let i = 0; i < count; i++) {
       const shape = SHAPES[i % SHAPES.length];
       const piece = make("span", `fin-piece fin-piece-${shape}`);
@@ -65,56 +72,116 @@ window.Movements.m2 = (function () {
     }
   }
 
-  // One real beat of motion in the middle of the still photos — the
-  // crown clip, held noticeably longer than a photo beat so it actually
-  // reads as moving instead of flickering past like a seventh photo.
-  const MOTIF_BEATS = ["portrait", "trio", "candid", "hero", "flower", "video", "candid"];
-
-  function runMontage(container, done) {
-    const stage = el("fin-m2-montage");
-    let i = 0;
-    const total = MOTIF_BEATS.length;
-    function beat() {
-      if (i >= total) return done();
-      stage.innerHTML = "";
-      const kind = MOTIF_BEATS[i % MOTIF_BEATS.length];
-      let holdMs = 520;
-      if (kind === "trio") {
-        const wrap = make("div", "fin-m2-trio");
-        for (let k = 0; k < 3; k++) wrap.appendChild(photoFrame({ role: "candid", index: i + k, treatment: "print" }));
-        stage.appendChild(wrap);
-      } else if (kind === "flower") {
-        stage.appendChild(make("div", "fin-m2-flower-beat"));
-      } else if (kind === "video" && window.FinaleCore.pickVideo("hero")) {
-        const frame = window.FinaleCore.videoFrame({ role: "hero", index: i, treatment: "full" });
-        frame.classList.add("fin-m2-solo");
-        stage.appendChild(frame);
-        holdMs = 1500;
+  // Real preload confirmation — an item is only ever revealed once
+  // its image has fired 'load' or its video has fired 'loadeddata'
+  // (or a capped 2.8s fallback, so a slow asset can't stall the
+  // whole party). This is what "the images don't even load" was
+  // pointing at: beats used to swap on a fixed timer regardless of
+  // whether the browser had actually finished decoding anything yet.
+  function preloadFrame(kind, role, index) {
+    return new Promise((resolve) => {
+      let frame, mediaNode;
+      if (kind === "video") {
+        frame = videoFrame({ role, index, treatment: "full" });
+        mediaNode = frame.querySelector("video");
       } else {
-        const frame = photoFrame({ role: kind === "hero" ? "hero" : "candid", index: i, treatment: kind === "hero" ? "full" : "print" });
-        frame.classList.add("fin-m2-solo");
-        stage.appendChild(frame);
+        frame = photoFrame({ role, index, treatment: kind === "hero" ? "full" : "print" });
+        mediaNode = frame.querySelector("img");
       }
+      if (!mediaNode) return resolve(frame); // empty-state fallback, nothing to wait on
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        resolve(frame);
+      };
+      if (mediaNode.tagName === "VIDEO") {
+        mediaNode.addEventListener("loadeddata", finish, { once: true });
+      } else {
+        mediaNode.addEventListener("load", finish, { once: true });
+      }
+      mediaNode.addEventListener("error", finish, { once: true });
+      setTimeout(finish, 2800);
+    });
+  }
+
+  // Pulling from the full media pool now, not a fixed handful — real
+  // videos get real hold time so they're actually watched, not
+  // flickered past like a seventh photo.
+  const MOTIF_BEATS = [
+    { kind: "hero", hold: 2600 },
+    { kind: "trio", hold: 2800 },
+    { kind: "candid", hold: 2400 },
+    { kind: "video", role: "hero", hold: 3400 },
+    { kind: "silly", hold: 2400 },
+    { kind: "video", role: "candid", hold: 3200 },
+    { kind: "flower", hold: 1800 },
+    { kind: "hero", hold: 2600 },
+    { kind: "video", role: "silly", hold: 3000 },
+    { kind: "trio", hold: 2800 },
+    { kind: "candid", hold: 2400 },
+    { kind: "video", role: "hero", hold: 3200 },
+    { kind: "silly", hold: 2400 },
+    { kind: "candid", hold: 2400 },
+  ];
+
+  async function runMontage(myGen, done) {
+    const stage = el("fin-m2-montage");
+    if (!stage) return;
+    for (let i = 0; i < MOTIF_BEATS.length; i++) {
+      const beat = MOTIF_BEATS[i];
+      let frame;
+      if (beat.kind === "trio") {
+        frame = make("div", "fin-m2-trio");
+        const parts = await Promise.all([0, 1, 2].map((k) => preloadFrame("candid", "candid", i + k)));
+        parts.forEach((p) => frame.appendChild(p));
+      } else if (beat.kind === "flower") {
+        frame = make("div", "fin-m2-flower-beat");
+      } else if (beat.kind === "video") {
+        if (!pickVideoSafe(beat.role)) {
+          frame = await preloadFrame("candid", "candid", i);
+          frame.classList.add("fin-m2-solo");
+        } else {
+          frame = await preloadFrame("video", beat.role, i);
+          frame.classList.add("fin-m2-solo");
+        }
+      } else {
+        frame = await preloadFrame(beat.kind, beat.kind === "hero" ? "hero" : beat.kind, i);
+        frame.classList.add("fin-m2-solo");
+      }
+      if (myGen !== generation) return;
+
+      stage.innerHTML = "";
+      stage.appendChild(frame);
       requestAnimationFrame(() => stage.classList.add("is-in"));
-      if (i % 2 === 0) Cat.moveTo(10 + Math.random() * 75, 78 + Math.random() * 12, 500);
-      i++;
-      const t = setTimeout(() => {
-        stage.classList.remove("is-in");
-        // This inner timeout must be tracked too, not just the outer
-        // one — otherwise it survives clearTimers() on exit/skip and
-        // fires beat() again against a DOM that's already gone (this
-        // was a real crash: el("fin-m2-burst") returning null once
-        // the movement had moved on).
-        const t2 = setTimeout(beat, 180);
-        timers.push(t2);
-      }, holdMs);
-      timers.push(t);
+      if (frame.querySelector("video")) {
+        const p = frame.querySelector("video").play();
+        if (p && p.catch) p.catch(() => {});
+      }
+      if (i % 3 === 0) fw && fw.launch({ x: 0.15 + Math.random() * 0.7, y: 0.24 + Math.random() * 0.28, count: 36 });
+      if (i % 2 === 0) Cat.moveTo(10 + Math.random() * 75, 78 + Math.random() * 12, 600);
+
+      await new Promise((resolve) => after(beat.hold, resolve));
+      if (myGen !== generation) return;
+      stage.classList.remove("is-in");
+      await new Promise((resolve) => after(260, resolve));
+      if (myGen !== generation) return;
     }
-    beat();
+    done();
+  }
+
+  function pickVideoSafe(role) {
+    try {
+      return pickVideo(role);
+    } catch {
+      return null;
+    }
   }
 
   return {
     async enter({ container, go }) {
+      generation++;
+      const myGen = generation;
       container.innerHTML = buildHTML();
       const stage = container.querySelector(".fin-m2");
       requestAnimationFrame(() => stage.classList.add("is-in"));
@@ -127,59 +194,62 @@ window.Movements.m2 = (function () {
       Cat.panic();
       Cat.moveTo(50, 15, 300);
 
-      // A first small volley right as the party opens, before the
-      // bigger launches land under the headlines.
+      // A first small volley right as the party opens.
       fw.launch({ x: 0.22, y: 0.28 });
       fw.launch({ x: 0.78, y: 0.32 });
 
       // HAPPY BIRTHDAY / AMIRAH / 21 — three separate giant beats,
-      // one at a time (this is what the balloon's BOOM breaks apart
-      // into), each settling to a small mark before the next lands.
-      after(150, () => {
+      // one at a time, each settling to a small mark before the next
+      // lands. Slower than a flash-cut on purpose — she should
+      // actually get to read each one, not watch them blur past.
+      after(400, () => {
         el("fin-m2-headline").classList.add("is-in");
         fw.launch({ x: 0.5, y: 0.22, color: "#f3c15f" });
       });
-      after(900, () => {
+      after(2200, () => {
         el("fin-m2-headline").classList.add("is-settled");
         el("fin-m2-headline-2").classList.add("is-in");
         fw.launch({ x: 0.32, y: 0.3, color: "#ff2e88" });
         fw.launch({ x: 0.68, y: 0.26, color: "#ff2e88" });
       });
-      after(1650, () => {
+      after(4000, () => {
         el("fin-m2-headline-2").classList.add("is-settled");
         el("fin-m2-21").classList.add("is-in");
         fw.launch({ x: 0.5, y: 0.35, color: "#3d7fff", count: 70 });
       });
 
-      after(2500, () => {
+      after(5800, () => {
+        if (myGen !== generation) return;
         el("fin-m2-21").classList.add("is-settled");
-        window.FinaleCore.boomStamp(stage, { corner: "br" });
-        runMontage(container, () => {
+        runMontage(myGen, () => {
+          if (myGen !== generation) return;
           // A second, smaller confetti + fireworks wave right as the
           // montage ends — keeps the energy from just trailing off.
           burstPieces(30);
           fw.launch({ x: 0.25, y: 0.3 });
           fw.launch({ x: 0.75, y: 0.3 });
           Cat.panic();
-        });
-      });
 
-      // Hard pull-away: the party gets yanked, not faded politely —
-      // straight into the 21-second montage, no pivot line needed.
-      after(8600, () => {
-        el("fin-m2-burst").innerHTML = "";
-        el("fin-m2-headline").classList.add("is-gone");
-        el("fin-m2-headline-2").classList.add("is-gone");
-        el("fin-m2-21").classList.add("is-gone");
-        el("fin-m2-montage").classList.add("is-gone");
-        stage.classList.add("is-quiet");
-        teardownEffects();
-        Cat.stand();
-        Cat.moveTo(50, 60, 800);
-        after(700, () => go(3));
+          // Hard pull-away: the party gets yanked, not faded politely —
+          // straight into the 21-second montage, no pivot line needed.
+          after(1400, () => {
+            if (myGen !== generation) return;
+            el("fin-m2-burst").innerHTML = "";
+            el("fin-m2-headline").classList.add("is-gone");
+            el("fin-m2-headline-2").classList.add("is-gone");
+            el("fin-m2-21").classList.add("is-gone");
+            el("fin-m2-montage").classList.add("is-gone");
+            stage.classList.add("is-quiet");
+            teardownEffects();
+            Cat.stand();
+            Cat.moveTo(50, 60, 800);
+            after(700, () => myGen === generation && go(3));
+          });
+        });
       });
     },
     exit() {
+      generation++;
       clearTimers();
       teardownEffects();
       Cat.reset();
@@ -187,6 +257,7 @@ window.Movements.m2 = (function () {
       if (burst) burst.innerHTML = "";
     },
     skip() {
+      generation++;
       clearTimers();
       teardownEffects();
       Cat.reset();
