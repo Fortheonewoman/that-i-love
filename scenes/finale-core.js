@@ -312,5 +312,203 @@ window.FinaleCore = (function () {
     return stamp;
   }
 
-  return { el, make, Cat, photoFrame, pickPhoto, videoFrame, pickVideo, drawThread, readTime, playSequence, boomStamp };
+  /* ------------------------------------------------------------
+     FIREWORKS — a real canvas particle system, not a CSS sprite
+     sheet: rockets launch from low on screen, climb with a slight
+     drift and gravity, then burst into 40–70 radiating particles
+     that fade and fall. Used sparingly (balloon→BOOM, the opening
+     explosion, the final celebration) — never a constant background
+     loop, per the brief.
+
+     Fireworks.mount(container) creates one canvas sized to its
+     parent and returns a handle:
+       .launch({ x, y, color, count }) — x/y in 0–1 fractions of the
+         canvas (y is the BURST height, not the launch point — the
+         rocket always launches from the bottom edge).
+       .burstAt(xPct, yPct, opts) — an instant burst with no rocket
+         climb, for confetti-adjacent flourishes.
+       .stop() — clears all particles/rockets, keeps the canvas.
+       .destroy() — stops and removes the canvas entirely.
+     Auto-pauses its rAF loop when nothing is animating (no idle
+     redraw cost between fireworks), and never runs more than one
+     loop per canvas no matter how many times launch() is called.
+     ------------------------------------------------------------ */
+  const Fireworks = (function () {
+    function mount(container, opts) {
+      opts = opts || {};
+      const canvas = document.createElement("canvas");
+      canvas.className = "fin-fireworks-canvas";
+      container.appendChild(canvas);
+      const ctx = canvas.getContext("2d");
+      let w = 0,
+        h = 0,
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      function resize() {
+        const rect = container.getBoundingClientRect();
+        w = Math.max(1, rect.width);
+        h = Math.max(1, rect.height);
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      resize();
+      const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(resize) : null;
+      if (ro) ro.observe(container);
+
+      let rockets = [];
+      let particles = [];
+      let rafId = null;
+      let destroyed = false;
+
+      const DEFAULT_COLORS = ["#f3c15f", "#ff2e88", "#3d7fff", "#dfe4ee", "#6c3fd6"];
+
+      function spawnBurst(x, y, color, count) {
+        const n = count || 55;
+        for (let i = 0; i < n; i++) {
+          const angle = (Math.PI * 2 * i) / n + Math.random() * 0.3;
+          const speed = 1.4 + Math.random() * 2.6;
+          particles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1,
+            decay: 0.008 + Math.random() * 0.012,
+            color,
+            size: 1.4 + Math.random() * 1.8,
+          });
+        }
+        ensureLoop();
+      }
+
+      function launch(launchOpts) {
+        launchOpts = launchOpts || {};
+        const color = launchOpts.color || DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)];
+        const targetX = (launchOpts.x != null ? launchOpts.x : 0.2 + Math.random() * 0.6) * w;
+        const targetY = (launchOpts.y != null ? launchOpts.y : 0.25 + Math.random() * 0.25) * h;
+        rockets.push({
+          x: targetX + (Math.random() * 40 - 20),
+          y: h + 10,
+          targetY,
+          vy: -(6.5 + Math.random() * 2.5),
+          color,
+          count: launchOpts.count,
+          trail: [],
+        });
+        ensureLoop();
+      }
+
+      function burstAt(xPct, yPct, burstOpts) {
+        burstOpts = burstOpts || {};
+        spawnBurst(xPct * w, yPct * h, burstOpts.color || DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)], burstOpts.count);
+      }
+
+      function ensureLoop() {
+        if (rafId == null && !destroyed) rafId = requestAnimationFrame(tick);
+      }
+
+      function tick() {
+        rafId = null;
+        if (destroyed) return;
+        ctx.clearRect(0, 0, w, h);
+
+        rockets = rockets.filter((r) => {
+          r.trail.push({ x: r.x, y: r.y });
+          if (r.trail.length > 6) r.trail.shift();
+          r.y += r.vy;
+          r.vy += 0.06;
+          const reached = r.vy >= 0 || r.y <= r.targetY;
+          ctx.strokeStyle = r.color;
+          ctx.globalAlpha = 0.6;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          r.trail.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          if (reached) {
+            spawnBurst(r.x, r.y, r.color, r.count);
+            return false;
+          }
+          return true;
+        });
+
+        particles = particles.filter((p) => {
+          p.life -= p.decay;
+          if (p.life <= 0) return false;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.045;
+          p.vx *= 0.985;
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+          return true;
+        });
+        ctx.globalAlpha = 1;
+
+        if (rockets.length || particles.length) rafId = requestAnimationFrame(tick);
+      }
+
+      function stop() {
+        rockets = [];
+        particles = [];
+        ctx.clearRect(0, 0, w, h);
+        if (rafId != null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+      }
+
+      function destroy() {
+        destroyed = true;
+        stop();
+        if (ro) ro.disconnect();
+        canvas.remove();
+      }
+
+      return { launch, burstAt, stop, destroy, canvas };
+    }
+
+    return { mount };
+  })();
+
+  /* ------------------------------------------------------------
+     DISCO — a light layer (rotating beams + a small mirror ball +
+     twinkling glints), pure CSS/DOM, appended to a container and
+     removable as one unit. opts: { beams (default 5), glints
+     (default 14), color } — color lets a later scene tint the beams
+     toward her chosen favorite color instead of the neutral default.
+     ------------------------------------------------------------ */
+  function discoLayer(container, opts) {
+    opts = opts || {};
+    const layer = make("div", "fin-disco-layer");
+    const beamCount = opts.beams || 5;
+    for (let i = 0; i < beamCount; i++) {
+      const beam = make("div", "fin-disco-beam");
+      beam.style.setProperty("--beam-color", opts.color || ["#f3c15f", "#ff2e88", "#3d7fff", "#6c3fd6"][i % 4]);
+      beam.style.setProperty("--beam-dur", 5 + Math.random() * 5 + "s");
+      beam.style.setProperty("--beam-delay", -(Math.random() * 6) + "s");
+      layer.appendChild(beam);
+    }
+    if (opts.ball !== false) layer.appendChild(make("div", "fin-disco-ball"));
+    const glintCount = opts.glints != null ? opts.glints : 14;
+    for (let i = 0; i < glintCount; i++) {
+      const glint = make("span", "fin-disco-glint");
+      glint.style.left = Math.random() * 100 + "%";
+      glint.style.top = Math.random() * 100 + "%";
+      glint.style.setProperty("--glint-dur", 1.6 + Math.random() * 2.4 + "s");
+      glint.style.setProperty("--glint-delay", -(Math.random() * 3) + "s");
+      glint.style.setProperty("--glint-peak", 0.4 + Math.random() * 0.5);
+      layer.appendChild(glint);
+    }
+    container.appendChild(layer);
+    return layer;
+  }
+
+  return { el, make, Cat, photoFrame, pickPhoto, videoFrame, pickVideo, drawThread, readTime, playSequence, boomStamp, Fireworks, discoLayer };
 })();

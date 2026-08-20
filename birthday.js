@@ -1,22 +1,32 @@
 /* ============================================================
-   birthday.js — the movement director. Loads scenes/finale-movement
-   1..5.js (each attaches itself to window.Movements.mN as
-   {enter, exit, skip}), and moves between them.
+   birthday.js — the movement director for Day 8. Loads
+   scenes/finale-movement1..5.js (each attaches itself to
+   window.Movements.mN as {enter, exit, skip}), and moves between
+   them.
 
-   Two ways in:
-     - Naturally, when TimeLock says the birthday has unlocked.
-     - Dev shortcut: ?act=3 in the URL jumps straight to movement 3,
-       so a single movement can be replayed without stepping through
-       from the start every time. (Param kept as "act" for URL
-       stability — it now addresses movements, not the old acts.)
+   Day 8 storyboard (per the Day 8 rebuild — no relation to the old
+   5-act "sky/explosion/story/twenty-one/them" structure):
+     1. The Balloon      — silence, one balloon, she pops it, BOOM.
+     2. The Explosion     — HAPPY BIRTHDAY / AMIRAH / 21, fireworks,
+                            confetti, disco, a short photo flourish.
+     3. 21 Seconds         — the one fast, hard-cut montage.
+     4. Favorite Color     — the real question, finally asked.
+     5. Affirmations       — seven lines, said aloud, one at a time.
+   Carousel/final-smile, Obinna's voice, and the final celebration
+   are further movements, still being built — see finale-movement5.js
+   for where the currently-built experience settles for now.
+
+   Day 8 is the LAST day — nothing here hands off anywhere else once
+   the sequence ends. (Day 7's own ending is what hands off INTO Day
+   8, via app.js's launchBirthdayFromDay7(); the reverse never
+   happens now.)
+
+   Dev shortcut: ?act=3 in the URL jumps straight to movement 3, so a
+   single movement can be replayed without stepping through from the
+   start every time. (Param kept as "act" for URL stability.)
 
    Shared state (ctx) lives here so any movement can read/write it —
-   e.g. how many of the 21 lights are lit, whether the "I LOVE YOU"
-   letters have already assembled once this run, etc.
-
-   Every movement's enter() receives { container, go, ctx, onDone },
-   where onDone is only ever called by movement 5, to hand off to
-   Day 7 through app.js.
+   e.g. her chosen favorite color, once she's picked it.
    ============================================================ */
 const Birthday = (function () {
   "use strict";
@@ -24,12 +34,9 @@ const Birthday = (function () {
   const TOTAL_MOVEMENTS = 5;
   let currentMovement = null;
   let currentN = 0;
-  let onRequestDay7 = null;
 
   const ctx = {
-    litLights: 0, // Movement IV's 21-light count, read by later movements for the Day-4 callback
-    caughtCat: false,
-    favoriteColor: null, // set by Movement III once she picks; --fin-chosen carries it as a CSS var too
+    favoriteColor: null, // set by Movement IV once she picks; --d8-chosen/--fin-chosen carry it as CSS vars too
   };
 
   function stageEl() {
@@ -72,9 +79,10 @@ const Birthday = (function () {
       container: stageEl(),
       go: goToMovement,
       ctx,
-      onDone: () => {
-        if (onRequestDay7) onRequestDay7();
-      },
+      // Day 8 is the last day now — nothing to hand off to once the
+      // sequence finishes. Reserved for the final movement to mark
+      // "Day 8 fully watched" bookkeeping, if that ever matters.
+      onDone: () => {},
     });
   }
 
@@ -91,8 +99,7 @@ const Birthday = (function () {
     if (skipBtn) skipBtn.addEventListener("click", skipCurrent);
   }
 
-  async function start(opts) {
-    onRequestDay7 = (opts && opts.onRequestDay7) || null;
+  async function start() {
     document.getElementById("birthday").hidden = false;
     wireChrome();
 

@@ -283,7 +283,7 @@ function wireMute() {
   });
 }
 
-const MOVEMENT_NAMES = ["the sky", "the explosion", "the story", "twenty-one", "them"];
+const MOVEMENT_NAMES = ["the balloon", "the explosion", "21 seconds", "favorite color", "affirmations"];
 
 function wireReplayControls() {
   const startBtn = document.getElementById("replay-start");
@@ -466,15 +466,6 @@ function wireReplayControls() {
     overlayEl.hidden = true;
     document.documentElement.style.setProperty("--accent", DEFAULT_ACCENT);
   });
-
-  // The finale's last act: hand her straight to Day 7. Leaves the
-  // birthday sequence behind entirely and opens the letter directly,
-  // through the same door every other day uses — no separate path.
-  function goToDay7() {
-    document.getElementById("birthday").hidden = true;
-    appEl.hidden = false;
-    openDay("day7");
-  }
 
   function shake(el) {
     el.classList.remove("is-shaking");
@@ -699,7 +690,7 @@ function wireReplayControls() {
       appEl.hidden = true;
       wireMute();
       wireReplayControls();
-      Birthday.start({ onRequestDay7: () => goToDay7() });
+      Birthday.start();
     }, 1600);
   }
 
@@ -707,14 +698,15 @@ function wireReplayControls() {
   // already unlocked when she opened it) and trusted time says the
   // birthday has actually started. No countdown screen for a moment
   // that already happened; straight into Day 8 instead. Reuses the
-  // same Birthday.start() every other entry point uses.
+  // same Birthday.start() every other entry point uses. Day 8 is the
+  // last day now — nothing hands back to Day 7 from here.
   function launchBirthdayFromDay7() {
     birthdayLaunched = true;
     day7RootEl.hidden = true;
     appEl.hidden = true;
     wireMute();
     wireReplayControls();
-    Birthday.start({ onRequestDay7: () => goToDay7() });
+    Birthday.start();
   }
 
   // Dev shortcut (?act=N) or already-past-unlock-on-load: launch
@@ -724,7 +716,7 @@ function wireReplayControls() {
   if (wantsBirthdaySequence) {
     wireMute();
     wireReplayControls();
-    await Birthday.start({ onRequestDay7: () => goToDay7() });
+    await Birthday.start();
     return;
   }
 

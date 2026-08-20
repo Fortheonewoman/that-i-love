@@ -19,6 +19,22 @@ window.Movements.m2 = (function () {
     timers = [];
   }
 
+  // Module-scoped (not local to enter()) so exit()/skip() can always
+  // tear these down, even if she leaves before the natural cleanup
+  // beat at the end of enter()'s own timeline runs.
+  let fw = null;
+  let disco = null;
+  function teardownEffects() {
+    if (fw) {
+      fw.destroy();
+      fw = null;
+    }
+    if (disco) {
+      disco.remove();
+      disco = null;
+    }
+  }
+
   const SHAPES = ["petal", "ribbon", "paper", "star"];
   const PIECE_COUNT = 70;
 
@@ -84,7 +100,13 @@ window.Movements.m2 = (function () {
       i++;
       const t = setTimeout(() => {
         stage.classList.remove("is-in");
-        setTimeout(beat, 180);
+        // This inner timeout must be tracked too, not just the outer
+        // one — otherwise it survives clearTimers() on exit/skip and
+        // fires beat() again against a DOM that's already gone (this
+        // was a real crash: el("fin-m2-burst") returning null once
+        // the movement had moved on).
+        const t2 = setTimeout(beat, 180);
+        timers.push(t2);
       }, holdMs);
       timers.push(t);
     }
@@ -97,36 +119,53 @@ window.Movements.m2 = (function () {
       const stage = container.querySelector(".fin-m2");
       requestAnimationFrame(() => stage.classList.add("is-in"));
 
+      disco = window.FinaleCore.discoLayer(stage, { beams: 6, glints: 16 });
+      fw = window.FinaleCore.Fireworks.mount(stage);
+
       burstPieces(PIECE_COUNT);
       Cat.show();
       Cat.panic();
       Cat.moveTo(50, 15, 300);
 
+      // A first small volley right as the party opens, before the
+      // bigger launches land under the headlines.
+      fw.launch({ x: 0.22, y: 0.28 });
+      fw.launch({ x: 0.78, y: 0.32 });
+
       // HAPPY BIRTHDAY / AMIRAH / 21 — three separate giant beats,
       // one at a time (this is what the balloon's BOOM breaks apart
       // into), each settling to a small mark before the next lands.
-      after(150, () => el("fin-m2-headline").classList.add("is-in"));
+      after(150, () => {
+        el("fin-m2-headline").classList.add("is-in");
+        fw.launch({ x: 0.5, y: 0.22, color: "#f3c15f" });
+      });
       after(900, () => {
         el("fin-m2-headline").classList.add("is-settled");
         el("fin-m2-headline-2").classList.add("is-in");
+        fw.launch({ x: 0.32, y: 0.3, color: "#ff2e88" });
+        fw.launch({ x: 0.68, y: 0.26, color: "#ff2e88" });
       });
       after(1650, () => {
         el("fin-m2-headline-2").classList.add("is-settled");
         el("fin-m2-21").classList.add("is-in");
+        fw.launch({ x: 0.5, y: 0.35, color: "#3d7fff", count: 70 });
       });
 
       after(2500, () => {
         el("fin-m2-21").classList.add("is-settled");
         window.FinaleCore.boomStamp(stage, { corner: "br" });
         runMontage(container, () => {
-          // A second, smaller confetti wave right as the montage ends —
-          // keeps the energy from just trailing off.
+          // A second, smaller confetti + fireworks wave right as the
+          // montage ends — keeps the energy from just trailing off.
           burstPieces(30);
+          fw.launch({ x: 0.25, y: 0.3 });
+          fw.launch({ x: 0.75, y: 0.3 });
           Cat.panic();
         });
       });
 
-      // Hard pull-away: the party gets yanked, not faded politely.
+      // Hard pull-away: the party gets yanked, not faded politely —
+      // straight into the 21-second montage, no pivot line needed.
       after(8600, () => {
         el("fin-m2-burst").innerHTML = "";
         el("fin-m2-headline").classList.add("is-gone");
@@ -134,31 +173,22 @@ window.Movements.m2 = (function () {
         el("fin-m2-21").classList.add("is-gone");
         el("fin-m2-montage").classList.add("is-gone");
         stage.classList.add("is-quiet");
+        teardownEffects();
         Cat.stand();
         Cat.moveTo(50, 60, 800);
-
-        const after1 = el("fin-m2-after");
-        after1.hidden = false;
-        window.FinaleCore.playSequence(
-          after1,
-          [
-            { type: "line", text: "okay." },
-            { type: "pause", ms: 900 },
-            { type: "line", text: "now that we've got that out of the way…" },
-            { type: "pause", ms: 1400 },
-          ],
-          { onDone: () => go(3) }
-        );
+        after(700, () => go(3));
       });
     },
     exit() {
       clearTimers();
+      teardownEffects();
       Cat.reset();
       const burst = el("fin-m2-burst");
       if (burst) burst.innerHTML = "";
     },
     skip() {
       clearTimers();
+      teardownEffects();
       Cat.reset();
       Birthday.goToMovement(3);
     },

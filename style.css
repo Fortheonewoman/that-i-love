@@ -594,7 +594,10 @@ h1, h2, h3 {
   inset: 0;
   height: 100dvh;
   overflow: hidden;
-  background: linear-gradient(165deg, #FFFBF3 0%, #FFF8EE 45%, #F7ECDA 100%);
+  /* Base layer is the same dark night the balloon opens on — a
+     movement only needs its own background if it wants to diverge
+     from it, not to escape a cream default underneath. */
+  background: radial-gradient(ellipse 130% 70% at 50% 6%, #1c1433 0%, #0a0a18 55%, #05050d 100%);
   color: var(--ink);
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   --fin-ivory: #FFF8EE;
@@ -609,8 +612,23 @@ h1, h2, h3 {
   --fin-violet: #6C63FF;
   --fin-champagne: #D4AF7A;
   --fin-indigo: #232A4D;
-  --fin-chosen: var(--fin-coral); /* overwritten live once she picks in Movement III */
+  --fin-chosen: var(--fin-coral); /* overwritten live once she picks favorite color */
   --fin-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Day 8's own dark birthday-night palette (per the CRITICAL DAY 8
+     UPDATE — no cream/paper anywhere in Day 8, that's Days 1–7). */
+  --d8-midnight: #0a0a18;
+  --d8-indigo: #201540;
+  --d8-plum: #3a1a4a;
+  --d8-cobalt: #2b3fd6;
+  --d8-electric: #3d7fff;
+  --d8-pink: #ff2e88;
+  --d8-wine: #7a1030;
+  --d8-violet: #6c3fd6;
+  --d8-gold: #f3c15f;
+  --d8-silver: #dfe4ee;
+  --d8-ink: #f3eeff;
+  --d8-chosen: var(--d8-gold); /* overwritten live once she picks — never guessed before then */
 }
 
 .movement-stage { position: absolute; inset: 0; overflow: hidden; }
@@ -859,175 +877,240 @@ h1, h2, h3 {
 .fin-m2-after { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 0.4rem; align-items: center; justify-content: center; text-align: center; }
 
 /* ============================================================
-   Movement III — The Story
+   Shared Day 8 machinery — fireworks (canvas), disco (light beams +
+   mirror ball + glints), used across the opening explosion and the
+   final celebration. Dark-palette by default; --d8-chosen substitutes
+   in wherever a "her color" accent is wanted, once she's picked one.
    ============================================================ */
-.fin-m3 { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: background 1.4s var(--fin-ease); }
-.fin-m3.is-colored { background: radial-gradient(circle at 30% 20%, rgba(255,111,89,0.08), transparent 55%), radial-gradient(circle at 75% 75%, rgba(59,91,255,0.07), transparent 55%); }
-.fin-m3-callbacks { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.6s ease; }
-.fin-m3-callbacks.is-fading { opacity: 0; }
-.fin-callback-star { position: absolute; font-size: 1.4rem; color: var(--fin-cobalt); opacity: 0; transition: opacity 0.6s var(--fin-ease); }
-.fin-callback-star.is-in { opacity: 1; }
-.fin-callback-star.is-fading { opacity: 0; }
-.fin-callback-stamp { position: absolute; left: 50%; top: 65%; transform: translateX(-50%); margin: 0; padding: 0.3rem 0.7rem; border: 1.5px solid var(--fin-cherry); border-radius: 0.3rem; color: var(--fin-cherry); font-size: 0.7rem; letter-spacing: 0.1em; font-weight: 700; opacity: 0; transition: opacity 0.5s var(--fin-ease); }
-.fin-callback-stamp.is-in { opacity: 0.85; }
-.fin-callback-stamp.is-fading { opacity: 0; }
+.fin-fireworks-canvas { position: absolute; inset: 0; pointer-events: none; }
 
-.fin-m3-personality { max-width: 26rem; padding: 0 1.5rem; opacity: 0; transition: opacity 0.7s var(--fin-ease); }
-.fin-m3-personality.is-in { opacity: 1; }
-.fin-m3-personality.is-fading { opacity: 0; transition: opacity 0.5s var(--fin-ease); }
-.fin-m3-personality .fin-photo { margin: 0 auto 0.8rem; opacity: 0; }
-.fin-personality-label { margin: 0 0 0.3rem; font-family: var(--font-display); font-style: italic; font-size: 1.4rem; color: var(--fin-cherry); opacity: 0; }
-.fin-personality-line { margin: 0; font-size: 1rem; color: var(--fin-indigo); opacity: 0; }
-.is-word-in .fin-photo,
-.is-word-in .fin-personality-label,
-.is-word-in .fin-personality-line { animation: fin-recap-pop 0.5s var(--fin-ease) forwards; }
-.is-word-in .fin-personality-line { animation-delay: 0.15s; }
-@keyframes fin-recap-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
-.fin-m3-color { max-width: 30rem; padding: 0 1.5rem; opacity: 0; transition: opacity 0.8s var(--fin-ease); display: flex; flex-direction: column; align-items: center; }
-.fin-m3-color.is-in { opacity: 1; }
-.fin-m3-color.is-fading { opacity: 0; transition: opacity 0.7s var(--fin-ease); }
-.fin-m3-swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; width: min(24rem, 82vw); opacity: 0; transition: opacity 0.6s var(--fin-ease); }
-.fin-m3-swatches.is-in { opacity: 1; }
-.fin-m3-swatches.is-fading { opacity: 0; }
-.fin-swatch { appearance: none; border: none; border-radius: 0.6rem; height: 4.2rem; cursor: pointer; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--sw) 70%, white), var(--sw)); box-shadow: 0 6px 16px -8px rgba(35,42,77,0.4); transition: transform 0.25s var(--fin-ease); position: relative; overflow: hidden; }
-.fin-swatch:hover { transform: translateY(-3px) scale(1.03); }
-.fin-swatch-name { position: absolute; bottom: 0.35rem; left: 0.5rem; font-size: 0.68rem; color: rgba(255,255,255,0.92); text-shadow: 0 1px 3px rgba(0,0,0,0.35); font-weight: 600; }
-.fin-swatch-other { background: repeating-linear-gradient(45deg, var(--fin-cherry), var(--fin-cherry) 8px, var(--fin-coral) 8px, var(--fin-coral) 16px, var(--fin-butter) 16px, var(--fin-butter) 24px, var(--fin-cobalt) 24px, var(--fin-cobalt) 32px); }
-.fin-color-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.fin-m3-color-after { margin: 0; font-family: var(--font-display); font-style: italic; font-size: 1.6rem; opacity: 0; animation: fin-fadeup 0.7s var(--fin-ease) forwards; }
-@keyframes fin-fadeup { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-.fin-m3-color-after.is-fading { opacity: 0 !important; transition: opacity 0.5s ease; }
-.fin-stamp-recorded { margin-top: 0.6rem; display: inline-block; padding: 0.3rem 0.7rem; border: 1.5px solid var(--fin-green); border-radius: 0.3rem; color: var(--fin-green); font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 700; opacity: 0; transform: rotate(-3deg) scale(0.85); transition: opacity 0.4s var(--fin-ease), transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
-.fin-stamp-recorded.is-in { opacity: 0.9; transform: rotate(-3deg) scale(1); }
-
-.fin-love-stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 1rem; opacity: 0; transition: opacity 0.8s var(--fin-ease); }
-.fin-love-stage.is-in { opacity: 1; }
-.fin-love-stage.is-fading { opacity: 0; transition: opacity 0.6s var(--fin-ease); }
-.fin-love-word { margin: 0; font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: clamp(2.2rem, 9vw, 4rem); color: var(--fin-cherry); opacity: 0; transform: translateY(14px); transition: opacity 0.9s var(--fin-ease), transform 0.9s var(--fin-ease); }
-.fin-love-word.is-in { opacity: 1; transform: none; }
-.fin-love-word.is-knocked { transform: rotate(-8deg) translateY(4px); transition: transform 0.3s var(--fin-ease); }
-.fin-love-sorry { position: absolute; bottom: 20%; margin: 0; font-family: var(--font-display); font-style: italic; font-size: 0.9rem; color: var(--ink-soft); opacity: 0; transition: opacity 0.6s var(--fin-ease); }
-.fin-love-sorry.is-in { opacity: 1; }
+.fin-disco-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.fin-disco-beam {
+  position: absolute; left: 50%; top: -10%; width: 3px; height: 130%;
+  transform-origin: 50% 8%;
+  background: linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--beam-color, var(--d8-gold)) 55%, transparent) 35%, transparent 75%);
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  animation: fin-disco-sweep var(--beam-dur, 7s) linear infinite;
+  animation-delay: var(--beam-delay, 0s);
+}
+@keyframes fin-disco-sweep {
+  0% { transform: translateX(-50%) rotate(0deg); }
+  100% { transform: translateX(-50%) rotate(360deg); }
+}
+.fin-disco-ball {
+  position: absolute; left: 50%; top: 6%; width: 2.6rem; height: 2.6rem; border-radius: 50%; transform: translateX(-50%);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.9), transparent 30%),
+    radial-gradient(circle at 65% 60%, rgba(255,255,255,0.5), transparent 35%),
+    conic-gradient(from 0deg, #cfd6e6, #fff, #cfd6e6, #9aa4bd, #fff, #cfd6e6);
+  box-shadow: 0 0 22px 6px rgba(223, 228, 238, 0.35);
+  animation: fin-disco-spin 6s linear infinite;
+}
+@keyframes fin-disco-spin { to { transform: translateX(-50%) rotate(360deg); } }
+.fin-disco-glint {
+  position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fff;
+  box-shadow: 0 0 6px 2px rgba(255,255,255,0.8);
+  opacity: 0; animation: fin-glint-twinkle var(--glint-dur, 2.4s) ease-in-out infinite;
+  animation-delay: var(--glint-delay, 0s);
+}
+@keyframes fin-glint-twinkle { 0%, 100% { opacity: 0; } 50% { opacity: var(--glint-peak, 0.8); } }
 
 /* ============================================================
-   Movement IV — Twenty-One
+   Movement II — The Opening Explosion (recolored for Day 8's dark
+   birthday-night palette — the balloon's BOOM should never cut to a
+   bright cream page).
    ============================================================ */
-.fin-m4t { position: absolute; inset: 0; background: var(--fin-ivory); transition: background 1s var(--fin-ease); --m4t-light: var(--fin-butter); }
-.fin-m4t.is-celebrating { background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--m4t-light) 30%, transparent), transparent 60%); }
-.fin-m4t-lights { position: absolute; inset: 0; }
-.fin-m4t-light { position: absolute; width: 0.5rem; height: 0.5rem; border-radius: 50%; border: none; background: rgba(35,42,77,0.15); padding: 0; cursor: pointer; transition: background 0.4s var(--fin-ease), box-shadow 0.4s var(--fin-ease), transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
-.fin-m4t-light.is-lit { background: var(--m4t-light); box-shadow: 0 0 18px 5px color-mix(in srgb, var(--m4t-light) 65%, transparent); transform: scale(1.6); }
-.fin-m4t-count { position: absolute; left: 50%; top: 12%; transform: translateX(-50%); margin: 0; font-family: var(--font-display); font-size: 1.3rem; color: var(--fin-indigo); opacity: 0; transition: opacity 0.7s var(--fin-ease); }
-.fin-m4t-count.is-in { opacity: 1; }
-.fin-m4t-count.is-holding { color: var(--fin-cherry); font-weight: 700; }
-.fin-m4t-headline { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.85); margin: 0; font-family: var(--font-display); font-weight: 700; font-style: italic; text-align: center; font-size: clamp(1.8rem, 7vw, 3rem); color: var(--fin-cherry); opacity: 0; transition: opacity 1s var(--fin-ease), transform 1s cubic-bezier(0.34,1.56,0.64,1); }
-.fin-m4t-headline.is-in { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.fin-m2 {
+  position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s ease;
+  background: radial-gradient(circle at 50% 30%, var(--d8-plum) 0%, var(--d8-indigo) 45%, var(--d8-midnight) 100%);
+}
+.fin-m2.is-in { opacity: 1; }
+.fin-m2.is-quiet { background: var(--d8-midnight); }
+.fin-m2-burst { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.fin-m2-headline {
+  position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%) scale(0.7); margin: 0; text-align: center; z-index: 3;
+  font-family: var(--font-display); font-weight: 700; font-style: italic; color: var(--d8-gold); line-height: 1.05;
+  text-shadow: 0 0 30px color-mix(in srgb, var(--d8-gold) 55%, transparent);
+  font-size: clamp(2.4rem, 11vw, 5rem); opacity: 0; transition: opacity 0.6s var(--fin-ease), transform 0.6s cubic-bezier(0.34,1.56,0.64,1), top 0.8s var(--fin-ease), font-size 0.8s var(--fin-ease);
+}
+.fin-m2-headline.is-in { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.fin-m2-headline.is-settled { top: 7%; font-size: clamp(1.1rem, 3.4vw, 1.5rem); }
+.fin-m2-headline.is-gone { opacity: 0; transition: opacity 0.4s ease; }
+.fin-m2-headline-2 { color: var(--d8-pink); text-shadow: 0 0 30px color-mix(in srgb, var(--d8-pink) 55%, transparent); }
+.fin-m2-headline-2.is-settled { top: 11.5%; }
+.fin-m2-21 {
+  position: absolute; left: 50%; top: 60%; transform: translate(-50%, -50%) scale(0.6); margin: 0; z-index: 3;
+  font-family: var(--font-display); font-weight: 700; color: var(--d8-electric);
+  text-shadow: 0 0 30px color-mix(in srgb, var(--d8-electric) 55%, transparent);
+  font-size: clamp(2.4rem, 10vw, 4rem); opacity: 0; transition: opacity 0.6s var(--fin-ease), transform 0.6s cubic-bezier(0.34,1.56,0.64,1), top 0.8s var(--fin-ease), font-size 0.8s var(--fin-ease);
+}
+.fin-m2-21.is-in { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.fin-m2-21.is-settled { top: 16.5%; font-size: 1.4rem; }
+.fin-m2-21.is-gone { opacity: 0; transition: opacity 0.4s ease; }
+.fin-m2-montage { position: absolute; left: 50%; top: 55%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; z-index: 3; }
+.fin-m2-montage.is-in { opacity: 1; }
+.fin-m2-montage.is-gone { opacity: 0; }
+.fin-m2-trio { display: flex; gap: 0.6rem; }
+.fin-m2-trio .fin-photo { width: 6.5rem; }
+.fin-m2-solo { width: min(20rem, 74vw); }
+.fin-m2-flower-beat {
+  width: min(16rem, 66vw); height: 12rem; border-radius: 0.4rem;
+  background: radial-gradient(circle at 30% 30%, var(--d8-pink), transparent 60%), radial-gradient(circle at 70% 60%, var(--d8-gold), transparent 55%), var(--d8-indigo);
+}
+.fin-m2-after { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 0.4rem; align-items: center; justify-content: center; text-align: center; z-index: 3; color: var(--d8-ink); }
 
 /* ============================================================
-   Movement V — Them
+   Movement III — 21 Seconds of Amirah. Fast, hard-cut montage.
+   Distinct register from the majestic carousel later: chaotic,
+   loud, quick — the visual edit itself is the rhythm now that
+   there's no music to carry it.
    ============================================================ */
-.fin-m5 { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--fin-ivory); text-align: center; }
+.fin-m3 {
+  position: absolute; inset: 0; overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, var(--d8-indigo) 0%, var(--d8-midnight) 70%);
+}
+.fin-m3-stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.fin-m3-item { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; }
+.fin-m3-item.is-in { opacity: 1; }
+.fin-m3-item .fin-photo { width: min(24rem, 82vw); box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6); }
+.fin-m3-item .fin-photo-full { width: min(30rem, 92vw); }
+.fin-m3-word {
+  margin: 0; font-family: var(--font-display); font-weight: 800; font-style: italic; text-align: center;
+  font-size: clamp(2.6rem, 13vw, 6rem); color: var(--d8-ink);
+  text-shadow: 0 0 40px rgba(255,255,255,0.3);
+}
+.fin-m3-word.is-color { color: var(--d8-chosen, var(--d8-gold)); text-shadow: 0 0 40px color-mix(in srgb, var(--d8-chosen, var(--d8-gold)) 60%, transparent); }
+.fin-m3-timer {
+  position: absolute; top: max(1rem, env(safe-area-inset-top)); right: max(1rem, env(safe-area-inset-right));
+  font-family: var(--font-display); font-size: 0.85rem; color: rgba(243,238,255,0.5); letter-spacing: 0.05em;
+}
+.fin-m3.is-ending .fin-m3-stage { transition: opacity 0.8s var(--fin-ease); opacity: 0; }
 
-.fin-approach { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s var(--fin-ease); }
-.fin-approach.is-in { opacity: 1; }
-.fin-figure { position: absolute; top: 55%; width: 3.4rem; height: 7rem; border-radius: 50% 50% 40% 40% / 45% 45% 30% 30%; transition: left 2.6s var(--fin-ease), transform 0.6s var(--fin-ease); }
-.fin-figure-him { left: 8%; background: linear-gradient(180deg, #1a1a1a, #050505); box-shadow: 0 10px 24px -10px rgba(0,0,0,0.6); transition: left 2.6s var(--fin-ease), transform 0.6s var(--fin-ease), background 1.4s var(--fin-ease), box-shadow 1.4s var(--fin-ease); }
-.fin-figure-him::after { content: ""; position: absolute; left: 50%; top: 8%; width: 0.35rem; height: 2.2rem; background: var(--fin-cherry); border-radius: 0.1rem; transform: translateX(-50%); opacity: 0.9; }
-.fin-figure-him.is-matching { background: linear-gradient(180deg, #1a1a1a, color-mix(in srgb, var(--her-color, var(--fin-coral)) 55%, #1a1a1a)); box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--her-color, var(--fin-coral)) 45%, transparent); }
-.fin-figure-her { left: 92%; background: linear-gradient(180deg, color-mix(in srgb, var(--her-color, var(--fin-coral)) 70%, white), var(--her-color, var(--fin-coral))); box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--her-color, var(--fin-coral)) 50%, transparent); }
-.fin-figure.is-approaching.fin-figure-him { left: 38%; }
-.fin-figure.is-approaching.fin-figure-her { left: 62%; }
-.fin-approach.is-close .fin-figure-him { left: 44%; }
-.fin-approach.is-close .fin-figure-her { left: 56%; }
-.fin-approach-joke { position: absolute; left: 50%; bottom: 12%; transform: translateX(-50%); margin: 0; max-width: 24rem; padding: 0 1rem; font-family: var(--font-display); font-style: italic; font-size: 0.9rem; color: var(--ink-soft); text-align: center; opacity: 0; transition: opacity 0.6s var(--fin-ease); }
-.fin-approach-joke.is-in { opacity: 1; }
-.fin-approach-joke.is-fading { opacity: 0; }
-.fin-approach-thread { opacity: 0.7; }
-.fin-approach.is-still .fin-approach-thread { opacity: 0.3; transition: opacity 1s ease; }
+/* ============================================================
+   Movement IV — Favorite Color. A dark room filled with color, not
+   a swatch grid — floating light panes she taps, chosen one settles
+   and holds, everything else fades. "something else" opens a native
+   color picker as the specific-choice escape hatch.
+   ============================================================ */
+.fin-m4 { position: absolute; inset: 0; overflow: hidden; background: var(--d8-midnight); }
+.fin-m4-cat-beat { position: absolute; inset: 0; }
+.fin-m4-talk {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); text-align: center; width: min(28rem, 86vw);
+}
+.fin-m4-talk .fin-seq-line, .fin-m4-talk .fin-seq-big { color: var(--d8-ink); }
+.fin-m4-talk .fin-seq-title { color: var(--d8-gold); }
 
-.fin-embrace {
-  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+.fin-m4-room {
+  position: absolute; inset: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: clamp(0.8rem, 2.4vw, 1.6rem); padding: 3.5rem 1.5rem; opacity: 0; transition: opacity 0.9s var(--fin-ease);
+}
+.fin-m4-room.is-in { opacity: 1; }
+.fin-m4-room.is-fading { opacity: 0; transition: opacity 0.6s var(--fin-ease); }
+.fin-m4-pane {
+  appearance: none; border: none; cursor: pointer; border-radius: 1.1rem;
+  width: clamp(4.6rem, 11vw, 6.4rem); height: clamp(6rem, 15vw, 8.6rem);
+  background:
+    radial-gradient(circle at 32% 22%, color-mix(in srgb, var(--pc) 85%, white), transparent 45%),
+    linear-gradient(165deg, color-mix(in srgb, var(--pc) 92%, white) 0%, var(--pc) 55%, color-mix(in srgb, var(--pc) 80%, black) 100%);
+  box-shadow: 0 12px 30px -12px color-mix(in srgb, var(--pc) 70%, transparent), 0 0 0 1px rgba(255,255,255,0.06) inset;
+  transform: translateY(0) rotate(var(--tilt, 0deg));
+  transition: transform 0.35s var(--fin-ease), box-shadow 0.35s var(--fin-ease);
+  position: relative; overflow: hidden;
+}
+.fin-m4-pane::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.22) 48%, transparent 62%);
+  transform: translateX(-120%); transition: transform 0.7s ease;
+}
+.fin-m4-pane:hover { transform: translateY(-6px) rotate(0deg); box-shadow: 0 20px 40px -14px color-mix(in srgb, var(--pc) 80%, transparent), 0 0 0 1px rgba(255,255,255,0.1) inset; }
+.fin-m4-pane:hover::after { transform: translateX(120%); }
+.fin-m4-pane.is-chosen { transform: scale(1.08) rotate(0deg); box-shadow: 0 0 40px 8px color-mix(in srgb, var(--pc) 65%, transparent); }
+.fin-m4-pane-other {
+  background: conic-gradient(from 0deg, #c0142b, #ff6f59, #f3c15f, #2f9e5c, #3b5bff, #6c63ff, #e63e8c, #c0142b);
+}
+.fin-m4-color-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.fin-m4-after {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
   opacity: 0; transition: opacity 0.7s var(--fin-ease);
-  --fin-skin-him: #B98358; /* light brown */
-  --fin-skin-her: #5C3A21; /* deep brown */
 }
-.fin-embrace.is-in { opacity: 1; }
+.fin-m4-after.is-in { opacity: 1; }
+.fin-m4-after.is-fading { opacity: 0; transition: opacity 0.6s var(--fin-ease); }
+.fin-m4-finally { margin: 0; font-family: var(--font-display); font-style: italic; font-size: clamp(1.6rem, 5vw, 2.3rem); color: var(--d8-chosen); }
+.fin-m4-late { margin: 0; font-size: 0.85rem; color: rgba(243,238,255,0.55); }
 
-.fin-hug-svg { width: min(19rem, 66vw); height: auto; overflow: visible; filter: drop-shadow(0 18px 30px rgba(20,20,20,0.18)); transition: transform 1.1s cubic-bezier(0.34,1.2,0.64,1); }
-.fin-embrace.is-embracing .fin-hug-svg { transform: scale(1.02); }
+/* ============================================================
+   Movement V — Affirmations.
+   ============================================================ */
+.fin-m5 { position: absolute; inset: 0; overflow: hidden; background: var(--d8-midnight); opacity: 0; transition: opacity 0.6s var(--fin-ease); }
+.fin-m5.is-in { opacity: 1; }
+.fin-m5-world { position: absolute; inset: 0; transition: background 1.2s var(--fin-ease); }
+.fin-m5-intro { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); text-align: center; width: min(26rem, 86vw); transition: opacity 0.6s var(--fin-ease); }
+.fin-m5-intro.is-fading { opacity: 0; }
+.fin-m5-intro .fin-seq-title { color: var(--d8-gold); }
+.fin-m5-intro .fin-seq-big { color: var(--d8-ink); }
 
-.fin-hug-shadow { fill: rgba(20,20,20,0.1); }
-
-/* Him — suit, already carrying her chosen color from the approach. */
-.fin-hug-him-torso, .fin-hug-him-legs, .fin-hug-him-arm-far, .fin-hug-him-arm-near {
-  fill: color-mix(in srgb, var(--her-color, var(--fin-coral)) 45%, #17181c);
-  transition: fill 1s var(--fin-ease);
+.fin-m5-stage {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.4rem;
+  opacity: 0; transition: opacity 0.6s var(--fin-ease);
 }
-.fin-hug-him-lapel { fill: none; stroke: rgba(255,255,255,0.35); stroke-width: 1.4; }
-.fin-hug-him-head, .fin-hug-him-neck { fill: var(--fin-skin-him); }
-
-/* Her — the gown, in her own chosen color. */
-.fin-hug-her-gown, .fin-hug-her-arm-far, .fin-hug-her-arm-near, .fin-hug-her-torso {
-  fill: var(--her-color, var(--fin-coral));
-  transition: fill 1s var(--fin-ease);
+.fin-m5-stage.is-in { opacity: 1; }
+.fin-m5-stage.is-fading { opacity: 0; }
+.fin-m5-affirmation {
+  margin: 0; text-align: center; font-family: var(--font-display); font-style: italic; font-weight: 600;
+  font-size: clamp(1.8rem, 6vw, 2.8rem); color: var(--d8-ink); text-shadow: 0 0 30px rgba(255,255,255,0.15);
+  padding: 0 1.5rem;
 }
-.fin-hug-her-head, .fin-hug-her-neck { fill: var(--fin-skin-her); }
-
-/* A very small, slow breathing motion on both torsos — the "tiny
-   human movement" during the five-second stare and the hold after,
-   not a bounce. */
-.fin-hug-him-torso, .fin-hug-her-torso { animation: fin-breathe 3.4s ease-in-out infinite; transform-origin: 50% 100%; }
-.fin-hug-her-torso { animation-delay: 0.6s; }
-@keyframes fin-breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.015); } }
-
-/* Her gown sways very slightly — fabric that moves, not a static cutout. */
-.fin-hug-her-gown { animation: fin-gown-sway 4.2s ease-in-out infinite; transform-origin: 50% 0%; }
-@keyframes fin-gown-sway { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(0.6deg); } }
-
-.fin-voice { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); max-width: 22rem; padding: 0 1.5rem; opacity: 0; transition: opacity 0.8s var(--fin-ease); }
-.fin-voice.is-in { opacity: 1; }
-.fin-voice.is-fading { opacity: 0; transition: opacity 0.6s ease; }
-
-.fin-m5-burst { position: absolute; inset: 0; pointer-events: none; }
-
-.fin-m5-final { display: flex; flex-direction: column; align-items: center; gap: 1rem; opacity: 0; transition: opacity 1s var(--fin-ease); --her-color: var(--fin-coral); }
-.fin-m5-final.is-in { opacity: 1; }
-.fin-m5-final.is-fading { opacity: 0; transition: opacity 0.7s var(--fin-ease); }
-.fin-m5-final-words { margin: 0; font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: clamp(1.8rem, 6vw, 2.8rem); color: var(--her-color); line-height: 1.15; }
-
-.fin-m5-close { max-width: 26rem; padding: 0 1.5rem; opacity: 0; transition: opacity 0.8s var(--fin-ease); }
-.fin-m5-close.is-in { opacity: 1; }
-.fin-m5-close.is-fading { opacity: 0; transition: opacity 0.7s var(--fin-ease); }
-
-.fin-m5-envelope-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; opacity: 0; transition: opacity 0.9s var(--fin-ease); }
-.fin-m5-envelope-wrap.is-in { opacity: 1; }
-.fin-envelope { position: relative; width: 12rem; height: 8rem; border-radius: 0.25rem; cursor: pointer; background: linear-gradient(160deg, #FFFDF6, var(--fin-parchment)); box-shadow: 0 14px 30px -14px rgba(35,42,77,0.45), inset 0 0 0 1px rgba(35,42,77,0.08), inset 0 -3px 0 0 color-mix(in srgb, var(--her-color, var(--fin-coral)) 55%, transparent); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem; transition: transform 0.4s var(--fin-ease); }
-.fin-envelope:hover { transform: translateY(-3px); }
-.fin-envelope.is-open { transform: scale(1.06) rotate(-1deg); box-shadow: 0 0 60px 10px color-mix(in srgb, var(--her-color, var(--fin-coral)) 45%, transparent); }
-.fin-envelope-for { margin: 0; font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 1.05rem; color: var(--fin-indigo); }
-.fin-envelope-num { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; color: var(--fin-cherry); }
-.fin-envelope-thread { position: absolute; top: -0.5rem; left: 50%; width: 1px; height: 1rem; background: var(--fin-cherry); transform: translateX(-50%); }
-.fin-envelope-flower { position: absolute; bottom: 0.4rem; right: 0.6rem; font-size: 0.9rem; color: var(--her-color, var(--fin-coral)); opacity: 0.8; }
-.fin-m5-envelope-hint { margin: 0; font-size: 0.82rem; color: var(--ink-soft); font-style: italic; opacity: 0.8; transition: opacity 0.5s var(--fin-ease); }
-.fin-m5-envelope-hint.is-fine { opacity: 1; }
-.fin-m5-envelope-hint.is-fading { opacity: 0; }
-
-.fin-m5-handoff { max-width: 24rem; padding: 0 1.5rem; opacity: 0; transition: opacity 1s var(--fin-ease); }
-.fin-m5-handoff.is-in { opacity: 1; }
-
-@media (max-width: 700px) {
-  .fin-cloud-near { width: 12rem; }
-  .fin-cloud-mid { width: 9rem; }
-  .fin-cloud-far { width: 6rem; }
-  .fin-m2-trio { flex-direction: column; }
-  .fin-m2-trio .fin-photo { width: 8rem; }
-  .fin-photo-full { width: 90vw; }
-  .fin-m3-swatches { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
-  .fin-swatch { height: 3.6rem; }
-  .fin-figure { width: 2.6rem; height: 5.4rem; }
-  .fin-m5-final-words { font-size: 1.6rem; }
+.fin-m5-said {
+  appearance: none; border: 1px solid rgba(243,238,255,0.28); background: rgba(255,255,255,0.05);
+  color: var(--d8-ink); font-size: 0.85rem; letter-spacing: 0.03em; padding: 0.6rem 1.4rem; border-radius: 999px;
+  cursor: pointer; transition: opacity 0.3s ease, background 0.3s ease;
 }
+.fin-m5-said:hover { background: rgba(255,255,255,0.12); }
+.fin-m5-said:disabled { opacity: 0.4; cursor: default; }
+
+/* I am beautiful — photos drift in around the text */
+.fin-m5-orbit-photo {
+  position: absolute; width: 6rem; transform: translate(-50%, -50%) rotate(var(--rot)) scale(0.85); opacity: 0;
+  transition: opacity 0.8s var(--fin-ease) var(--d), transform 0.8s var(--fin-ease) var(--d);
+}
+.fin-m5-world:has(.fin-m5-orbit-photo) .fin-m5-orbit-photo { opacity: 0.9; transform: translate(-50%, -50%) rotate(var(--rot)) scale(1); }
+
+/* I am calm — ambient motion (disco/fireworks if still lingering) slows */
+.fin-m5-world.is-calm { animation: none; }
+.fin-m5-world.is-calm * { animation-duration: 6s !important; }
+
+/* I am intentional — a few points of light align into a row */
+.fin-m5-align-dot {
+  position: absolute; left: calc(50% - 4rem + var(--i) * 2rem); top: 65%; width: 0.4rem; height: 0.4rem; border-radius: 50%;
+  background: var(--d8-gold); opacity: 0.5; transform: translateY(-10px);
+  transition: opacity 0.6s var(--fin-ease), transform 0.6s var(--fin-ease); transition-delay: calc(var(--i) * 90ms);
+}
+.fin-m5-world.is-aligned .fin-m5-align-dot { opacity: 1; transform: translateY(0); box-shadow: 0 0 12px 3px color-mix(in srgb, var(--d8-gold) 60%, transparent); }
+
+/* I am allowed to grow — a soft bloom of light expands */
+.fin-m5-bloom {
+  position: absolute; left: 50%; top: 50%; width: 2rem; height: 2rem; border-radius: 50%; transform: translate(-50%, -50%) scale(0.3);
+  background: radial-gradient(circle, color-mix(in srgb, var(--d8-chosen) 55%, transparent), transparent 70%);
+  opacity: 0.5; transition: transform 2.4s var(--fin-ease), opacity 2.4s var(--fin-ease);
+}
+.fin-m5-bloom.is-growing { transform: translate(-50%, -50%) scale(9); opacity: 0.9; }
+
+/* I deserve peace — everything decorative disappears */
+.fin-m5-world.is-empty { background: var(--d8-midnight); }
+
+/* I trust myself — one centered light strengthens */
+.fin-m5-core {
+  position: absolute; left: 50%; top: 50%; width: 0.6rem; height: 0.6rem; border-radius: 50%; transform: translate(-50%, -50%);
+  background: var(--d8-ink); box-shadow: 0 0 10px 3px rgba(255,255,255,0.4);
+  transition: box-shadow 1.6s var(--fin-ease), background 1.6s var(--fin-ease);
+}
+.fin-m5-core.is-strong { background: var(--d8-gold); box-shadow: 0 0 60px 18px color-mix(in srgb, var(--d8-gold) 70%, transparent); }
+
+/* I am loved — the whole space fills with her color, no attribution */
+.fin-m5-world.is-loved { background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--d8-chosen) 45%, var(--d8-midnight)) 0%, var(--d8-midnight) 85%); }
+
 /* ============================================================
    Floral decoration — elegant botanical sprigs (stem, leaves,
    layered petals), not flower emoji or corner stickers. Peeks
